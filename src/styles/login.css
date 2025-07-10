@@ -1,0 +1,52 @@
+/* Estilos do componente de login */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: var(--gradient-primary);
+}
+
+.login-form {
+  background: white;
+  padding: var(--spacing-2xl);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease;
+}
+
+.login-form h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-size-3xl);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.login-form .form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.login-form .btn {
+  width: 100%;
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    padding: var(--spacing-xl);
+  }
+  
+  .login-form h1 {
+    font-size: var(--font-size-2xl);
+  }
+}
