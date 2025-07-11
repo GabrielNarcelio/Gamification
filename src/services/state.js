@@ -1,37 +1,37 @@
 // Gerenciador de estado da aplicação
 
-import { ADMIN_CREDENTIALS } from '@/utils/config';
-import type { AppState, User } from '@/types';
+import { ADMIN_CREDENTIALS } from '@/utils/config.js';
 
 class StateManager {
-  private state: AppState = {
-    user: null,
-    userPoints: 0,
-    userType: null
-  };
+  constructor() {
+    this.state = {
+      user: null,
+      userPoints: 0,
+      userType: null
+    };
+    this.listeners = new Set();
+  }
 
-  private listeners: Set<(state: AppState) => void> = new Set();
-
-  getState(): AppState {
+  getState() {
     return { ...this.state };
   }
 
-  setState(newState: Partial<AppState>): void {
+  setState(newState) {
     this.state = { ...this.state, ...newState };
     this.notifyListeners();
   }
 
-  subscribe(listener: (state: AppState) => void): () => void {
+  subscribe(listener) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
-  private notifyListeners(): void {
+  notifyListeners() {
     this.listeners.forEach(listener => listener(this.getState()));
   }
 
   // Métodos específicos para login/logout
-  login(user: User, points: number, type: 'Usuário' | 'Administrador'): void {
+  login(user, points, type) {
     this.setState({
       user,
       userPoints: points,
@@ -39,8 +39,8 @@ class StateManager {
     });
   }
 
-  loginAsAdmin(): void {
-    const adminUser: User = {
+  loginAsAdmin() {
+    const adminUser = {
       nome: ADMIN_CREDENTIALS.username,
       senha: ADMIN_CREDENTIALS.password,
       tipo: 'Administrador',
@@ -54,7 +54,7 @@ class StateManager {
     });
   }
 
-  logout(): void {
+  logout() {
     this.setState({
       user: null,
       userPoints: 0,
@@ -62,23 +62,23 @@ class StateManager {
     });
   }
 
-  updatePoints(points: number): void {
+  updatePoints(points) {
     this.setState({ userPoints: points });
   }
 
-  isLoggedIn(): boolean {
+  isLoggedIn() {
     return this.state.user !== null;
   }
 
-  isAdmin(): boolean {
+  isAdmin() {
     return this.state.userType === 'Administrador';
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser() {
     return this.state.user;
   }
 
-  getUserPoints(): number {
+  getUserPoints() {
     return this.state.userPoints;
   }
 }

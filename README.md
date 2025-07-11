@@ -1,14 +1,22 @@
 # Sistema de Gamificação de Tarefas - Versão Moderna
 
-![Versão](https://img.shields.io/badge/versão-2.0.0-blue.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
+![Versão](https:/3. **Configure a URL da API**:
+   - Abra `src/utils/config.js`
+   - Atua## 📋 Scripts Disponíveis
+
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build para produção
+- `npm run preview` - Visualiza o build de produção run d2. **API não responde**: Confirme se a URL da API está correta em `config.js`v` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build para produção
+- `npm run preview` - Visualiza o build de produção `API_URL` com sua URL do Google Apps Scriptg.shields.io/badge/versão-2.0.0-blue.svg)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)
 ![Vite](https://img.shields.io/badge/Vite-5.0-646CFF.svg)
 
-Um sistema moderno de gamificação de tarefas construído com **Vite**, **TypeScript** e arquitetura modular escalável. Integrado com **Google Apps Script** para persistência de dados.
+Um sistema moderno de gamificação de tarefas construído com **Vite**, **JavaScript ES6+** e arquitetura modular escalável. Integrado com **Google Apps Script** para persistência de dados.
 
 ## 🚀 Características
 
-- ✅ **Arquitetura Moderna**: Construído com Vite e TypeScript
+- ✅ **Arquitetura Moderna**: Construído com Vite e JavaScript ES6+ Modules
 - 🏗️ **Separação de Responsabilidades**: Componentes modulares e serviços organizados
 - 🎯 **Sistema de Pontuação**: Ganhe pontos completando tarefas
 - 🏆 **Ranking em Tempo Real**: Competição saudável entre usuários
@@ -19,7 +27,7 @@ Um sistema moderno de gamificação de tarefas construído com **Vite**, **TypeS
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Frontend**: TypeScript, HTML5, CSS3
+- **Frontend**: JavaScript ES6+, HTML5, CSS3
 - **Build Tool**: Vite
 - **Backend**: Google Apps Script
 - **Persistência**: Google Sheets
@@ -30,28 +38,26 @@ Um sistema moderno de gamificação de tarefas construído com **Vite**, **TypeS
 \`\`\`
 src/
 ├── components/          # Componentes da interface
-│   ├── LoginComponent.ts
-│   ├── DashboardComponent.ts
-│   ├── TasksComponent.ts
-│   ├── RewardsComponent.ts
-│   ├── RankingComponent.ts
-│   ├── HistoryComponent.ts
-│   └── AdminPanelComponent.ts
+│   ├── LoginComponent.js
+│   ├── DashboardComponent.js
+│   ├── TasksComponent.js
+│   ├── RewardsComponent.js
+│   ├── RankingComponent.js
+│   ├── HistoryComponent.js
+│   └── AdminPanelComponent.js
 ├── services/           # Serviços e integração com API
-│   ├── api.ts         # Comunicação com Google Apps Script
-│   └── state.ts       # Gerenciamento de estado
-├── types/             # Definições de tipos TypeScript
-│   └── index.ts
+│   ├── api.js         # Comunicação com Google Apps Script
+│   └── state.js       # Gerenciamento de estado
 ├── utils/             # Utilitários e configurações
-│   ├── config.ts      # Configurações da aplicação
-│   └── helpers.ts     # Funções auxiliares
+│   ├── config.js      # Configurações da aplicação
+│   └── helpers.js     # Funções auxiliares
 ├── styles/            # Estilos organizados
 │   ├── main.css       # Estilos base e variáveis
 │   ├── login.css      # Estilos do login
 │   ├── dashboard.css  # Estilos do dashboard
 │   └── components.css # Estilos dos componentes
-├── App.ts            # Aplicação principal
-└── main.ts          # Ponto de entrada
+├── App.js            # Aplicação principal
+└── main.js          # Ponto de entrada
 \`\`\`
 
 ## 🚀 Como Executar
@@ -128,7 +134,7 @@ O sistema requer um Google Apps Script configurado. Consulte os arquivos de conf
 
 Este projeto é uma migração moderna do sistema original. Principais melhorias:
 
-- ✅ **TypeScript**: Tipagem estática e melhor DX
+- ✅ **JavaScript Moderno**: ES6+ com tipagem via JSDoc
 - ✅ **Arquitetura Modular**: Componentes organizados e reutilizáveis
 - ✅ **State Management**: Gerenciamento centralizado de estado
 - ✅ **Build Moderno**: Vite para desenvolvimento rápido

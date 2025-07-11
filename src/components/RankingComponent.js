@@ -1,21 +1,18 @@
 // Componente de Ranking
 
-import { apiService } from '@/services/api';
-import { stateManager } from '@/services/state';
-import { escapeHtml } from '@/utils/helpers';
-import type { RankingItem } from '@/types';
+import { apiService } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
+import { escapeHtml } from '@/utils/helpers.js';
 
 export class RankingComponent {
-  private container: HTMLElement;
-  private ranking: RankingItem[] = [];
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
+    this.ranking = [];
     this.render();
     this.loadRanking();
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div id="ranking-list" class="ranking-list">
         <div class="loading">Carregando ranking...</div>
@@ -23,8 +20,8 @@ export class RankingComponent {
     `;
   }
 
-  private async loadRanking(): Promise<void> {
-    const rankingList = this.container.querySelector('#ranking-list') as HTMLElement;
+  async loadRanking() {
+    const rankingList = this.container.querySelector('#ranking-list');
     
     try {
       this.ranking = await apiService.getRanking();
@@ -35,8 +32,8 @@ export class RankingComponent {
     }
   }
 
-  private renderRanking(): void {
-    const rankingList = this.container.querySelector('#ranking-list') as HTMLElement;
+  renderRanking() {
+    const rankingList = this.container.querySelector('#ranking-list');
     const state = stateManager.getState();
     const currentUser = state.user?.nome;
     const isAdmin = state.userType === 'Administrador';
@@ -77,7 +74,7 @@ export class RankingComponent {
     }).join('');
   }
 
-  public refresh(): void {
+  refresh() {
     this.loadRanking();
   }
 }

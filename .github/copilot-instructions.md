@@ -2,12 +2,12 @@
 
 ## Sobre o Projeto
 
-Este é um sistema moderno de gamificação de tarefas construído com **Vite** e **TypeScript**, migrado de uma versão HTML/CSS/JS original. O sistema oferece um ambiente completo de gestão de tarefas com pontuação, ranking, loja de prêmios e painel administrativo.
+Este é um sistema moderno de gamificação de tarefas construído com **Vite** e **JavaScript ES6+**, migrado de uma versão HTML/CSS/JS original. O sistema oferece um ambiente completo de gestão de tarefas com pontuação, ranking, loja de prêmios e painel administrativo.
 
 ## Arquitetura
 
-### Frontend (Vite + TypeScript)
-- **Framework**: Vite com TypeScript
+### Frontend (Vite + JavaScript)
+- **Framework**: Vite com JavaScript ES6+
 - **Arquitetura**: Componentes modulares com separação de responsabilidades
 - **State Management**: Sistema próprio de gerenciamento de estado
 - **Estilos**: CSS moderno com variáveis e design responsivo

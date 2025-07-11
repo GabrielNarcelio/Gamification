@@ -1,20 +1,18 @@
 // Componente de Login
 
-import { apiService } from '@/services/api';
-import { stateManager } from '@/services/state';
-import { ADMIN_CREDENTIALS, MESSAGES } from '@/utils/config';
-import { validateRequired, createLoadingButton } from '@/utils/helpers';
+import { apiService } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
+import { ADMIN_CREDENTIALS, MESSAGES } from '@/utils/config.js';
+import { validateRequired, createLoadingButton } from '@/utils/helpers.js';
 
 export class LoginComponent {
-  private container: HTMLElement;
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
     this.render();
     this.setupEventListeners();
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div class="login-container">
         <div class="login-form">
@@ -34,10 +32,10 @@ export class LoginComponent {
     `;
   }
 
-  private setupEventListeners(): void {
-    const usernameInput = this.container.querySelector('#login-username') as HTMLInputElement;
-    const passwordInput = this.container.querySelector('#login-password') as HTMLInputElement;
-    const loginButton = this.container.querySelector('#login-button') as HTMLButtonElement;
+  setupEventListeners() {
+    const usernameInput = this.container.querySelector('#login-username');
+    const passwordInput = this.container.querySelector('#login-password');
+    const loginButton = this.container.querySelector('#login-button');
 
     // Enter key support
     [usernameInput, passwordInput].forEach(input => {
@@ -51,11 +49,11 @@ export class LoginComponent {
     loginButton.addEventListener('click', () => this.handleLogin());
   }
 
-  private async handleLogin(): Promise<void> {
-    const usernameInput = this.container.querySelector('#login-username') as HTMLInputElement;
-    const passwordInput = this.container.querySelector('#login-password') as HTMLInputElement;
-    const loginButton = this.container.querySelector('#login-button') as HTMLButtonElement;
-    const errorDiv = this.container.querySelector('#login-error') as HTMLElement;
+  async handleLogin() {
+    const usernameInput = this.container.querySelector('#login-username');
+    const passwordInput = this.container.querySelector('#login-password');
+    const loginButton = this.container.querySelector('#login-button');
+    const errorDiv = this.container.querySelector('#login-error');
 
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
@@ -89,7 +87,7 @@ export class LoginComponent {
         const user = {
           nome: username,
           senha: password,
-          tipo: (response.tipo || 'Usuário') as 'Usuário' | 'Administrador',
+          tipo: response.tipo || 'Usuário',
           pontos: response.pontos || 0
         };
         
@@ -105,10 +103,10 @@ export class LoginComponent {
     }
   }
 
-  public clearForm(): void {
-    const usernameInput = this.container.querySelector('#login-username') as HTMLInputElement;
-    const passwordInput = this.container.querySelector('#login-password') as HTMLInputElement;
-    const errorDiv = this.container.querySelector('#login-error') as HTMLElement;
+  clearForm() {
+    const usernameInput = this.container.querySelector('#login-username');
+    const passwordInput = this.container.querySelector('#login-password');
+    const errorDiv = this.container.querySelector('#login-error');
 
     usernameInput.value = '';
     passwordInput.value = '';

@@ -1,21 +1,18 @@
 // Componente de Histórico
 
-import { apiService } from '@/services/api';
-import { stateManager } from '@/services/state';
-import { escapeHtml } from '@/utils/helpers';
-import type { HistoryItem } from '@/types';
+import { apiService } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
+import { escapeHtml } from '@/utils/helpers.js';
 
 export class HistoryComponent {
-  private container: HTMLElement;
-  private history: HistoryItem[] = [];
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
+    this.history = [];
     this.render();
     this.loadHistory();
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div id="history-list" class="history-list">
         <div class="loading">Carregando histórico...</div>
@@ -23,8 +20,8 @@ export class HistoryComponent {
     `;
   }
 
-  private async loadHistory(): Promise<void> {
-    const historyList = this.container.querySelector('#history-list') as HTMLElement;
+  async loadHistory() {
+    const historyList = this.container.querySelector('#history-list');
     const state = stateManager.getState();
     
     if (!state.user) return;
@@ -43,8 +40,8 @@ export class HistoryComponent {
     }
   }
 
-  private renderHistory(): void {
-    const historyList = this.container.querySelector('#history-list') as HTMLElement;
+  renderHistory() {
+    const historyList = this.container.querySelector('#history-list');
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
@@ -82,7 +79,7 @@ export class HistoryComponent {
     }).join('');
   }
 
-  public refresh(): void {
+  refresh() {
     this.loadHistory();
   }
 }

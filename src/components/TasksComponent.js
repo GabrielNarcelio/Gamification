@@ -1,23 +1,20 @@
 // Componente de Tarefas
 
-import { apiService } from '@/services/api';
-import { stateManager } from '@/services/state';
-import { MESSAGES } from '@/utils/config';
-import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers';
-import type { Task } from '@/types';
+import { apiService } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
+import { MESSAGES } from '@/utils/config.js';
+import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
 export class TasksComponent {
-  private container: HTMLElement;
-  private tasks: Task[] = [];
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
+    this.tasks = [];
     this.render();
     this.setupEventListeners();
     this.loadTasks();
   }
 
-  private render(): void {
+  render() {
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
@@ -45,15 +42,15 @@ export class TasksComponent {
     `;
   }
 
-  private setupEventListeners(): void {
+  setupEventListeners() {
     const state = stateManager.getState();
     if (state.userType === 'Administrador') {
-      const createButton = this.container.querySelector('#create-task-button') as HTMLButtonElement;
+      const createButton = this.container.querySelector('#create-task-button');
       createButton?.addEventListener('click', () => this.handleCreateTask());
 
       // Enter key support for inputs
-      const titleInput = this.container.querySelector('#new-task-title') as HTMLInputElement;
-      const pointsInput = this.container.querySelector('#new-task-points') as HTMLInputElement;
+      const titleInput = this.container.querySelector('#new-task-title');
+      const pointsInput = this.container.querySelector('#new-task-points');
       
       [titleInput, pointsInput].forEach(input => {
         input?.addEventListener('keypress', (e) => {
@@ -65,12 +62,12 @@ export class TasksComponent {
     }
   }
 
-  private async handleCreateTask(): Promise<void> {
-    const titleInput = this.container.querySelector('#new-task-title') as HTMLInputElement;
-    const descriptionInput = this.container.querySelector('#new-task-description') as HTMLTextAreaElement;
-    const pointsInput = this.container.querySelector('#new-task-points') as HTMLInputElement;
-    const createButton = this.container.querySelector('#create-task-button') as HTMLButtonElement;
-    const errorDiv = this.container.querySelector('#task-form-error') as HTMLElement;
+  async handleCreateTask() {
+    const titleInput = this.container.querySelector('#new-task-title');
+    const descriptionInput = this.container.querySelector('#new-task-description');
+    const pointsInput = this.container.querySelector('#new-task-points');
+    const createButton = this.container.querySelector('#create-task-button');
+    const errorDiv = this.container.querySelector('#task-form-error');
 
     const title = titleInput.value.trim();
     const description = descriptionInput.value.trim();
@@ -119,11 +116,11 @@ export class TasksComponent {
     }
   }
 
-  private async handleConcludeTask(taskId: string, points: number): Promise<void> {
+  async handleConcludeTask(taskId, points) {
     const state = stateManager.getState();
     if (!state.user) return;
 
-    const button = this.container.querySelector(`[data-task-id="${taskId}"]`) as HTMLButtonElement;
+    const button = this.container.querySelector(`[data-task-id="${taskId}"]`);
     if (!button) return;
 
     const resetButton = createLoadingButton(button, '🔄 Concluindo...');
@@ -152,8 +149,8 @@ export class TasksComponent {
     }
   }
 
-  private async loadTasks(): Promise<void> {
-    const taskList = this.container.querySelector('#task-list') as HTMLElement;
+  async loadTasks() {
+    const taskList = this.container.querySelector('#task-list');
     
     try {
       this.tasks = await apiService.getTasks();
@@ -164,8 +161,8 @@ export class TasksComponent {
     }
   }
 
-  private renderTasks(): void {
-    const taskList = this.container.querySelector('#task-list') as HTMLElement;
+  renderTasks() {
+    const taskList = this.container.querySelector('#task-list');
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
@@ -202,13 +199,13 @@ export class TasksComponent {
     `).join('');
 
     // Store reference for onclick handlers
-    (window as any).taskComponent = {
-      concludeTask: (taskId: string, points: number) => this.handleConcludeTask(taskId, points)
+    window.taskComponent = {
+      concludeTask: (taskId, points) => this.handleConcludeTask(taskId, points)
     };
   }
 
-  private showSuccessMessage(message: string): void {
-    const taskList = this.container.querySelector('#task-list') as HTMLElement;
+  showSuccessMessage(message) {
+    const taskList = this.container.querySelector('#task-list');
     const successDiv = document.createElement('div');
     successDiv.className = 'success-message';
     successDiv.textContent = message;
@@ -220,7 +217,7 @@ export class TasksComponent {
     }, 3000);
   }
 
-  public refresh(): void {
+  refresh() {
     this.loadTasks();
   }
 }

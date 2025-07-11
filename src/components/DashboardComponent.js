@@ -1,22 +1,14 @@
 // Componente principal do Dashboard
 
-import { stateManager } from '@/services/state';
-import { TasksComponent } from './TasksComponent';
-import { RewardsComponent } from './RewardsComponent';
-import { RankingComponent } from './RankingComponent';
-import { HistoryComponent } from './HistoryComponent';
-import { AdminPanelComponent } from './AdminPanelComponent';
-import type { AppState } from '@/types';
+import { stateManager } from '@/services/state.js';
+import { TasksComponent } from './TasksComponent.js';
+import { RewardsComponent } from './RewardsComponent.js';
+import { RankingComponent } from './RankingComponent.js';
+import { HistoryComponent } from './HistoryComponent.js';
+import { AdminPanelComponent } from './AdminPanelComponent.js';
 
 export class DashboardComponent {
-  private container: HTMLElement;
-  private tasksComponent: TasksComponent;
-  private rewardsComponent: RewardsComponent;
-  private rankingComponent: RankingComponent;
-  private historyComponent: HistoryComponent;
-  private adminPanelComponent: AdminPanelComponent | null = null;
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
     this.render();
     this.setupEventListeners();
@@ -26,7 +18,7 @@ export class DashboardComponent {
     stateManager.subscribe(this.handleStateChange.bind(this));
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div class="dashboard-container">
         <header class="dashboard-header">
@@ -69,18 +61,18 @@ export class DashboardComponent {
     `;
   }
 
-  private setupEventListeners(): void {
-    const logoutButton = this.container.querySelector('#logout-button') as HTMLButtonElement;
+  setupEventListeners() {
+    const logoutButton = this.container.querySelector('#logout-button');
     logoutButton.addEventListener('click', () => {
       stateManager.logout();
     });
   }
 
-  private initializeComponents(): void {
-    const tasksContainer = this.container.querySelector('#tasks-container') as HTMLElement;
-    const rewardsContainer = this.container.querySelector('#rewards-container') as HTMLElement;
-    const rankingContainer = this.container.querySelector('#ranking-container') as HTMLElement;
-    const historyContainer = this.container.querySelector('#history-container') as HTMLElement;
+  initializeComponents() {
+    const tasksContainer = this.container.querySelector('#tasks-container');
+    const rewardsContainer = this.container.querySelector('#rewards-container');
+    const rankingContainer = this.container.querySelector('#ranking-container');
+    const historyContainer = this.container.querySelector('#history-container');
 
     this.tasksComponent = new TasksComponent(tasksContainer);
     this.rewardsComponent = new RewardsComponent(rewardsContainer);
@@ -88,15 +80,15 @@ export class DashboardComponent {
     this.historyComponent = new HistoryComponent(historyContainer);
   }
 
-  private handleStateChange(state: AppState): void {
+  handleStateChange(state) {
     if (!state.user) return;
 
     // Update user info display
-    const userNameElement = this.container.querySelector('#user-name') as HTMLElement;
-    const userPointsElement = this.container.querySelector('#user-points') as HTMLElement;
-    const userTypeElement = this.container.querySelector('#user-type') as HTMLElement;
-    const historyTitle = this.container.querySelector('#history-title') as HTMLElement;
-    const adminPanelContainer = this.container.querySelector('#admin-panel-container') as HTMLElement;
+    const userNameElement = this.container.querySelector('#user-name');
+    const userPointsElement = this.container.querySelector('#user-points');
+    const userTypeElement = this.container.querySelector('#user-type');
+    const historyTitle = this.container.querySelector('#history-title');
+    const adminPanelContainer = this.container.querySelector('#admin-panel-container');
 
     userNameElement.textContent = state.user.nome;
     userPointsElement.textContent = state.userPoints.toString();
@@ -120,7 +112,7 @@ export class DashboardComponent {
     this.refreshComponents();
   }
 
-  private refreshComponents(): void {
+  refreshComponents() {
     this.tasksComponent.refresh();
     this.rewardsComponent.refresh();
     this.rankingComponent.refresh();
@@ -131,7 +123,7 @@ export class DashboardComponent {
     }
   }
 
-  public refresh(): void {
+  refresh() {
     this.refreshComponents();
   }
 }

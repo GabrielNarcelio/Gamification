@@ -1,24 +1,21 @@
 // Componente do Painel Administrativo
 
-import { apiService } from '@/services/api';
-import { MESSAGES } from '@/utils/config';
-import { validateRequired, validatePoints, createLoadingButton, escapeHtml } from '@/utils/helpers';
-import type { User, UserFormMode } from '@/types';
+import { apiService } from '@/services/api.js';
+import { MESSAGES } from '@/utils/config.js';
+import { validateRequired, validatePoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
 export class AdminPanelComponent {
-  private container: HTMLElement;
-  private users: User[] = [];
-  private currentFormMode: UserFormMode = 'create';
-  private currentEditUserId: string | null = null;
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
+    this.users = [];
+    this.currentFormMode = 'create';
+    this.currentEditUserId = null;
     this.render();
     this.setupEventListeners();
     this.loadUsers();
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div class="admin-panel-content">
         <h3>👨‍💼 Painel Administrativo</h3>
@@ -79,43 +76,43 @@ export class AdminPanelComponent {
     `;
   }
 
-  private setupEventListeners(): void {
+  setupEventListeners() {
     // Show user form button
-    const showFormButton = this.container.querySelector('#show-user-form-button') as HTMLButtonElement;
+    const showFormButton = this.container.querySelector('#show-user-form-button');
     showFormButton.addEventListener('click', () => this.showUserForm('create'));
 
     // Refresh users button
-    const refreshButton = this.container.querySelector('#refresh-users-button') as HTMLButtonElement;
+    const refreshButton = this.container.querySelector('#refresh-users-button');
     refreshButton.addEventListener('click', () => this.loadUsers());
 
     // Cancel form button
-    const cancelButton = this.container.querySelector('#cancel-user-form') as HTMLButtonElement;
+    const cancelButton = this.container.querySelector('#cancel-user-form');
     cancelButton.addEventListener('click', () => this.hideUserForm());
 
     // Save user button
-    const saveButton = this.container.querySelector('#save-user-button') as HTMLButtonElement;
+    const saveButton = this.container.querySelector('#save-user-button');
     saveButton.addEventListener('click', () => this.handleSaveUser());
 
     // Enter key support for form inputs
     const formInputs = this.container.querySelectorAll('#user-form input');
     formInputs.forEach(input => {
       input.addEventListener('keypress', (e) => {
-        if ((e as KeyboardEvent).key === 'Enter') {
+        if (e.key === 'Enter') {
           this.handleSaveUser();
         }
       });
     });
   }
 
-  private showUserForm(mode: UserFormMode, user?: User): void {
-    const form = this.container.querySelector('#user-form') as HTMLElement;
-    const title = this.container.querySelector('#user-form-title') as HTMLElement;
-    const nameInput = this.container.querySelector('#form-user-name') as HTMLInputElement;
-    const passwordInput = this.container.querySelector('#form-user-password') as HTMLInputElement;
-    const typeSelect = this.container.querySelector('#form-user-type') as HTMLSelectElement;
-    const pointsInput = this.container.querySelector('#form-user-points') as HTMLInputElement;
-    const userIdInput = this.container.querySelector('#edit-user-id') as HTMLInputElement;
-    const errorDiv = this.container.querySelector('#user-form-error') as HTMLElement;
+  showUserForm(mode, user = null) {
+    const form = this.container.querySelector('#user-form');
+    const title = this.container.querySelector('#user-form-title');
+    const nameInput = this.container.querySelector('#form-user-name');
+    const passwordInput = this.container.querySelector('#form-user-password');
+    const typeSelect = this.container.querySelector('#form-user-type');
+    const pointsInput = this.container.querySelector('#form-user-points');
+    const userIdInput = this.container.querySelector('#edit-user-id');
+    const errorDiv = this.container.querySelector('#user-form-error');
 
     this.currentFormMode = mode;
     errorDiv.textContent = '';
@@ -142,24 +139,24 @@ export class AdminPanelComponent {
     nameInput.focus();
   }
 
-  private hideUserForm(): void {
-    const form = this.container.querySelector('#user-form') as HTMLElement;
+  hideUserForm() {
+    const form = this.container.querySelector('#user-form');
     form.style.display = 'none';
     this.currentFormMode = 'create';
     this.currentEditUserId = null;
   }
 
-  private async handleSaveUser(): Promise<void> {
-    const nameInput = this.container.querySelector('#form-user-name') as HTMLInputElement;
-    const passwordInput = this.container.querySelector('#form-user-password') as HTMLInputElement;
-    const typeSelect = this.container.querySelector('#form-user-type') as HTMLSelectElement;
-    const pointsInput = this.container.querySelector('#form-user-points') as HTMLInputElement;
-    const saveButton = this.container.querySelector('#save-user-button') as HTMLButtonElement;
-    const errorDiv = this.container.querySelector('#user-form-error') as HTMLElement;
+  async handleSaveUser() {
+    const nameInput = this.container.querySelector('#form-user-name');
+    const passwordInput = this.container.querySelector('#form-user-password');
+    const typeSelect = this.container.querySelector('#form-user-type');
+    const pointsInput = this.container.querySelector('#form-user-points');
+    const saveButton = this.container.querySelector('#save-user-button');
+    const errorDiv = this.container.querySelector('#user-form-error');
 
     const name = nameInput.value.trim();
     const password = passwordInput.value.trim();
-    const type = typeSelect.value as 'Usuário' | 'Administrador';
+    const type = typeSelect.value;
     const points = pointsInput.value.trim();
 
     // Clear previous errors
@@ -175,7 +172,7 @@ export class AdminPanelComponent {
       return;
     }
 
-    const user: User = {
+    const user = {
       nome: name,
       senha: password,
       tipo: type,
@@ -214,12 +211,12 @@ export class AdminPanelComponent {
     }
   }
 
-  private async handleDeleteUser(userId: string, userName: string): Promise<void> {
+  async handleDeleteUser(userId, userName) {
     if (!confirm(`Tem certeza que deseja excluir o usuário "${userName}"?\n\nEsta ação não pode ser desfeita.`)) {
       return;
     }
 
-    const button = this.container.querySelector(`[data-delete-user="${userId}"]`) as HTMLButtonElement;
+    const button = this.container.querySelector(`[data-delete-user="${userId}"]`);
     if (!button) return;
 
     const resetButton = createLoadingButton(button, '🔄 Excluindo...');
@@ -241,8 +238,8 @@ export class AdminPanelComponent {
     }
   }
 
-  private async handleStructureSheet(): Promise<void> {
-    const button = this.container.querySelector('#structure-sheet-button') as HTMLButtonElement;
+  async handleStructureSheet() {
+    const button = this.container.querySelector('#structure-sheet-button');
     if (!button) return;
 
     const resetButton = createLoadingButton(button, '🔄 Estruturando...');
@@ -264,8 +261,8 @@ export class AdminPanelComponent {
     }
   }
 
-  private async loadUsers(): Promise<void> {
-    const usersList = this.container.querySelector('#users-list') as HTMLElement;
+  async loadUsers() {
+    const usersList = this.container.querySelector('#users-list');
     
     try {
       const response = await apiService.getUsers();
@@ -283,7 +280,7 @@ export class AdminPanelComponent {
         `;
         
         // Add event listener for structure button
-        const structureButton = usersList.querySelector('#structure-sheet-button') as HTMLButtonElement;
+        const structureButton = usersList.querySelector('#structure-sheet-button');
         structureButton?.addEventListener('click', () => this.handleStructureSheet());
         
         return;
@@ -297,8 +294,8 @@ export class AdminPanelComponent {
     }
   }
 
-  private renderUsers(): void {
-    const usersList = this.container.querySelector('#users-list') as HTMLElement;
+  renderUsers() {
+    const usersList = this.container.querySelector('#users-list');
 
     if (this.users.length === 0) {
       usersList.innerHTML = '<div class="empty">Nenhum usuário encontrado.</div>';
@@ -335,16 +332,16 @@ export class AdminPanelComponent {
     `).join('');
 
     // Store reference for onclick handlers
-    (window as any).adminPanel = {
-      editUser: (userId: string, nome: string, senha: string, tipo: string, pontos: number) => {
-        this.showUserForm('edit', { id: userId, nome, senha, tipo: tipo as 'Usuário' | 'Administrador', pontos });
+    window.adminPanel = {
+      editUser: (userId, nome, senha, tipo, pontos) => {
+        this.showUserForm('edit', { id: userId, nome, senha, tipo, pontos });
       },
-      deleteUser: (userId: string, userName: string) => this.handleDeleteUser(userId, userName)
+      deleteUser: (userId, userName) => this.handleDeleteUser(userId, userName)
     };
   }
 
-  private showSuccessMessage(message: string): void {
-    const usersList = this.container.querySelector('#users-list') as HTMLElement;
+  showSuccessMessage(message) {
+    const usersList = this.container.querySelector('#users-list');
     const successDiv = document.createElement('div');
     successDiv.className = 'success-message';
     successDiv.textContent = message;
@@ -356,7 +353,7 @@ export class AdminPanelComponent {
     }, 3000);
   }
 
-  public refresh(): void {
+  refresh() {
     this.loadUsers();
   }
 }

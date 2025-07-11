@@ -1,19 +1,16 @@
 // Aplicação Principal
 
-import { stateManager } from '@/services/state';
-import { LoginComponent } from '@/components/LoginComponent';
-import { DashboardComponent } from '@/components/DashboardComponent';
-import type { AppState } from '@/types';
+import { stateManager } from '@/services/state.js';
+import { LoginComponent } from '@/components/LoginComponent.js';
+import { DashboardComponent } from '@/components/DashboardComponent.js';
 
 export class App {
-  private container: HTMLElement;
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
     this.init();
   }
 
-  private init(): void {
+  init() {
     // Subscribe to state changes
     stateManager.subscribe(this.handleStateChange.bind(this));
     
@@ -21,7 +18,7 @@ export class App {
     this.handleStateChange(stateManager.getState());
   }
 
-  private handleStateChange(state: AppState): void {
+  handleStateChange(state) {
     if (state.user) {
       this.showDashboard();
     } else {
@@ -29,17 +26,17 @@ export class App {
     }
   }
 
-  private showLogin(): void {
+  showLogin() {
     this.container.innerHTML = '<div id="login-container"></div>';
     
-    const loginContainer = this.container.querySelector('#login-container') as HTMLElement;
+    const loginContainer = this.container.querySelector('#login-container');
     new LoginComponent(loginContainer);
   }
 
-  private showDashboard(): void {
+  showDashboard() {
     this.container.innerHTML = '<div id="dashboard-container"></div>';
     
-    const dashboardContainer = this.container.querySelector('#dashboard-container') as HTMLElement;
+    const dashboardContainer = this.container.querySelector('#dashboard-container');
     new DashboardComponent(dashboardContainer);
   }
 }

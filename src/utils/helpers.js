@@ -1,6 +1,6 @@
 // Utilitários diversos
 
-export function formatDate(date: Date = new Date()): string {
+export function formatDate(date = new Date()) {
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -10,14 +10,14 @@ export function formatDate(date: Date = new Date()): string {
   });
 }
 
-export function validateRequired(value: string, fieldName: string): string | null {
+export function validateRequired(value, fieldName) {
   if (!value.trim()) {
     return `${fieldName} é obrigatório.`;
   }
   return null;
 }
 
-export function validatePoints(value: string): string | null {
+export function validatePoints(value) {
   const points = parseInt(value);
   if (isNaN(points) || points < 0) {
     return 'Os pontos devem ser um número maior ou igual a zero.';
@@ -25,7 +25,7 @@ export function validatePoints(value: string): string | null {
   return null;
 }
 
-export function validateTaskPoints(value: string): string | null {
+export function validateTaskPoints(value) {
   const points = parseInt(value);
   if (isNaN(points) || points < 1) {
     return 'Os pontos devem ser um número maior que zero.';
@@ -33,23 +33,17 @@ export function validateTaskPoints(value: string): string | null {
   return null;
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
+export function debounce(func, wait) {
+  let timeout;
+  return (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
+export function throttle(func, limit) {
+  let inThrottle;
+  return (...args) => {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
@@ -58,13 +52,13 @@ export function throttle<T extends (...args: any[]) => any>(
   };
 }
 
-export function escapeHtml(text: string): string {
+export function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
-export function createLoadingButton(button: HTMLButtonElement, loadingText: string): () => void {
+export function createLoadingButton(button, loadingText) {
   const originalText = button.textContent || '';
   const originalDisabled = button.disabled;
   

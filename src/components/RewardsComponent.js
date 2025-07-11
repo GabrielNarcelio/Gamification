@@ -1,22 +1,19 @@
 // Componente de Recompensas/Prêmios
 
-import { apiService } from '@/services/api';
-import { stateManager } from '@/services/state';
-import { MESSAGES } from '@/utils/config';
-import { createLoadingButton, escapeHtml } from '@/utils/helpers';
-import type { Reward } from '@/types';
+import { apiService } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
+import { MESSAGES } from '@/utils/config.js';
+import { createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
 export class RewardsComponent {
-  private container: HTMLElement;
-  private rewards: Reward[] = [];
-
-  constructor(container: HTMLElement) {
+  constructor(container) {
     this.container = container;
+    this.rewards = [];
     this.render();
     this.loadRewards();
   }
 
-  private render(): void {
+  render() {
     this.container.innerHTML = `
       <div id="rewards-list" class="rewards-list">
         <div class="loading">Carregando prêmios...</div>
@@ -24,7 +21,7 @@ export class RewardsComponent {
     `;
   }
 
-  private async handleRedeemReward(rewardId: string, cost: number): Promise<void> {
+  async handleRedeemReward(rewardId, cost) {
     const state = stateManager.getState();
     if (!state.user) return;
 
@@ -33,7 +30,7 @@ export class RewardsComponent {
       return;
     }
 
-    const button = this.container.querySelector(`[data-reward-id="${rewardId}"]`) as HTMLButtonElement;
+    const button = this.container.querySelector(`[data-reward-id="${rewardId}"]`);
     if (!button) return;
 
     const resetButton = createLoadingButton(button, '🔄 Resgatando...');
@@ -59,8 +56,8 @@ export class RewardsComponent {
     }
   }
 
-  private async loadRewards(): Promise<void> {
-    const rewardsList = this.container.querySelector('#rewards-list') as HTMLElement;
+  async loadRewards() {
+    const rewardsList = this.container.querySelector('#rewards-list');
     
     try {
       this.rewards = await apiService.getRewards();
@@ -71,8 +68,8 @@ export class RewardsComponent {
     }
   }
 
-  private renderRewards(): void {
-    const rewardsList = this.container.querySelector('#rewards-list') as HTMLElement;
+  renderRewards() {
+    const rewardsList = this.container.querySelector('#rewards-list');
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
@@ -110,13 +107,13 @@ export class RewardsComponent {
     }).join('');
 
     // Store reference for onclick handlers
-    (window as any).rewardsComponent = {
-      redeemReward: (rewardId: string, cost: number) => this.handleRedeemReward(rewardId, cost)
+    window.rewardsComponent = {
+      redeemReward: (rewardId, cost) => this.handleRedeemReward(rewardId, cost)
     };
   }
 
-  private showSuccessMessage(message: string): void {
-    const rewardsList = this.container.querySelector('#rewards-list') as HTMLElement;
+  showSuccessMessage(message) {
+    const rewardsList = this.container.querySelector('#rewards-list');
     const successDiv = document.createElement('div');
     successDiv.className = 'success-message';
     successDiv.textContent = message;
@@ -128,7 +125,7 @@ export class RewardsComponent {
     }, 3000);
   }
 
-  public refresh(): void {
+  refresh() {
     this.loadRewards();
   }
 }

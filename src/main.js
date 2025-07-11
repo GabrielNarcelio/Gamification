@@ -1,6 +1,6 @@
 // Arquivo principal da aplicação
 
-import { App } from './App';
+import { App } from './App.js';
 import './styles/main.css';
 
 // Initialize the application when DOM is loaded
