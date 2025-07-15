@@ -611,21 +611,21 @@ export class ApiService {
     }
   }
 
-  async getHistory(username) {
-    console.log(`📜 Buscando histórico do usuário: ${username}`);
+  async getHistory(userId) {
+    console.log(`📜 Buscando histórico do usuário: ${userId}`);
     
     try {
       if (await this.shouldUseMockData()) {
         await simulateNetworkDelay();
-        const userHistory = mockData.history.filter(h => h.username === username);
+        const userHistory = mockData.history.filter(h => h.userId === userId);
         return { success: true, data: userHistory };
       }
 
       // REST API call
-      const response = await this.makeRequest(`/history/user/${username}`);
+      const response = await this.makeRequest(`/history/user/${userId}`);
       return response;
     } catch (error) {
-      const userHistory = mockData.history.filter(h => h.username === username);
+      const userHistory = mockData.history.filter(h => h.userId === userId);
       return await this.handleCorsError(error, 'getHistory', userHistory);
     }
   }
@@ -777,6 +777,169 @@ export class ApiService {
       success: true, 
       message: 'Estrutura já configurada no backend Node.js' 
     };
+  }
+
+  // === MÉTODOS DE CONQUISTAS (ACHIEVEMENTS) ===
+
+  async getAchievements() {
+    console.log('🏆 Buscando todas as conquistas...');
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        return { 
+          success: true, 
+          data: mockData.achievements || [],
+          total: (mockData.achievements || []).length
+        };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/achievements');
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getAchievements', []);
+    }
+  }
+
+  async getUserAchievements(userId) {
+    console.log(`🏆 Buscando conquistas do usuário: ${userId}`);
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        const userAchievements = mockData.userAchievements?.filter(ua => ua.userId === userId) || [];
+        const achievements = mockData.achievements || [];
+        
+        const achievementsWithStatus = achievements.map(achievement => {
+          const userAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
+          return {
+            ...achievement,
+            unlocked: !!userAchievement,
+            unlockedAt: userAchievement?.unlockedAt || null,
+            progress: userAchievement?.progress || 0
+          };
+        });
+        
+        const unlocked = achievementsWithStatus.filter(a => a.unlocked);
+        const locked = achievementsWithStatus.filter(a => !a.unlocked);
+        
+        return { 
+          success: true, 
+          data: {
+            all: achievementsWithStatus,
+            unlocked,
+            locked,
+            stats: {
+              total: achievementsWithStatus.length,
+              unlocked: unlocked.length,
+              locked: locked.length,
+              totalPoints: unlocked.reduce((sum, a) => sum + a.points, 0)
+            }
+          }
+        };
+      }
+
+      // REST API call
+      const response = await this.makeRequest(`/achievements/user/${userId}`);
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getUserAchievements', {
+        all: [],
+        unlocked: [],
+        locked: [],
+        stats: { total: 0, unlocked: 0, locked: 0, totalPoints: 0 }
+      });
+    }
+  }
+
+  async checkUserAchievements(userId) {
+    console.log(`🔍 Verificando conquistas para usuário: ${userId}`);
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        // Simulação simples para mock
+        return { 
+          success: true, 
+          data: {
+            newlyUnlocked: [],
+            totalChecked: 0,
+            newUnlocks: 0
+          },
+          message: 'Verificação completa (modo simulado)'
+        };
+      }
+
+      // REST API call
+      const response = await this.makeRequest(`/achievements/check/${userId}`, {
+        method: 'POST'
+      });
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'checkUserAchievements', {
+        newlyUnlocked: [],
+        totalChecked: 0,
+        newUnlocks: 0
+      });
+    }
+  }
+
+  async createAchievement(achievement) {
+    console.log('➕ Criando nova conquista:', achievement);
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        const newAchievement = {
+          id: generateId(),
+          ...achievement,
+          createdAt: new Date().toISOString()
+        };
+        
+        if (!mockData.achievements) {
+          mockData.achievements = [];
+        }
+        
+        mockData.achievements.push(newAchievement);
+        return { success: true, data: newAchievement };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/achievements', {
+        method: 'POST',
+        body: JSON.stringify(achievement)
+      });
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'createAchievement', null);
+    }
+  }
+
+  async deleteAchievement(achievementId) {
+    console.log(`🗑️ Deletando conquista: ${achievementId}`);
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        const achievementIndex = mockData.achievements?.findIndex(a => a.id === achievementId);
+        if (achievementIndex !== -1) {
+          const deletedAchievement = mockData.achievements.splice(achievementIndex, 1)[0];
+          return { success: true, data: deletedAchievement };
+        }
+        return { success: false, error: 'Conquista não encontrada' };
+      }
+
+      // REST API call
+      const response = await this.makeRequest(`/achievements/${achievementId}`, {
+        method: 'DELETE'
+      });
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'deleteAchievement', null);
+    }
   }
 
   // === MÉTODOS AUXILIARES ===

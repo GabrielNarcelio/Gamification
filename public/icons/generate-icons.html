@@ -1,0 +1,54 @@
+// Criar ícones PNG simples usando canvas no navegador
+// Execute este código no console do navegador para gerar os ícones
+
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+function createIcon(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  
+  // Background gradient
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, '#4f46e5');
+  gradient.addColorStop(1, '#7c3aed');
+  
+  // Draw background
+  ctx.fillStyle = gradient;
+  ctx.roundRect(0, 0, size, size, size * 0.2);
+  ctx.fill();
+  
+  // Draw trophy emoji (simplified)
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `${size * 0.4}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🎮', size / 2, size / 2);
+  
+  return canvas;
+}
+
+function downloadIcon(size) {
+  const canvas = createIcon(size);
+  canvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `icon-${size}x${size}.png`;
+    a.click();
+  });
+}
+
+// Baixar todos os ícones
+console.log('🎨 Gerando ícones PWA...');
+sizes.forEach((size, index) => {
+  setTimeout(() => {
+    downloadIcon(size);
+    console.log(`✅ Ícone ${size}x${size} criado`);
+  }, index * 500);
+});
+
+console.log('📋 Instruções:');
+console.log('1. Execute este código no console do navegador');
+console.log('2. Os arquivos PNG serão baixados automaticamente');
+console.log('3. Mova os arquivos para a pasta public/icons/');

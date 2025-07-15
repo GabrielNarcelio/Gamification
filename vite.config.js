@@ -7,13 +7,19 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 5174,  // Corrigido para porta atual
     open: true,
-    cors: true
+    cors: true,
+    // Força limpeza de cache
+    force: true
     // Proxy removido: usando backend Node.js direto
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
   },
+  // Força rebuild do CSS
+  css: {
+    devSourcemap: true
+  }
 })

@@ -21,17 +21,6 @@
       "createdAt": "2025-07-15T18:06:41.740Z"
     },
     {
-      "id": "175260437349131347y8wa",
-      "username": "Tulio",
-      "password": "adasdasda",
-      "name": "Tulio",
-      "email": "tulio@gmail.com",
-      "type": "user",
-      "points": 300,
-      "createdAt": "2025-07-15T18:32:53.491Z",
-      "updatedAt": "2025-07-15T20:56:30.776Z"
-    },
-    {
       "id": "1752612047094z2mrx5f94",
       "username": "narcelio",
       "password": "narcelio",
@@ -43,14 +32,15 @@
       "updatedAt": "2025-07-15T20:42:02.922Z"
     },
     {
-      "id": "1752612684569jhwjdbgq2",
-      "username": "teste",
-      "password": "123456",
-      "name": "Usuario Teste",
-      "email": "teste@teste.com",
+      "id": "1752618947490nxeo7tmm9",
+      "username": "gabriel",
+      "password": "gabriel",
+      "name": "gabriel",
+      "email": "gabrielo@gmail.com",
       "type": "user",
-      "points": 100,
-      "createdAt": "2025-07-15T20:51:24.569Z"
+      "points": 200,
+      "createdAt": "2025-07-15T22:35:47.490Z",
+      "updatedAt": "2025-07-15T22:36:05.013Z"
     }
   ],
   "tasks": [
@@ -640,6 +630,297 @@
           "points"
         ]
       }
+    },
+    {
+      "id": "17526151335390szh1eiqe",
+      "userId": "1752615133537bcmmjo97q",
+      "type": "user_created",
+      "description": "Usuário 'Usuario Um' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T21:32:13.539Z",
+      "details": {
+        "username": "usuario1",
+        "type": "user"
+      }
+    },
+    {
+      "id": "17526152901848hsdv17sg",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Usuario Teste' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T21:34:50.184Z",
+      "details": {
+        "deletedUsername": "teste",
+        "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "1752618873311tuqjrsb7j",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Tulio' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T22:34:33.311Z",
+      "details": {
+        "deletedUsername": "Tulio",
+        "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "175261887591150apmdjjp",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Usuario Um' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T22:34:35.911Z",
+      "details": {
+        "deletedUsername": "usuario1",
+        "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "17526189474914coo5dt8r",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "user_created",
+      "description": "Usuário 'gabriel' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T22:35:47.491Z",
+      "details": {
+        "username": "gabriel",
+        "type": "user"
+      }
+    },
+    {
+      "id": "1752618965014au0sp9cgq",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "user_updated",
+      "description": "Usuário 'gabriel' atualizado",
+      "points": 0,
+      "timestamp": "2025-07-15T22:36:05.014Z",
+      "details": {
+        "changes": [
+          "username",
+          "password",
+          "name",
+          "email",
+          "type",
+          "points"
+        ]
+      }
+    },
+    {
+      "id": "1752618971939twtjxbd1s",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-15T22:36:11.939Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752618972091dpzc1roli",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "achievement_unlocked",
+      "description": "Conquista desbloqueada: Primeiro Acesso",
+      "points": 10,
+      "timestamp": "2025-07-15T22:36:12.091Z",
+      "details": {
+        "achievementId": "first_login",
+        "achievementName": "Primeiro Acesso",
+        "achievementRarity": "common"
+      }
+    },
+    {
+      "id": "1752618972092oifgi9ami",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "achievement_unlocked",
+      "description": "Conquista desbloqueada: zzxmvmv",
+      "points": 50,
+      "timestamp": "2025-07-15T22:36:12.092Z",
+      "details": {
+        "achievementId": "1752618861726layhis2b4",
+        "achievementName": "zzxmvmv",
+        "achievementRarity": "common"
+      }
+    },
+    {
+      "id": "1752618978001a77a5k8kk",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "task_completed",
+      "description": "Tarefa 'Completar Projeto React' concluída",
+      "points": 50,
+      "timestamp": "2025-07-15T22:36:18.001Z",
+      "details": {
+        "taskId": "1",
+        "taskTitle": "Completar Projeto React",
+        "pointsEarned": 50
+      }
+    },
+    {
+      "id": "1752618978003sw2wamab8",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "achievement_unlocked",
+      "description": "Conquista desbloqueada: Iniciante",
+      "points": 20,
+      "timestamp": "2025-07-15T22:36:18.003Z",
+      "details": {
+        "achievementId": "task_beginner",
+        "achievementName": "Iniciante"
+      }
+    },
+    {
+      "id": "17526189780965lawxctiw",
+      "userId": "1752618947490nxeo7tmm9",
+      "type": "achievement_unlocked",
+      "description": "Conquista desbloqueada: Colecionador",
+      "points": 50,
+      "timestamp": "2025-07-15T22:36:18.096Z",
+      "details": {
+        "achievementId": "points_collector",
+        "achievementName": "Colecionador",
+        "achievementRarity": "uncommon"
+      }
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first_login",
+      "name": "Primeiro Acesso",
+      "description": "Faça seu primeiro login no sistema",
+      "icon": "👋",
+      "points": 10,
+      "type": "login",
+      "condition": {
+        "type": "login_count",
+        "value": 1
+      },
+      "rarity": "common"
+    },
+    {
+      "id": "task_beginner",
+      "name": "Iniciante",
+      "description": "Complete sua primeira tarefa",
+      "icon": "🎯",
+      "points": 20,
+      "type": "task",
+      "condition": {
+        "type": "tasks_completed",
+        "value": 1
+      },
+      "rarity": "common"
+    },
+    {
+      "id": "task_warrior",
+      "name": "Guerreiro das Tarefas",
+      "description": "Complete 10 tarefas",
+      "icon": "⚔️",
+      "points": 100,
+      "type": "task",
+      "condition": {
+        "type": "tasks_completed",
+        "value": 10
+      },
+      "rarity": "rare"
+    },
+    {
+      "id": "task_master",
+      "name": "Mestre das Tarefas",
+      "description": "Complete 50 tarefas",
+      "icon": "👑",
+      "points": 500,
+      "type": "task",
+      "condition": {
+        "type": "tasks_completed",
+        "value": 50
+      },
+      "rarity": "epic"
+    },
+    {
+      "id": "points_collector",
+      "name": "Colecionador",
+      "description": "Acumule 100 pontos",
+      "icon": "💎",
+      "points": 50,
+      "type": "points",
+      "condition": {
+        "type": "total_points",
+        "value": 100
+      },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "points_millionaire",
+      "name": "Milionário",
+      "description": "Acumule 1000 pontos",
+      "icon": "💰",
+      "points": 200,
+      "type": "points",
+      "condition": {
+        "type": "total_points",
+        "value": 1000
+      },
+      "rarity": "legendary"
+    },
+    {
+      "id": "daily_streak_7",
+      "name": "Semana Dedicada",
+      "description": "Complete tarefas por 7 dias consecutivos",
+      "icon": "🔥",
+      "points": 150,
+      "type": "streak",
+      "condition": {
+        "type": "daily_streak",
+        "value": 7
+      },
+      "rarity": "rare"
+    },
+    {
+      "id": "1752618861726layhis2b4",
+      "name": "zzxmvmv",
+      "description": "lxlçcz",
+      "icon": "🏆",
+      "points": 50,
+      "type": "task",
+      "condition": {
+        "type": "login_count",
+        "value": 1
+      },
+      "rarity": "common",
+      "createdAt": "2025-07-15T22:34:21.726Z"
+    }
+  ],
+  "userAchievements": [
+    {
+      "id": "1752618972091cz5tm993o",
+      "userId": "1752618947490nxeo7tmm9",
+      "achievementId": "first_login",
+      "unlockedAt": "2025-07-15T22:36:12.091Z",
+      "progress": 1
+    },
+    {
+      "id": "1752618972092vx8i1mktv",
+      "userId": "1752618947490nxeo7tmm9",
+      "achievementId": "1752618861726layhis2b4",
+      "unlockedAt": "2025-07-15T22:36:12.092Z",
+      "progress": 1
+    },
+    {
+      "id": "1752618978003e1cmsfius",
+      "userId": "1752618947490nxeo7tmm9",
+      "achievementId": "task_beginner",
+      "unlockedAt": "2025-07-15T22:36:18.003Z",
+      "progress": 1
+    },
+    {
+      "id": "1752618978096jogl081lp",
+      "userId": "1752618947490nxeo7tmm9",
+      "achievementId": "points_collector",
+      "unlockedAt": "2025-07-15T22:36:18.096Z",
+      "progress": 100
     }
   ]
 }

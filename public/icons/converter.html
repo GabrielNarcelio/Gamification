@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Converter SVG para PNG</title>
+</head>
+<body>
+  <h2>Conversão de Ícones PWA</h2>
+  <p>Use este código para converter SVG para PNG no navegador:</p>
+  
+  <script>
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+    
+    function downloadPNG(svgElement, size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      const data = new XMLSerializer().serializeToString(svgElement);
+      const DOMURL = window.URL || window.webkitURL || window;
+      const img = new Image();
+      const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+      const url = DOMURL.createObjectURL(svg);
+      
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0);
+        DOMURL.revokeObjectURL(url);
+        
+        canvas.toBlob(function(blob) {
+          const a = document.createElement('a');
+          a.download = `icon-${size}x${size}.png`;
+          a.href = URL.createObjectURL(blob);
+          a.click();
+        });
+      };
+      
+      img.src = url;
+    }
+    
+    // Auto-converter ao carregar
+    window.onload = () => {
+      sizes.forEach(size => {
+        fetch(`/icons/icon-${size}x${size}.svg`)
+          .then(response => response.text())
+          .then(svgText => {
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+            const svgElement = svgDoc.documentElement;
+            
+            setTimeout(() => downloadPNG(svgElement, size), size * 10);
+          });
+      });
+    };
+  </script>
+</body>
+</html>

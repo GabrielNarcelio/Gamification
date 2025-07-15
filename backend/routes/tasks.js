@@ -418,6 +418,67 @@ router.post('/:id/complete', async (req, res) => {
     data.history.push(historyEntry);
     await saveData(data);
     
+    // ✨ VERIFICAR CONQUISTAS AUTOMATICAMENTE
+    try {
+      console.log(`🏆 Verificando conquistas para usuário: ${userId}`);
+      
+      // Importar e verificar conquistas
+      const fs = require('fs').promises;
+      const path = require('path');
+      
+      // Lógica simplificada de verificação de conquistas
+      if (!data.achievements) {
+        console.log('📋 Nenhuma conquista configurada ainda');
+      } else if (!data.userAchievements) {
+        data.userAchievements = [];
+      } else {
+        // Verificar conquista básica de primeira tarefa
+        const userAchievements = data.userAchievements.filter(ua => ua.userId === userId);
+        const completedTasksCount = data.history.filter(h => 
+          h.type === 'task_completed' && h.userId === userId
+        ).length;
+        
+        // Verificar se deve desbloquear "primeira tarefa"
+        const firstTaskAchievement = data.achievements.find(a => a.id === 'task_beginner');
+        const hasFirstTask = userAchievements.find(ua => ua.achievementId === 'task_beginner');
+        
+        if (firstTaskAchievement && !hasFirstTask && completedTasksCount === 1) {
+          const newAchievement = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            userId,
+            achievementId: 'task_beginner',
+            unlockedAt: new Date().toISOString(),
+            progress: 1
+          };
+          
+          data.userAchievements.push(newAchievement);
+          data.users[userIndex].points += firstTaskAchievement.points;
+          
+          console.log(`🎉 Conquista desbloqueada: ${firstTaskAchievement.name} (+${firstTaskAchievement.points} pontos)`);
+          
+          // Adicionar ao histórico
+          const achievementHistory = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            userId,
+            type: 'achievement_unlocked',
+            description: `Conquista desbloqueada: ${firstTaskAchievement.name}`,
+            points: firstTaskAchievement.points,
+            timestamp: new Date().toISOString(),
+            details: {
+              achievementId: firstTaskAchievement.id,
+              achievementName: firstTaskAchievement.name
+            }
+          };
+          
+          data.history.push(achievementHistory);
+          await saveData(data);
+        }
+      }
+    } catch (achievementError) {
+      console.error('⚠️ Erro ao verificar conquistas automaticamente:', achievementError);
+      // Não falhar a requisição por causa de erro nas conquistas
+    }
+    
     console.log(`✅ Tarefa completada: ${task.title} (+${task.points} pontos)`);
     res.json({ 
       success: true, 

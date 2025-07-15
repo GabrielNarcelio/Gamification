@@ -21,8 +21,10 @@ app.use(cors({
   origin: [
     'http://localhost:3000', 
     'http://localhost:5173',
+    'http://localhost:5174',
     'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -48,6 +50,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/rewards', require('./routes/rewards'));
 app.use('/api/history', require('./routes/history'));
+app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/ranking', require('./routes/ranking'));
 
 // Rota de health check

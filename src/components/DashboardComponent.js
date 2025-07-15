@@ -1,11 +1,12 @@
 // Componente principal do Dashboard
 
-import { stateManager } from '@/services/state.js';
+import { stateManager } from '../services/state.js';
 import { TasksComponent } from './TasksComponent.js';
 import { RewardsComponent } from './RewardsComponent.js';
 import { RankingComponent } from './RankingComponent.js';
 import { HistoryComponent } from './HistoryComponent.js';
 import { AdminPanelComponent } from './AdminPanelComponent.js';
+import { AchievementsComponent } from './AchievementsComponent.js';
 
 export class DashboardComponent {
   constructor(container) {
@@ -52,7 +53,12 @@ export class DashboardComponent {
             </section>
 
             <section class="dashboard-section">
-              <h3>🏆 Ranking</h3>
+              <h3>🏆 Conquistas</h3>
+              <div id="achievements-container"></div>
+            </section>
+
+            <section class="dashboard-section">
+              <h3>🏅 Ranking</h3>
               <div id="ranking-container"></div>
             </section>
 
@@ -76,13 +82,19 @@ export class DashboardComponent {
   initializeComponents() {
     const tasksContainer = this.container.querySelector('#tasks-container');
     const rewardsContainer = this.container.querySelector('#rewards-container');
+    const achievementsContainer = this.container.querySelector('#achievements-container');
     const rankingContainer = this.container.querySelector('#ranking-container');
     const historyContainer = this.container.querySelector('#history-container');
 
     this.tasksComponent = new TasksComponent(tasksContainer);
     this.rewardsComponent = new RewardsComponent(rewardsContainer);
+    this.achievementsComponent = new AchievementsComponent();
+    this.achievementsComponent.init(achievementsContainer);
     this.rankingComponent = new RankingComponent(rankingContainer);
     this.historyComponent = new HistoryComponent(historyContainer);
+    
+    // Expor para debug global
+    window.achievementsComponent = this.achievementsComponent;
   }
 
   async checkAndShowDevBanner() {
@@ -101,8 +113,8 @@ export class DashboardComponent {
     }
   }
 
-  handleStateChange(state) {
-    if (!state.user) return;
+  handleStateChange(currentState) {
+    if (!currentState.user) return;
 
     // Update user info display
     const userNameElement = this.container.querySelector('#user-name');
@@ -111,12 +123,12 @@ export class DashboardComponent {
     const historyTitle = this.container.querySelector('#history-title');
     const adminPanelContainer = this.container.querySelector('#admin-panel-container');
 
-    userNameElement.textContent = state.user.nome;
-    userPointsElement.textContent = state.userPoints.toString();
-    userTypeElement.textContent = state.userType || '';
+    userNameElement.textContent = currentState.user.name || currentState.user.nome;
+    userPointsElement.textContent = currentState.user.points?.toString() || currentState.userPoints?.toString() || '0';
+    userTypeElement.textContent = currentState.user.type === 'admin' ? 'Administrador' : 'Usuário';
 
     // Handle admin panel
-    if (state.userType === 'Administrador') {
+    if (currentState.user.type === 'admin' || currentState.userType === 'Administrador') {
       adminPanelContainer.style.display = 'block';
       historyTitle.textContent = '📊 Histórico de Todos os Usuários';
       
@@ -136,6 +148,7 @@ export class DashboardComponent {
   refreshComponents() {
     this.tasksComponent.refresh();
     this.rewardsComponent.refresh();
+    this.achievementsComponent.loadAchievements();
     this.rankingComponent.refresh();
     this.historyComponent.refresh();
     

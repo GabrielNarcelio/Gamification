@@ -4,10 +4,340 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema completo de gamificação para gerenciamento de tarefas com conquistas, rankings e recompensas" />
+    <meta name="keywords" content="gamificação, tarefas, produtividade, conquistas, ranking" />
+    <meta name="author" content="Sistema de Gamificação" />
+    
+    <!-- PWA Theme -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="msapplication-TileColor" content="#4f46e5" />
+    <meta name="msapplication-navbutton-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA Mobile -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Gamificação" />
+    <meta name="application-name" content="Gamificação" />
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png" />
+    <link rel="mask-icon" href="/icons/icon-512x512.png" color="#4f46e5" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- DNS Prefetch para melhor performance -->
+    <link rel="dns-prefetch" href="//localhost:3001" />
+    
+    <!-- Critical CSS Inline para evitar FOUC -->
+    <style>
+      /* Reset básico e estilos críticos */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8f9fa;
+      }
+      
+      /* Loading inicial crítico */
+      .app-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+      }
+      
+      .app-loading::before {
+        content: '🎮';
+        margin-right: 10px;
+        font-size: 24px;
+        animation: bounce 1s infinite;
+      }
+      
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+      }
+      
+      /* Estilos básicos de botões e formulários */
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      
+      .btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+      }
+      
+      .btn-primary {
+        background: #007bff;
+      }
+      
+      .btn-secondary {
+        background: #6c757d;
+      }
+      
+      .btn-success {
+        background: #28a745;
+      }
+      
+      .btn-danger {
+        background: #dc3545;
+      }
+      
+      /* Container básico */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      
+      /* Forms básicos */
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+      }
+      
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+      
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      }
+      
+      /* Cards básicos */
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+      }
+      
+      /* Esconder conteúdo até carregar */
+      #app:empty {
+        min-height: 100vh;
+        background: #f8f9fa;
+      }
+      
+      /* Utility classes */
+      .text-center { text-align: center; }
+      .text-primary { color: #007bff; }
+      .text-success { color: #28a745; }
+      .text-danger { color: #dc3545; }
+      .mb-2 { margin-bottom: 0.5rem; }
+      .mb-3 { margin-bottom: 1rem; }
+      .mb-4 { margin-bottom: 1.5rem; }
+      .mt-2 { margin-top: 0.5rem; }
+      .mt-3 { margin-top: 1rem; }
+      .mt-4 { margin-top: 1.5rem; }
+    </style>
+    
     <title>Sistema de Gamificação de Tarefas</title>
   </head>
   <body>
+    <!-- Loading inicial -->
+    <div class="app-loading" id="initial-loading">
+      Carregando Sistema de Gamificação...
+    </div>
+    
     <div id="app"></div>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      // TEMPORARIAMENTE DESABILITAR SERVICE WORKER PARA CORRIGIR CSS
+      
+      // Limpar todos os caches e service workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            console.log('🗑️ Removendo Service Worker:', registration.scope);
+            registration.unregister();
+          });
+        });
+      }
+      
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            console.log('🗑️ Removendo cache:', cacheName);
+            caches.delete(cacheName);
+          });
+        });
+      }
+      
+      // Limpar localStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      console.log('🧹 Service Worker e caches removidos - CSS deve funcionar agora');
+      
+      // COMENTADO TEMPORARIAMENTE - Registrar Service Worker
+      /*
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', {
+            scope: '/'
+          })
+            .then(registration => {
+              console.log('� SW: Service Worker registrado com sucesso!', registration.scope);
+            })
+            .catch(error => {
+              console.error('❌ SW: Falha ao registrar Service Worker:', error);
+            });
+        });
+      }
+      */
+      
+      // Mostrar notificação de atualização
+      function showUpdateNotification() {
+        if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
+          window.location.reload();
+        }
+      }
+      
+      // Detectar quando o app está offline/online
+      window.addEventListener('online', () => {
+        console.log('🌐 Aplicação online');
+        document.body.classList.remove('offline');
+        showConnectionStatus('Conectado', 'success');
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('🔌 Aplicação offline');
+        document.body.classList.add('offline');
+        showConnectionStatus('Modo Offline', 'warning');
+      });
+      
+      // Mostrar status de conexão
+      function showConnectionStatus(message, type) {
+        // Esta função será implementada quando tivermos o sistema de notificações
+        console.log(`📡 Status: ${message}`);
+      }
+      
+      // Verificar se pode ser instalado como PWA
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('💡 PWA pode ser instalada!');
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallButton();
+      });
+      
+      // Mostrar botão de instalação
+      function showInstallButton() {
+        // Criar botão de instalação dinamicamente
+        const installBtn = document.createElement('button');
+        installBtn.id = 'pwa-install-btn';
+        installBtn.innerHTML = '📱 Instalar App';
+        installBtn.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #4f46e5;
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 25px;
+          cursor: pointer;
+          font-weight: bold;
+          box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+          z-index: 1000;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        `;
+        
+        installBtn.addEventListener('mouseenter', () => {
+          installBtn.style.transform = 'scale(1.05)';
+          installBtn.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.4)';
+        });
+        
+        installBtn.addEventListener('mouseleave', () => {
+          installBtn.style.transform = 'scale(1)';
+          installBtn.style.boxShadow = '0 4px 15px rgba(79, 70, 229, 0.3)';
+        });
+        
+        installBtn.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`📱 PWA instalação: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.remove();
+          }
+        });
+        
+        document.body.appendChild(installBtn);
+        
+        // Remover botão após 30 segundos se não usado
+        setTimeout(() => {
+          if (installBtn.parentNode) {
+            installBtn.style.opacity = '0';
+            setTimeout(() => installBtn.remove(), 300);
+          }
+        }, 30000);
+      }
+      
+      // Detectar quando PWA foi instalada
+      window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA instalada com sucesso!');
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) installBtn.remove();
+      });
+    </script>
+    
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

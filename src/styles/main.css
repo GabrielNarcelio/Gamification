@@ -1,9 +1,9 @@
 /* Estilos principais da aplicação */
 
-/* Importar outros arquivos de estilo */
-@import './login.css';
-@import './dashboard.css';
-@import './components.css';
+/* TEMPORARIAMENTE COMENTADO - Importar outros arquivos de estilo */
+/* @import './login.css'; */
+/* @import './dashboard.css'; */
+/* @import './components.css'; */
 
 :root {
   /* Cores */
@@ -46,6 +46,243 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
+  
+  /* PWA Colors */
+  --pwa-primary: #4f46e5;
+  --pwa-primary-dark: #3730a3;
+  --pwa-success: #10b981;
+  --pwa-warning: #f59e0b;
+  --pwa-error: #ef4444;
+  --pwa-offline: #6b7280;
+}
+
+/* PWA - Estilos para modo offline */
+body.offline {
+  filter: grayscale(0.3);
+  position: relative;
+}
+
+body.offline::before {
+  content: '🔌 Modo Offline - Funcionalidade limitada';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--pwa-offline);
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+  z-index: 10000;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+/* PWA - Botão de instalação */
+#pwa-install-btn {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  background: var(--pwa-primary) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 25px !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+  z-index: 1000 !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-family: inherit !important;
+}
+
+#pwa-install-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+  background: var(--pwa-primary-dark) !important;
+}
+
+#pwa-install-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* PWA - Indicador de carregamento offline */
+.offline-loading {
+  position: relative;
+}
+
+.offline-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--pwa-offline) 50%, 
+    transparent 100%);
+  animation: loading-bar 2s ease-in-out infinite;
+}
+
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* PWA - Notificações de status */
+.pwa-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 9999;
+  min-width: 200px;
+  text-align: center;
+  animation: slideInRight 0.3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.pwa-notification.success {
+  background: var(--pwa-success);
+}
+
+.pwa-notification.warning {
+  background: var(--pwa-warning);
+}
+
+.pwa-notification.error {
+  background: var(--pwa-error);
+}
+
+.pwa-notification.info {
+  background: var(--pwa-primary);
+}
+
+@keyframes slideInRight {
+  from { 
+    transform: translateX(100%); 
+    opacity: 0;
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1;
+  }
+}
+
+/* PWA - Melhorias de performance */
+.app-shell {
+  contain: layout style paint;
+}
+
+.component-container {
+  contain: layout style;
+}
+
+/* PWA - Loading states otimizados */
+.pwa-skeleton {
+  background: linear-gradient(90deg, 
+    #f0f0f0 25%, 
+    #e0e0e0 50%, 
+    #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-skeleton 1.5s infinite;
+}
+
+@keyframes loading-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* PWA - Responsividade melhorada */
+@media (max-width: 768px) {
+  #pwa-install-btn {
+    bottom: 10px !important;
+    right: 10px !important;
+    padding: 10px 16px !important;
+    font-size: 12px !important;
+  }
+  
+  .pwa-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
+  
+  body.offline::before {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
+/* PWA - Transições otimizadas */
+.page-transition {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-transition.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* PWA - Prevenção de FOUC (Flash of Unstyled Content) */
+[v-cloak] {
+  display: none !important;
+}
+
+.app-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.app-loading::before {
+  content: '🎮';
+  margin-right: 10px;
+  font-size: 24px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* PWA - Safe areas para dispositivos móveis */
+@supports (padding: max(0px)) {
+  .mobile-safe-top {
+    padding-top: max(20px, env(safe-area-inset-top));
+  }
+  
+  .mobile-safe-bottom {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+  
+  .mobile-safe-left {
+    padding-left: max(20px, env(safe-area-inset-left));
+  }
+  
+  .mobile-safe-right {
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
 }
 
 /* Reset e base */
@@ -293,15 +530,4 @@ textarea {
 
 .dev-banner strong {
   font-weight: 700;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

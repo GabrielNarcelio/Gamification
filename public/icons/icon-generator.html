@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Ícones PWA</title>
+</head>
+<body>
+    <h2>🎨 Gerador de Ícones PWA</h2>
+    <p>Clique no botão para gerar e baixar todos os ícones:</p>
+    <button onclick="generateAllIcons()" style="padding: 10px 20px; font-size: 16px; background: #4f46e5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        🚀 Gerar Ícones
+    </button>
+    
+    <div id="status" style="margin-top: 20px;"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4f46e5');
+            gradient.addColorStop(1, '#7c3aed');
+            
+            // Draw background with rounded corners
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.2);
+            ctx.fill();
+            
+            // Draw game controller icon
+            ctx.fillStyle = '#ffffff';
+            
+            // Controller body
+            const controllerWidth = size * 0.6;
+            const controllerHeight = size * 0.3;
+            const x = (size - controllerWidth) / 2;
+            const y = (size - controllerHeight) / 2;
+            
+            ctx.beginPath();
+            ctx.roundRect(x, y, controllerWidth, controllerHeight, controllerHeight / 3);
+            ctx.fill();
+            
+            // D-pad (left side)
+            const dpadSize = size * 0.08;
+            const dpadX = x + controllerWidth * 0.25;
+            const dpadY = y + controllerHeight * 0.5;
+            
+            // Horizontal line
+            ctx.fillRect(dpadX - dpadSize, dpadY - dpadSize/3, dpadSize * 2, dpadSize * 2/3);
+            // Vertical line
+            ctx.fillRect(dpadX - dpadSize/3, dpadY - dpadSize, dpadSize * 2/3, dpadSize * 2);
+            
+            // Buttons (right side)
+            const buttonSize = size * 0.04;
+            const buttonX = x + controllerWidth * 0.75;
+            const buttonY = y + controllerHeight * 0.5;
+            
+            // Four buttons in diamond pattern
+            ctx.beginPath();
+            ctx.arc(buttonX, buttonY - buttonSize, buttonSize, 0, 2 * Math.PI);
+            ctx.arc(buttonX + buttonSize, buttonY, buttonSize, 0, 2 * Math.PI);
+            ctx.arc(buttonX, buttonY + buttonSize, buttonSize, 0, 2 * Math.PI);
+            ctx.arc(buttonX - buttonSize, buttonY, buttonSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            return canvas;
+        }
+
+        function downloadIcon(size) {
+            return new Promise(resolve => {
+                const canvas = createIcon(size);
+                canvas.toBlob(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `icon-${size}x${size}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    resolve();
+                });
+            });
+        }
+
+        async function generateAllIcons() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '🎨 Gerando ícones...';
+            
+            for (let i = 0; i < sizes.length; i++) {
+                const size = sizes[i];
+                await downloadIcon(size);
+                statusDiv.innerHTML += `<br>✅ Ícone ${size}x${size} criado`;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            statusDiv.innerHTML += '<br><br>🎉 <strong>Todos os ícones foram gerados!</strong>';
+            statusDiv.innerHTML += '<br>📁 Mova os arquivos baixados para a pasta <code>public/icons/</code>';
+        }
+    </script>
+</body>
+</html>
