@@ -93,8 +93,8 @@ router.get('/:id', async (req, res) => {
 // POST /api/users - Criar novo usuário (via painel admin)
 router.post('/', async (req, res) => {
   try {
-    const { username, password, name, email, type = 'user' } = req.body;
-    console.log('➕ Criando usuário:', { username, name, email, type });
+    const { username, password, name, email, type = 'user', points = 0 } = req.body;
+    console.log('➕ Criando usuário:', { username, name, email, type, points });
     
     // Validações
     if (!username || !password || !name || !email) {
@@ -131,8 +131,8 @@ router.post('/', async (req, res) => {
       password, // Em produção, deveria ser hasheada
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      type: type.toLowerCase(),
-      points: 0,
+      type: type.toLowerCase() === 'admin' || type.toLowerCase() === 'administrador' ? 'admin' : 'user',
+      points: parseInt(points) || 0,
       createdAt: new Date().toISOString()
     };
     
@@ -220,6 +220,12 @@ router.put('/:id', async (req, res) => {
     
     // Atualizar usuário
     const oldUser = { ...data.users[userIndex] };
+    
+    // Normalizar tipo se estiver sendo atualizado
+    if (updates.type) {
+      updates.type = updates.type.toLowerCase() === 'admin' || updates.type.toLowerCase() === 'administrador' ? 'admin' : 'user';
+    }
+    
     data.users[userIndex] = { 
       ...data.users[userIndex], 
       ...updates,

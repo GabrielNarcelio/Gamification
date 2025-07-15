@@ -134,11 +134,11 @@ export class AdminPanelComponent {
       this.currentEditUserId = null;
     } else if (mode === 'edit' && user) {
       title.textContent = 'Editar Usuário';
-      nameInput.value = user.name;
-      passwordInput.value = user.password;
+      nameInput.value = user.name || '';
+      passwordInput.value = ''; // Sempre vazio para edição por segurança
       emailInput.value = user.email || '';
       typeSelect.value = user.type === 'admin' ? 'Administrador' : 'Usuário';
-      pointsInput.value = user.points.toString();
+      pointsInput.value = (user.points || 0).toString();
       userIdInput.value = user.id || '';
       this.currentEditUserId = user.id || null;
     }
@@ -184,10 +184,11 @@ export class AdminPanelComponent {
     }
 
     const user = {
-      nome: name,
+      username: name,  // O campo "nome" no formulário será usado como username
       senha: password,
+      name: name,      // O mesmo valor para name também
       email: email,
-      tipo: type,
+      tipo: type === 'Administrador' ? 'admin' : 'user',  // Converter para inglês
       pontos: parseInt(points)
     };
 
@@ -317,9 +318,9 @@ export class AdminPanelComponent {
     usersList.innerHTML = this.users.map(user => `
       <div class="user-item">
         <div class="user-info">
-          <div class="user-name">${escapeHtml(user.name)}</div>
+          <div class="user-name">${escapeHtml(user.name || 'Sem nome')}</div>
           <div class="user-details">
-            <span class="user-points">${user.points} pontos</span>
+            <span class="user-points">${user.points || 0} pontos</span>
             <span class="user-type ${user.type === 'admin' ? 'admin' : 'user'}">
               ${user.type === 'admin' ? 'Administrador' : 'Usuário'}
             </span>
@@ -328,14 +329,14 @@ export class AdminPanelComponent {
         <div class="user-actions">
           <button 
             class="btn btn-sm btn-primary" 
-            onclick="window.adminPanel.editUser('${user.id}', '${escapeHtml(user.name)}', '${escapeHtml(user.password)}', '${user.email}', '${user.type}', ${user.points})"
+            onclick="window.adminPanel.editUser('${user.id}', '${escapeHtml(user.name || '')}', '', '${user.email || ''}', '${user.type || 'user'}', ${user.points || 0})"
           >
             ✏️ Editar
           </button>
           <button 
             class="btn btn-sm btn-danger" 
             data-delete-user="${user.id}"
-            onclick="window.adminPanel.deleteUser('${user.id}', '${escapeHtml(user.name)}')"
+            onclick="window.adminPanel.deleteUser('${user.id}', '${escapeHtml(user.name || 'Usuário')}')"
           >
             🗑️ Excluir
           </button>

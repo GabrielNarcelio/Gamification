@@ -653,9 +653,9 @@ export class ApiService {
       const response = await this.makeRequest('/users', {
         method: 'POST',
         body: JSON.stringify({
-          username: user.nome,
+          username: user.username,
           password: user.senha,
-          name: user.nome,
+          name: user.name,
           email: user.email,
           type: user.tipo,
           points: user.pontos || 0
@@ -689,9 +689,9 @@ export class ApiService {
         if (userIndex !== -1) {
           mockData.users[userIndex] = { 
             ...mockData.users[userIndex], 
-            username: user.nome,
+            username: user.username,
             password: user.senha,
-            name: user.nome,
+            name: user.name,
             email: user.email,
             type: user.tipo,
             points: user.pontos
@@ -706,9 +706,9 @@ export class ApiService {
       const response = await this.makeRequest(`/users/${userId}`, {
         method: 'PUT',
         body: JSON.stringify({
-          username: user.nome,
+          username: user.username,
           password: user.senha,
-          name: user.nome,
+          name: user.name,
           email: user.email,
           type: user.tipo,
           points: user.pontos
