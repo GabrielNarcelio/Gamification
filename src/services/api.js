@@ -308,6 +308,50 @@ export class ApiService {
     }
   }
 
+  async deleteTask(taskId) {
+    console.log('🗑️ Deletando tarefa:', taskId);
+    
+    try {
+      console.log('🔍 Verificando shouldUseMockData...');
+      if (await this.shouldUseMockData()) {
+        console.log('📋 Usando mock data');
+        await simulateNetworkDelay();
+        
+        const taskIndex = mockData.tasks.findIndex(t => t.id === taskId);
+        if (taskIndex === -1) {
+          throw new Error('Tarefa não encontrada');
+        }
+        
+        const deletedTask = mockData.tasks.splice(taskIndex, 1)[0];
+        return { success: true, data: deletedTask, message: 'Tarefa deletada com sucesso' };
+      }
+
+      console.log('🌐 Usando API REST...');
+      console.log('📡 Fazendo request DELETE para /tasks/' + taskId);
+      
+      const response = await this.makeRequest(`/tasks/${taskId}`, {
+        method: 'DELETE'
+      });
+
+      console.log('✅ Delete concluído, resposta:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Erro capturado em deleteTask:', error);
+      // Fallback para mock (remover da lista local)
+      const taskIndex = mockData.tasks.findIndex(t => t.id === taskId);
+      if (taskIndex !== -1) {
+        const deletedTask = mockData.tasks.splice(taskIndex, 1)[0];
+        console.log('🔄 Usando fallback mock data para delete:', deletedTask);
+        return await this.handleCorsError(error, 'deleteTask', { 
+          success: true, 
+          data: deletedTask, 
+          message: 'Tarefa deletada com sucesso (offline)' 
+        });
+      }
+      throw error;
+    }
+  }
+
   async concludeTask(taskId, userId) {
     console.log(`✅ Completando tarefa ${taskId} para usuário ${userId}`);
     
@@ -378,6 +422,111 @@ export class ApiService {
         pointsEarned: task.points, 
         totalPoints: user.points 
       });
+    }
+  }
+
+  async createReward(title, description, cost, category, stock) {
+    console.log('➕ Criando prêmio:', { title, description, cost, category, stock });
+    
+    try {
+      console.log('🔍 Verificando shouldUseMockData...');
+      if (await this.shouldUseMockData()) {
+        console.log('📋 Usando mock data');
+        await simulateNetworkDelay();
+        
+        const newReward = {
+          id: generateId(),
+          title: title,
+          description: description,
+          cost: parseInt(cost),
+          category: category || 'Geral',
+          stock: stock ? parseInt(stock) : 999,
+          createdAt: new Date().toISOString()
+        };
+        
+        mockData.rewards.push(newReward);
+        return { success: true, data: newReward, message: 'Prêmio criado com sucesso' };
+      }
+
+      console.log('🌐 Usando API REST...');
+      // REST API call
+      const requestBody = { 
+        title, 
+        description, 
+        cost: parseInt(cost),
+        category: category || 'Geral',
+        stock: stock ? parseInt(stock) : undefined
+      };
+      
+      console.log('🔍 Debug createReward - request body:', requestBody);
+      
+      console.log('📡 Fazendo request para /rewards...');
+      const response = await this.makeRequest('/rewards', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('✅ Request concluído, resposta:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Erro capturado em createReward:', error);
+      // Fallback para mock
+      const newReward = {
+        id: generateId(),
+        title: title,
+        description: description,
+        cost: parseInt(cost),
+        category: category || 'Geral',
+        stock: stock ? parseInt(stock) : 999,
+        createdAt: new Date().toISOString()
+      };
+      mockData.rewards.push(newReward);
+      console.log('🔄 Usando fallback mock data:', newReward);
+      return await this.handleCorsError(error, 'createReward', newReward);
+    }
+  }
+
+  async deleteReward(rewardId) {
+    console.log('🗑️ Deletando prêmio:', rewardId);
+    
+    try {
+      console.log('🔍 Verificando shouldUseMockData...');
+      if (await this.shouldUseMockData()) {
+        console.log('📋 Usando mock data');
+        await simulateNetworkDelay();
+        
+        const rewardIndex = mockData.rewards.findIndex(r => r.id === rewardId);
+        if (rewardIndex === -1) {
+          throw new Error('Prêmio não encontrado');
+        }
+        
+        const deletedReward = mockData.rewards.splice(rewardIndex, 1)[0];
+        return { success: true, data: deletedReward, message: 'Prêmio deletado com sucesso' };
+      }
+
+      console.log('🌐 Usando API REST...');
+      console.log('📡 Fazendo request DELETE para /rewards/' + rewardId);
+      
+      const response = await this.makeRequest(`/rewards/${rewardId}`, {
+        method: 'DELETE'
+      });
+
+      console.log('✅ Delete concluído, resposta:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Erro capturado em deleteReward:', error);
+      // Fallback para mock (remover da lista local)
+      const rewardIndex = mockData.rewards.findIndex(r => r.id === rewardId);
+      if (rewardIndex !== -1) {
+        const deletedReward = mockData.rewards.splice(rewardIndex, 1)[0];
+        console.log('🔄 Usando fallback mock data para delete:', deletedReward);
+        return await this.handleCorsError(error, 'deleteReward', { 
+          success: true, 
+          data: deletedReward, 
+          message: 'Prêmio deletado com sucesso (offline)' 
+        });
+      }
+      throw error;
     }
   }
 

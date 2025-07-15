@@ -72,6 +72,18 @@
   justify-content: flex-end;
 }
 
+/* Admin Actions */
+.admin-actions {
+  justify-content: flex-start;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid #e9ecef;
+}
+
+.admin-actions .btn {
+  margin-right: var(--spacing-xs);
+}
+
 /* Rewards Component */
 .rewards-list {
   display: flex;
@@ -355,6 +367,44 @@
 
 .sheet-setup-warning p {
   margin-bottom: var(--spacing-lg);
+}
+
+/* Rewards Component */
+.reward-form {
+  background: #f8f9fa;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  border: 2px solid #28a745;
+}
+
+.reward-form h4 {
+  color: #28a745;
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-lg);
+}
+
+.reward-form select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+}
+
+.reward-meta {
+  display: flex;
+  gap: var(--spacing-md);
+  margin: var(--spacing-sm) 0;
+  color: var(--secondary-color);
+  font-size: var(--font-size-sm);
+}
+
+.reward-meta small {
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e9ecef;
 }
 
 /* Responsividade dos componentes */

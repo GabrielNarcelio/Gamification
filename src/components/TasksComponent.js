@@ -124,6 +124,47 @@ export class TasksComponent {
     }
   }
 
+  async handleDeleteTask(taskId, taskTitle) {
+    const currentState = stateManager.getState();
+    
+    // Verificar se usuário é admin
+    if (currentState.userType !== 'Administrador') {
+      console.error('❌ Apenas administradores podem deletar tarefas');
+      return;
+    }
+
+    // Confirmar exclusão
+    const confirmed = confirm(`Tem certeza que deseja deletar a tarefa "${taskTitle}"?\n\nEsta ação não pode ser desfeita.`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deletando tarefa:', { taskId, taskTitle });
+      
+      const response = await api.deleteTask(taskId);
+      
+      if (response.success) {
+        // Reload tasks para atualizar a lista
+        await this.loadTasks();
+        
+        // Show success message
+        this.showSuccessMessage(`✅ Tarefa "${taskTitle}" deletada com sucesso!`);
+      } else {
+        const errorDiv = this.container.querySelector('#task-form-error');
+        if (errorDiv) {
+          errorDiv.textContent = response.message || 'Erro ao deletar tarefa.';
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao deletar tarefa:', error);
+      const errorDiv = this.container.querySelector('#task-form-error');
+      if (errorDiv) {
+        errorDiv.textContent = 'Erro inesperado ao deletar tarefa.';
+      }
+    }
+  }
+
   async handleConcludeTask(taskId, points) {
     const state = stateManager.getState();
     if (!state.user) return;
@@ -193,6 +234,16 @@ export class TasksComponent {
           <div class="task-creator">
             <small>Criado por: ${escapeHtml(task.createdBy || 'Sistema')}</small>
           </div>
+          <div class="task-actions admin-actions">
+            <button 
+              class="btn btn-danger btn-sm" 
+              data-task-id="${task.id}"
+              onclick="window.taskComponent.deleteTask('${task.id}', '${escapeHtml(task.title)}')"
+              title="Deletar tarefa"
+            >
+              🗑️ Deletar
+            </button>
+          </div>
         ` : `
           <div class="task-actions">
             <button 
@@ -209,7 +260,8 @@ export class TasksComponent {
 
     // Store reference for onclick handlers
     window.taskComponent = {
-      concludeTask: (taskId, points) => this.handleConcludeTask(taskId, points)
+      concludeTask: (taskId, points) => this.handleConcludeTask(taskId, points),
+      deleteTask: (taskId, title) => this.handleDeleteTask(taskId, title)
     };
   }
 

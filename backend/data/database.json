@@ -93,16 +93,6 @@
       "createdBy": "admin"
     },
     {
-      "id": "1752603333365d0u5w1shj",
-      "title": "dajhakj",
-      "description": "kdsjalkdj",
-      "points": 10,
-      "category": "Geral",
-      "difficulty": "medium",
-      "createdAt": "2025-07-15T18:15:33.365Z",
-      "createdBy": "admin"
-    },
-    {
       "id": "175260363033087sm8fhki",
       "title": "Arrumar a requisição",
       "description": "sçlkdaçdk",
@@ -120,26 +110,6 @@
       "category": "Geral",
       "difficulty": "medium",
       "createdAt": "2025-07-15T18:21:10.191Z",
-      "createdBy": "admin"
-    },
-    {
-      "id": "17526037526781d4ux3nuj",
-      "title": "lkjglsdkg",
-      "description": "skjdfalkjfa",
-      "points": 10,
-      "category": "Geral",
-      "difficulty": "medium",
-      "createdAt": "2025-07-15T18:22:32.678Z",
-      "createdBy": "admin"
-    },
-    {
-      "id": "1752604000655seooh4vz4",
-      "title": "kjsadgkas",
-      "description": "sjhdasj",
-      "points": 10,
-      "category": "Geral",
-      "difficulty": "medium",
-      "createdAt": "2025-07-15T18:26:40.655Z",
       "createdBy": "admin"
     }
   ],
@@ -190,13 +160,13 @@
       "createdAt": "2025-01-15T10:00:00.000Z"
     },
     {
-      "id": "6",
-      "title": "Coffee Break Premium",
-      "description": "Coffee break especial para a equipe",
-      "cost": 80,
-      "category": "Alimentação",
-      "stock": 4,
-      "createdAt": "2025-01-15T10:00:00.000Z"
+      "id": "1752605507808q199o4ltl",
+      "title": "Fone de Ouvido",
+      "description": "Fone de ouvido Bluetooth premium",
+      "cost": 500,
+      "category": "Eletr�nicos",
+      "stock": 10,
+      "createdAt": "2025-07-15T18:51:47.808Z"
     }
   ],
   "history": [
@@ -493,6 +463,42 @@
       "details": {
         "deletedUsername": "maria",
         "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "1752605177553qebs8wyh6",
+      "userId": "admin",
+      "type": "task_deleted",
+      "description": "Tarefa 'dajhakj' deletada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:46:17.553Z",
+      "details": {
+        "deletedTaskTitle": "dajhakj",
+        "deletedTaskPoints": 10
+      }
+    },
+    {
+      "id": "17526051829539pf770220",
+      "userId": "admin",
+      "type": "task_deleted",
+      "description": "Tarefa 'lkjglsdkg' deletada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:46:22.953Z",
+      "details": {
+        "deletedTaskTitle": "lkjglsdkg",
+        "deletedTaskPoints": 10
+      }
+    },
+    {
+      "id": "1752605217607q4c86cx1q",
+      "userId": "admin",
+      "type": "task_deleted",
+      "description": "Tarefa 'kjsadgkas' deletada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:46:57.607Z",
+      "details": {
+        "deletedTaskTitle": "kjsadgkas",
+        "deletedTaskPoints": 10
       }
     }
   ]

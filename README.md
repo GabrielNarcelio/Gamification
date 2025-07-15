@@ -34,11 +34,14 @@ npm run dev
 ## 🎮 Funcionalidades
 - ✅ Autenticação de usuários
 - ✅ Criação e gerenciamento de tarefas
+- ✅ **Exclusão de tarefas (Admin apenas)**
+- ✅ **Criação de prêmios (Admin apenas)**
+- ✅ **Exclusão de prêmios (Admin apenas)**
 - ✅ Sistema de pontuação
 - ✅ Ranking de usuários
-- ✅ Sistema de prêmios
+- ✅ Sistema de prêmios e resgate
 - ✅ Histórico de atividades
-- ✅ Interface administrativa
+- ✅ Interface administrativa completa
 
 ## 🔧 Scripts Disponíveis
 - `npm run dev` - Inicia frontend

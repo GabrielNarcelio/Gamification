@@ -14,11 +14,163 @@ export class RewardsComponent {
   }
 
   render() {
+    const state = stateManager.getState();
+    const isAdmin = state.userType === 'Administrador';
+
     this.container.innerHTML = `
+      ${isAdmin ? `
+        <div class="reward-form">
+          <h4>➕ Criar Novo Prêmio</h4>
+          <div class="form-group">
+            <input type="text" id="new-reward-title" placeholder="Nome do prêmio" />
+          </div>
+          <div class="form-group">
+            <textarea id="new-reward-description" placeholder="Descrição do prêmio"></textarea>
+          </div>
+          <div class="form-group">
+            <input type="number" id="new-reward-cost" placeholder="Custo em pontos" min="1" max="10000" />
+          </div>
+          <div class="form-group">
+            <select id="new-reward-category">
+              <option value="Geral">Geral</option>
+              <option value="Eletrônicos">Eletrônicos</option>
+              <option value="Livros">Livros</option>
+              <option value="Vouchers">Vouchers</option>
+              <option value="Experiências">Experiências</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="number" id="new-reward-stock" placeholder="Estoque (opcional)" min="0" max="1000" />
+          </div>
+          <button id="create-reward-button" class="btn btn-primary">Criar Prêmio</button>
+          <div id="reward-form-error" class="error-message"></div>
+        </div>
+      ` : ''}
+      
       <div id="rewards-list" class="rewards-list">
         <div class="loading">Carregando prêmios...</div>
       </div>
     `;
+
+    // Setup event listeners if admin
+    if (isAdmin) {
+      this.setupAdminEventListeners();
+    }
+  }
+
+  setupAdminEventListeners() {
+    const createButton = this.container.querySelector('#create-reward-button');
+    createButton?.addEventListener('click', () => this.handleCreateReward());
+  }
+
+  async handleCreateReward() {
+    const titleInput = this.container.querySelector('#new-reward-title');
+    const descriptionInput = this.container.querySelector('#new-reward-description');
+    const costInput = this.container.querySelector('#new-reward-cost');
+    const categoryInput = this.container.querySelector('#new-reward-category');
+    const stockInput = this.container.querySelector('#new-reward-stock');
+    const errorDiv = this.container.querySelector('#reward-form-error');
+    const createButton = this.container.querySelector('#create-reward-button');
+
+    // Clear previous errors
+    errorDiv.textContent = '';
+
+    // Get values
+    const title = titleInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const cost = costInput.value.trim();
+    const category = categoryInput.value;
+    const stock = stockInput.value.trim();
+
+    // Validations
+    if (!title) {
+      errorDiv.textContent = 'Nome do prêmio é obrigatório.';
+      return;
+    }
+
+    if (!description) {
+      errorDiv.textContent = 'Descrição é obrigatória.';
+      return;
+    }
+
+    if (!cost || parseInt(cost) < 1 || parseInt(cost) > 10000) {
+      errorDiv.textContent = 'Custo deve estar entre 1 e 10000 pontos.';
+      return;
+    }
+
+    if (stock && (parseInt(stock) < 0 || parseInt(stock) > 1000)) {
+      errorDiv.textContent = 'Estoque deve estar entre 0 e 1000.';
+      return;
+    }
+
+    const resetButton = createLoadingButton(createButton, '🔄 Criando...');
+
+    try {
+      const response = await api.createReward(title, description, cost, category, stock);
+      
+      if (response.success) {
+        // Clear form
+        titleInput.value = '';
+        descriptionInput.value = '';
+        costInput.value = '';
+        categoryInput.value = 'Geral';
+        stockInput.value = '';
+        
+        // Reload rewards
+        await this.loadRewards();
+        
+        // Show success message
+        this.showSuccessMessage('✅ Prêmio criado com sucesso!');
+      } else {
+        errorDiv.textContent = response.message || 'Erro ao criar prêmio.';
+      }
+    } catch (error) {
+      console.error('Create reward error:', error);
+      errorDiv.textContent = 'Erro inesperado ao criar prêmio.';
+    } finally {
+      resetButton();
+    }
+  }
+
+  async handleDeleteReward(rewardId, rewardTitle) {
+    const state = stateManager.getState();
+    
+    // Verificar se usuário é admin
+    if (state.userType !== 'Administrador') {
+      console.error('❌ Apenas administradores podem deletar prêmios');
+      return;
+    }
+
+    // Confirmar exclusão
+    const confirmed = confirm(`Tem certeza que deseja deletar o prêmio "${rewardTitle}"?\n\nEsta ação não pode ser desfeita.`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deletando prêmio:', { rewardId, rewardTitle });
+      
+      const response = await api.deleteReward(rewardId);
+      
+      if (response.success) {
+        // Reload rewards para atualizar a lista
+        await this.loadRewards();
+        
+        // Show success message
+        this.showSuccessMessage(`✅ Prêmio "${rewardTitle}" deletado com sucesso!`);
+      } else {
+        const errorDiv = this.container.querySelector('#reward-form-error');
+        if (errorDiv) {
+          errorDiv.textContent = response.message || 'Erro ao deletar prêmio.';
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao deletar prêmio:', error);
+      const errorDiv = this.container.querySelector('#reward-form-error');
+      if (errorDiv) {
+        errorDiv.textContent = 'Erro inesperado ao deletar prêmio.';
+      }
+    }
   }
 
   async handleRedeemReward(rewardId, cost) {
@@ -91,7 +243,22 @@ export class RewardsComponent {
           <div class="reward-description">
             ${escapeHtml(reward.description)}
           </div>
-          ${!isAdmin ? `
+          <div class="reward-meta">
+            <small>Categoria: ${escapeHtml(reward.category || 'Geral')}</small>
+            ${reward.stock !== undefined ? `<small>Estoque: ${reward.stock}</small>` : ''}
+          </div>
+          ${isAdmin ? `
+            <div class="reward-actions admin-actions">
+              <button 
+                class="btn btn-danger btn-sm" 
+                data-reward-id="${reward.id}"
+                onclick="window.rewardsComponent.deleteReward('${reward.id}', '${escapeHtml(reward.title)}')"
+                title="Deletar prêmio"
+              >
+                🗑️ Deletar
+              </button>
+            </div>
+          ` : `
             <div class="reward-actions">
               <button 
                 class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
@@ -102,14 +269,15 @@ export class RewardsComponent {
                 ${canAfford ? '🎁 Resgatar' : '🔒 Pontos insuficientes'}
               </button>
             </div>
-          ` : ''}
+          `}
         </div>
       `;
     }).join('');
 
     // Store reference for onclick handlers
     window.rewardsComponent = {
-      redeemReward: (rewardId, cost) => this.handleRedeemReward(rewardId, cost)
+      redeemReward: (rewardId, cost) => this.handleRedeemReward(rewardId, cost),
+      deleteReward: (rewardId, title) => this.handleDeleteReward(rewardId, title)
     };
   }
 
