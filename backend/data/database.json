@@ -111,6 +111,16 @@
       "difficulty": "medium",
       "createdAt": "2025-07-15T18:21:10.191Z",
       "createdBy": "admin"
+    },
+    {
+      "id": "1752609931410lzrh6q91j",
+      "title": "asdlak",
+      "description": "çdpsla~dçla",
+      "points": 1,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T20:05:31.410Z",
+      "createdBy": "admin"
     }
   ],
   "rewards": [
@@ -167,6 +177,15 @@
       "category": "Eletr�nicos",
       "stock": 10,
       "createdAt": "2025-07-15T18:51:47.808Z"
+    },
+    {
+      "id": "1752609951827y8w9w7qwa",
+      "title": "asdkasdlkas",
+      "description": "sdakjçldsakç",
+      "cost": 10,
+      "category": "Geral",
+      "stock": 10,
+      "createdAt": "2025-07-15T20:05:51.827Z"
     }
   ],
   "history": [
@@ -499,6 +518,19 @@
       "details": {
         "deletedTaskTitle": "kjsadgkas",
         "deletedTaskPoints": 10
+      }
+    },
+    {
+      "id": "1752609931412rfvm0ostw",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'asdlak' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T20:05:31.412Z",
+      "details": {
+        "taskId": "1752609931410lzrh6q91j",
+        "taskTitle": "asdlak",
+        "taskPoints": 1
       }
     }
   ]
