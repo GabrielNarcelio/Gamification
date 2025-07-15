@@ -1,6 +1,6 @@
 // Componente de Login
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { ADMIN_CREDENTIALS, MESSAGES } from '@/utils/config.js';
 import { validateRequired, createLoadingButton } from '@/utils/helpers.js';
@@ -81,17 +81,23 @@ export class LoginComponent {
       }
 
       // Regular user login
-      const response = await apiService.login(username, password);
+      const response = await api.login(username, password);
       
       if (response.success) {
         const user = {
-          nome: username,
-          senha: password,
-          tipo: response.tipo || 'Usuário',
-          pontos: response.pontos || 0
+          id: response.data.id,
+          name: response.data.name,
+          username: username,
+          password: password,
+          email: response.data.email,
+          type: response.data.type || 'user',
+          points: response.data.points || 0
         };
         
-        stateManager.login(user, response.pontos || 0, user.tipo);
+        // Determine user type for display
+        const userType = response.data.type === 'admin' ? 'Administrador' : 'Usuário';
+        
+        stateManager.login(user, response.data.points || 0, userType);
       } else {
         errorDiv.textContent = MESSAGES.LOGIN_ERROR;
       }

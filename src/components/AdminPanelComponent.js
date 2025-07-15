@@ -1,6 +1,6 @@
 // Componente do Painel Administrativo
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { MESSAGES } from '@/utils/config.js';
 import { validateRequired, validatePoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
@@ -42,6 +42,11 @@ export class AdminPanelComponent {
             <div class="form-group">
               <label for="form-user-password">Senha:</label>
               <input type="password" id="form-user-password" placeholder="Digite a senha" />
+            </div>
+            
+            <div class="form-group">
+              <label for="form-user-email">Email:</label>
+              <input type="email" id="form-user-email" placeholder="Digite o email" />
             </div>
             
             <div class="form-group">
@@ -109,6 +114,7 @@ export class AdminPanelComponent {
     const title = this.container.querySelector('#user-form-title');
     const nameInput = this.container.querySelector('#form-user-name');
     const passwordInput = this.container.querySelector('#form-user-password');
+    const emailInput = this.container.querySelector('#form-user-email');
     const typeSelect = this.container.querySelector('#form-user-type');
     const pointsInput = this.container.querySelector('#form-user-points');
     const userIdInput = this.container.querySelector('#edit-user-id');
@@ -121,16 +127,18 @@ export class AdminPanelComponent {
       title.textContent = 'Criar Novo Usuário';
       nameInput.value = '';
       passwordInput.value = '';
+      emailInput.value = '';
       typeSelect.value = 'Usuário';
       pointsInput.value = '0';
       userIdInput.value = '';
       this.currentEditUserId = null;
     } else if (mode === 'edit' && user) {
       title.textContent = 'Editar Usuário';
-      nameInput.value = user.nome;
-      passwordInput.value = user.senha;
-      typeSelect.value = user.tipo;
-      pointsInput.value = user.pontos.toString();
+      nameInput.value = user.name;
+      passwordInput.value = user.password;
+      emailInput.value = user.email || '';
+      typeSelect.value = user.type === 'admin' ? 'Administrador' : 'Usuário';
+      pointsInput.value = user.points.toString();
       userIdInput.value = user.id || '';
       this.currentEditUserId = user.id || null;
     }
@@ -149,6 +157,7 @@ export class AdminPanelComponent {
   async handleSaveUser() {
     const nameInput = this.container.querySelector('#form-user-name');
     const passwordInput = this.container.querySelector('#form-user-password');
+    const emailInput = this.container.querySelector('#form-user-email');
     const typeSelect = this.container.querySelector('#form-user-type');
     const pointsInput = this.container.querySelector('#form-user-points');
     const saveButton = this.container.querySelector('#save-user-button');
@@ -156,6 +165,7 @@ export class AdminPanelComponent {
 
     const name = nameInput.value.trim();
     const password = passwordInput.value.trim();
+    const email = emailInput.value.trim();
     const type = typeSelect.value;
     const points = pointsInput.value.trim();
 
@@ -165,16 +175,18 @@ export class AdminPanelComponent {
     // Validation
     const nameError = validateRequired(name, 'Nome');
     const passwordError = validateRequired(password, 'Senha');
+    const emailError = validateRequired(email, 'Email');
     const pointsError = validatePoints(points);
 
-    if (nameError || passwordError || pointsError) {
-      errorDiv.textContent = nameError || passwordError || pointsError || '';
+    if (nameError || passwordError || emailError || pointsError) {
+      errorDiv.textContent = nameError || passwordError || emailError || pointsError || '';
       return;
     }
 
     const user = {
       nome: name,
       senha: password,
+      email: email,
       tipo: type,
       pontos: parseInt(points)
     };
@@ -185,13 +197,13 @@ export class AdminPanelComponent {
       let response;
       
       if (this.currentFormMode === 'create') {
-        response = await apiService.createUser(user);
+        response = await api.createUser(user);
       } else {
         if (!this.currentEditUserId) {
           throw new Error('ID do usuário não encontrado');
         }
         user.id = this.currentEditUserId;
-        response = await apiService.updateUser(this.currentEditUserId, user);
+        response = await api.updateUser(this.currentEditUserId, user);
       }
 
       if (response.success) {
@@ -222,7 +234,7 @@ export class AdminPanelComponent {
     const resetButton = createLoadingButton(button, '🔄 Excluindo...');
 
     try {
-      const response = await apiService.deleteUser(userId);
+      const response = await api.deleteUser(userId);
       
       if (response.success) {
         await this.loadUsers();
@@ -245,7 +257,7 @@ export class AdminPanelComponent {
     const resetButton = createLoadingButton(button, '🔄 Estruturando...');
 
     try {
-      const response = await apiService.structureSheet();
+      const response = await api.structureSheet();
       
       if (response.success) {
         alert(`✅ ${MESSAGES.SHEET_STRUCTURED}\n\n${response.message}`);
@@ -265,7 +277,7 @@ export class AdminPanelComponent {
     const usersList = this.container.querySelector('#users-list');
     
     try {
-      const response = await apiService.getUsers();
+      const response = await api.getUsers();
       
       // Check if sheet needs to be structured
       if (!response.success && response.message?.includes('não encontrada')) {
@@ -286,7 +298,7 @@ export class AdminPanelComponent {
         return;
       }
 
-      this.users = Array.isArray(response) ? response : (response.data || []);
+      this.users = response.success ? response.data : [];
       this.renderUsers();
     } catch (error) {
       console.error('Load users error:', error);
@@ -305,25 +317,25 @@ export class AdminPanelComponent {
     usersList.innerHTML = this.users.map(user => `
       <div class="user-item">
         <div class="user-info">
-          <div class="user-name">${escapeHtml(user.nome)}</div>
+          <div class="user-name">${escapeHtml(user.name)}</div>
           <div class="user-details">
-            <span class="user-points">${user.pontos} pontos</span>
-            <span class="user-type ${user.tipo === 'Administrador' ? 'admin' : 'user'}">
-              ${user.tipo}
+            <span class="user-points">${user.points} pontos</span>
+            <span class="user-type ${user.type === 'admin' ? 'admin' : 'user'}">
+              ${user.type === 'admin' ? 'Administrador' : 'Usuário'}
             </span>
           </div>
         </div>
         <div class="user-actions">
           <button 
             class="btn btn-sm btn-primary" 
-            onclick="window.adminPanel.editUser('${user.id}', '${escapeHtml(user.nome)}', '${escapeHtml(user.senha)}', '${user.tipo}', ${user.pontos})"
+            onclick="window.adminPanel.editUser('${user.id}', '${escapeHtml(user.name)}', '${escapeHtml(user.password)}', '${user.email}', '${user.type}', ${user.points})"
           >
             ✏️ Editar
           </button>
           <button 
             class="btn btn-sm btn-danger" 
             data-delete-user="${user.id}"
-            onclick="window.adminPanel.deleteUser('${user.id}', '${escapeHtml(user.nome)}')"
+            onclick="window.adminPanel.deleteUser('${user.id}', '${escapeHtml(user.name)}')"
           >
             🗑️ Excluir
           </button>
@@ -333,8 +345,8 @@ export class AdminPanelComponent {
 
     // Store reference for onclick handlers
     window.adminPanel = {
-      editUser: (userId, nome, senha, tipo, pontos) => {
-        this.showUserForm('edit', { id: userId, nome, senha, tipo, pontos });
+      editUser: (userId, name, password, email, type, points) => {
+        this.showUserForm('edit', { id: userId, name, password, email, type, points });
       },
       deleteUser: (userId, userName) => this.handleDeleteUser(userId, userName)
     };

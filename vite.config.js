@@ -7,8 +7,10 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: true,
+    cors: true
+    // Proxy removido: usando backend Node.js direto
   },
   build: {
     outDir: 'dist',

@@ -1,9 +1,36 @@
 // Configurações da aplicação
 
+// Detecta automaticamente se está em desenvolvimento
+const isDevelopment = () => {
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  return hostname === 'localhost' || 
+         hostname === '127.0.0.1' || 
+         hostname === '' ||
+         port === '3000' || 
+         port === '5173' || 
+         port === '8080';
+};
+
+// URL da API baseada no ambiente
+const getApiUrl = () => {
+  if (isDevelopment()) {
+    // Em desenvolvimento, usar backend Node.js local
+    return 'http://localhost:3001/api';
+  }
+  // Em produção, usar backend Node.js na Vercel
+  return 'https://seu-backend-gamification.vercel.app/api';
+};
+
 export const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbxo3CcWaKdFgRob-jyIwv359SDqWI2_nQc92SNlryqvPBXIrQtL4jJZORElseJqFmWB/exec",
+  API_URL: getApiUrl(),
   APP_NAME: "Sistema de Gamificação de Tarefas",
-  VERSION: "2.0.0"
+  VERSION: "2.0.0",
+  
+  // Configurações de desenvolvimento
+  DEV_MODE: isDevelopment(),
+  USE_MOCK_DATA: false // ✅ DESABILITADO: Usando backend Node.js real
 };
 
 export const ADMIN_CREDENTIALS = {

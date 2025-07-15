@@ -13,6 +13,7 @@ export class DashboardComponent {
     this.render();
     this.setupEventListeners();
     this.initializeComponents();
+    this.checkAndShowDevBanner();
     
     // Subscribe to state changes
     stateManager.subscribe(this.handleStateChange.bind(this));
@@ -21,6 +22,10 @@ export class DashboardComponent {
   render() {
     this.container.innerHTML = `
       <div class="dashboard-container">
+        <div id="dev-mode-banner" class="dev-banner" style="display: none;">
+          ⚠️ <strong>Modo Desenvolvimento:</strong> Usando dados simulados - API indisponível por CORS
+        </div>
+        
         <header class="dashboard-header">
           <div class="user-info">
             <h2>Bem-vindo, <span id="user-name"></span>!</h2>
@@ -78,6 +83,22 @@ export class DashboardComponent {
     this.rewardsComponent = new RewardsComponent(rewardsContainer);
     this.rankingComponent = new RankingComponent(rankingContainer);
     this.historyComponent = new HistoryComponent(historyContainer);
+  }
+
+  async checkAndShowDevBanner() {
+    try {
+      const { CONFIG } = await import('../utils/config.js');
+      
+      if (CONFIG.DEV_MODE) {
+        const banner = this.container.querySelector('#dev-mode-banner');
+        if (banner) {
+          banner.style.display = 'block';
+          console.log('🔄 Sistema rodando em modo de desenvolvimento com dados simulados');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar modo de desenvolvimento:', error);
+    }
   }
 
   handleStateChange(state) {

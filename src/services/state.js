@@ -41,10 +41,11 @@ class StateManager {
 
   loginAsAdmin() {
     const adminUser = {
-      nome: ADMIN_CREDENTIALS.username,
-      senha: ADMIN_CREDENTIALS.password,
-      tipo: 'Administrador',
-      pontos: 0
+      id: 'admin',
+      name: ADMIN_CREDENTIALS.username,
+      password: ADMIN_CREDENTIALS.password,
+      type: 'admin',
+      points: 0
     };
 
     this.setState({

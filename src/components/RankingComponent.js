@@ -1,6 +1,6 @@
 // Componente de Ranking
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { escapeHtml } from '@/utils/helpers.js';
 
@@ -24,7 +24,8 @@ export class RankingComponent {
     const rankingList = this.container.querySelector('#ranking-list');
     
     try {
-      this.ranking = await apiService.getRanking();
+      const response = await api.getRanking();
+      this.ranking = response.success ? response.data : [];
       this.renderRanking();
     } catch (error) {
       console.error('Load ranking error:', error);
@@ -35,7 +36,7 @@ export class RankingComponent {
   renderRanking() {
     const rankingList = this.container.querySelector('#ranking-list');
     const state = stateManager.getState();
-    const currentUser = state.user?.nome;
+    const currentUser = state.user?.name;
     const isAdmin = state.userType === 'Administrador';
 
     if (this.ranking.length === 0) {
@@ -44,7 +45,7 @@ export class RankingComponent {
     }
 
     rankingList.innerHTML = this.ranking.map((userRank, index) => {
-      const isCurrentUser = userRank.nome === currentUser && !isAdmin;
+      const isCurrentUser = userRank.name === currentUser && !isAdmin;
       const position = index + 1;
       
       let badge = '';
@@ -65,9 +66,9 @@ export class RankingComponent {
         <div class="ranking-item ${positionClass} ${isCurrentUser ? 'current-user' : ''}">
           <div class="ranking-position">#${position}</div>
           <div class="ranking-name">
-            ${escapeHtml(userRank.nome)}${isCurrentUser ? ' (Você)' : ''}
+            ${escapeHtml(userRank.name)}${isCurrentUser ? ' (Você)' : ''}
           </div>
-          <div class="ranking-points">${userRank.pontos} pts</div>
+          <div class="ranking-points">${userRank.points} pts</div>
           ${badge}
         </div>
       `;

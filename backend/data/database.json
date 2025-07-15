@@ -1,0 +1,499 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "admin123",
+      "name": "Administrador",
+      "email": "admin@sistema.com",
+      "type": "admin",
+      "points": 0,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "1752602801740j44uaxt7i",
+      "username": "adm",
+      "password": "admin123",
+      "name": "adm",
+      "email": "jkahafjk@gmail.com",
+      "type": "administrador",
+      "points": 80,
+      "createdAt": "2025-07-15T18:06:41.740Z"
+    },
+    {
+      "id": "175260437349131347y8wa",
+      "username": "tulio",
+      "password": "123456",
+      "name": "Tulio",
+      "email": "tulio@gmail.com",
+      "type": "usuário",
+      "points": 0,
+      "createdAt": "2025-07-15T18:32:53.491Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Completar Projeto React",
+      "description": "Finalizar desenvolvimento do projeto React",
+      "points": 50,
+      "category": "Desenvolvimento",
+      "difficulty": "medium",
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "createdBy": "1"
+    },
+    {
+      "id": "2",
+      "title": "Revisar Código",
+      "description": "Fazer code review do pull request #123",
+      "points": 30,
+      "category": "Revisão",
+      "difficulty": "easy",
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "createdBy": "1"
+    },
+    {
+      "id": "3",
+      "title": "Documentação API",
+      "description": "Criar documentação completa da API",
+      "points": 40,
+      "category": "Documentação",
+      "difficulty": "medium",
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "createdBy": "1"
+    },
+    {
+      "id": "4",
+      "title": "Testes Unitários",
+      "description": "Implementar testes unitários para módulo de usuários",
+      "points": 60,
+      "category": "Testes",
+      "difficulty": "hard",
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "createdBy": "1"
+    },
+    {
+      "id": "5",
+      "title": "Deploy Produção",
+      "description": "Realizar deploy da aplicação em produção",
+      "points": 80,
+      "category": "DevOps",
+      "difficulty": "hard",
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "createdBy": "1"
+    },
+    {
+      "id": "1752603293504xebvdc9ey",
+      "title": "Teste",
+      "description": "Descri��o teste",
+      "points": 10,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:14:53.504Z",
+      "createdBy": "admin"
+    },
+    {
+      "id": "1752603333365d0u5w1shj",
+      "title": "dajhakj",
+      "description": "kdsjalkdj",
+      "points": 10,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:15:33.365Z",
+      "createdBy": "admin"
+    },
+    {
+      "id": "175260363033087sm8fhki",
+      "title": "Arrumar a requisição",
+      "description": "sçlkdaçdk",
+      "points": 1000,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:20:30.330Z",
+      "createdBy": "admin"
+    },
+    {
+      "id": "1752603670191e443s0zij",
+      "title": "Teste Frontend",
+      "description": "Teste do frontend",
+      "points": 10,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:21:10.191Z",
+      "createdBy": "admin"
+    },
+    {
+      "id": "17526037526781d4ux3nuj",
+      "title": "lkjglsdkg",
+      "description": "skjdfalkjfa",
+      "points": 10,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:22:32.678Z",
+      "createdBy": "admin"
+    },
+    {
+      "id": "1752604000655seooh4vz4",
+      "title": "kjsadgkas",
+      "description": "sjhdasj",
+      "points": 10,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-15T18:26:40.655Z",
+      "createdBy": "admin"
+    }
+  ],
+  "rewards": [
+    {
+      "id": "1",
+      "title": "Vale Pizza",
+      "description": "Vale para uma pizza grande",
+      "cost": 100,
+      "category": "Alimentação",
+      "stock": 5,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "title": "Dia de Folga Extra",
+      "description": "Um dia adicional de folga",
+      "cost": 200,
+      "category": "Benefícios",
+      "stock": 3,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "title": "Curso Online",
+      "description": "Acesso a curso online de sua escolha",
+      "cost": 150,
+      "category": "Educação",
+      "stock": 10,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "title": "Gift Card Amazon",
+      "description": "Vale presente de R$ 50 na Amazon",
+      "cost": 120,
+      "category": "Compras",
+      "stock": 8,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "title": "Fones Bluetooth",
+      "description": "Fones de ouvido Bluetooth premium",
+      "cost": 250,
+      "category": "Eletrônicos",
+      "stock": 2,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "title": "Coffee Break Premium",
+      "description": "Coffee break especial para a equipe",
+      "cost": 80,
+      "category": "Alimentação",
+      "stock": 4,
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "1",
+      "userId": "2",
+      "type": "task_completed",
+      "description": "Tarefa 'Revisar Código' concluída",
+      "points": 30,
+      "timestamp": "2025-01-15T11:00:00.000Z",
+      "details": {
+        "taskId": "2",
+        "taskTitle": "Revisar Código"
+      }
+    },
+    {
+      "id": "2",
+      "userId": "3",
+      "type": "task_completed",
+      "description": "Tarefa 'Documentação API' concluída",
+      "points": 40,
+      "timestamp": "2025-01-15T12:00:00.000Z",
+      "details": {
+        "taskId": "3",
+        "taskTitle": "Documentação API"
+      }
+    },
+    {
+      "id": "3",
+      "userId": "2",
+      "type": "reward_redeemed",
+      "description": "Prêmio 'Coffee Break Premium' resgatado",
+      "points": -80,
+      "timestamp": "2025-01-15T13:00:00.000Z",
+      "details": {
+        "rewardId": "6",
+        "rewardTitle": "Coffee Break Premium"
+      }
+    },
+    {
+      "id": "4",
+      "userId": "3",
+      "type": "task_completed",
+      "description": "Tarefa 'Completar Projeto React' concluída",
+      "points": 50,
+      "timestamp": "2025-01-15T14:00:00.000Z",
+      "details": {
+        "taskId": "1",
+        "taskTitle": "Completar Projeto React"
+      }
+    },
+    {
+      "id": "5",
+      "userId": "4",
+      "type": "task_completed",
+      "description": "Tarefa 'Testes Unitários' concluída",
+      "points": 60,
+      "timestamp": "2025-01-15T15:00:00.000Z",
+      "details": {
+        "taskId": "4",
+        "taskTitle": "Testes Unitários"
+      }
+    },
+    {
+      "id": "1752591796619ukgjondnr",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'João Silva' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T15:03:16.622Z",
+      "details": {
+        "deletedUsername": "joao",
+        "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "1752599399680uhn246ulo",
+      "userId": "17525993996769rbuqdc7s",
+      "type": "user_created",
+      "description": "Usuário 'Usuario Teste' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:09:59.680Z",
+      "details": {
+        "username": "teste",
+        "type": "usu�rio"
+      }
+    },
+    {
+      "id": "1752600594374p6bl7lftl",
+      "userId": "1752600594353h2bncpkjz",
+      "type": "user_created",
+      "description": "Usuário 'Paulo' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:29:54.380Z",
+      "details": {
+        "username": "paulo",
+        "type": "usuário"
+      }
+    },
+    {
+      "id": "1752600603011dmnscgkyz",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Usuario Teste' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:30:03.013Z",
+      "details": {
+        "deletedUsername": "teste",
+        "deletedUserType": "usu�rio"
+      }
+    },
+    {
+      "id": "1752600653024ou1dbyjt6",
+      "userId": "1752600653023n4xx10wdu",
+      "type": "user_created",
+      "description": "Usuário 'Cadete' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:30:53.025Z",
+      "details": {
+        "username": "cadete",
+        "type": "usuário"
+      }
+    },
+    {
+      "id": "1752600662218xfg4b482q",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Cadete' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:31:02.218Z",
+      "details": {
+        "deletedUsername": "cadete",
+        "deletedUserType": "usuário"
+      }
+    },
+    {
+      "id": "1752601264377kqyjdr5eu",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Paulo' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T17:41:04.377Z",
+      "details": {
+        "deletedUsername": "paulo",
+        "deletedUserType": "usuário"
+      }
+    },
+    {
+      "id": "175260250180355r0d0hw3",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Pedro Costa' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T18:01:41.805Z",
+      "details": {
+        "deletedUsername": "pedro",
+        "deletedUserType": "user"
+      }
+    },
+    {
+      "id": "1752602801741pjpks96tc",
+      "userId": "1752602801740j44uaxt7i",
+      "type": "user_created",
+      "description": "Usuário 'adm' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T18:06:41.741Z",
+      "details": {
+        "username": "adm",
+        "type": "administrador"
+      }
+    },
+    {
+      "id": "17526028094066ex2yriug",
+      "userId": "1752602801740j44uaxt7i",
+      "type": "user_login",
+      "description": "Usuário 'adm' fez login",
+      "points": 0,
+      "timestamp": "2025-07-15T18:06:49.406Z",
+      "details": {
+        "username": "adm",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752602814471tqpu5nv5o",
+      "userId": "1752602801740j44uaxt7i",
+      "type": "task_completed",
+      "description": "Tarefa 'Deploy Produção' concluída",
+      "points": 80,
+      "timestamp": "2025-07-15T18:06:54.471Z",
+      "details": {
+        "taskId": "5",
+        "taskTitle": "Deploy Produção",
+        "pointsEarned": 80
+      }
+    },
+    {
+      "id": "1752603293506bt1lo0pai",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'Teste' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:14:53.506Z",
+      "details": {
+        "taskId": "1752603293504xebvdc9ey",
+        "taskTitle": "Teste",
+        "taskPoints": 10
+      }
+    },
+    {
+      "id": "17526033333675sm0yp50g",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'dajhakj' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:15:33.367Z",
+      "details": {
+        "taskId": "1752603333365d0u5w1shj",
+        "taskTitle": "dajhakj",
+        "taskPoints": 10
+      }
+    },
+    {
+      "id": "17526036303333rxxinyii",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'Arrumar a requisição' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:20:30.333Z",
+      "details": {
+        "taskId": "175260363033087sm8fhki",
+        "taskTitle": "Arrumar a requisição",
+        "taskPoints": 1000
+      }
+    },
+    {
+      "id": "17526036701932f8olywah",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'Teste Frontend' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:21:10.193Z",
+      "details": {
+        "taskId": "1752603670191e443s0zij",
+        "taskTitle": "Teste Frontend",
+        "taskPoints": 10
+      }
+    },
+    {
+      "id": "1752603752679mid0vfhkc",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'lkjglsdkg' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:22:32.679Z",
+      "details": {
+        "taskId": "17526037526781d4ux3nuj",
+        "taskTitle": "lkjglsdkg",
+        "taskPoints": 10
+      }
+    },
+    {
+      "id": "17526040006581nvr17g7w",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'kjsadgkas' criada",
+      "points": 0,
+      "timestamp": "2025-07-15T18:26:40.658Z",
+      "details": {
+        "taskId": "1752604000655seooh4vz4",
+        "taskTitle": "kjsadgkas",
+        "taskPoints": 10
+      }
+    },
+    {
+      "id": "1752604373493sqr7hv0vu",
+      "userId": "175260437349131347y8wa",
+      "type": "user_created",
+      "description": "Usuário 'Tulio' criado",
+      "points": 0,
+      "timestamp": "2025-07-15T18:32:53.493Z",
+      "details": {
+        "username": "tulio",
+        "type": "usuário"
+      }
+    },
+    {
+      "id": "1752604517897tyq2t8n38",
+      "userId": "system",
+      "type": "user_deleted",
+      "description": "Usuário 'Maria Santos' deletado",
+      "points": 0,
+      "timestamp": "2025-07-15T18:35:17.897Z",
+      "details": {
+        "deletedUsername": "maria",
+        "deletedUserType": "user"
+      }
+    }
+  ]
+}

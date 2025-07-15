@@ -1,6 +1,6 @@
 // Componente de Recompensas/Prêmios
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { MESSAGES } from '@/utils/config.js';
 import { createLoadingButton, escapeHtml } from '@/utils/helpers.js';
@@ -36,7 +36,7 @@ export class RewardsComponent {
     const resetButton = createLoadingButton(button, '🔄 Resgatando...');
 
     try {
-      const response = await apiService.redeemReward(rewardId, state.user.nome);
+      const response = await api.redeemReward(rewardId, state.user.id);
       
       if (response.success) {
         // Update user points
@@ -60,7 +60,8 @@ export class RewardsComponent {
     const rewardsList = this.container.querySelector('#rewards-list');
     
     try {
-      this.rewards = await apiService.getRewards();
+      const response = await api.getRewards();
+      this.rewards = response.success ? response.data : [];
       this.renderRewards();
     } catch (error) {
       console.error('Load rewards error:', error);
@@ -79,16 +80,16 @@ export class RewardsComponent {
     }
 
     rewardsList.innerHTML = this.rewards.map(reward => {
-      const canAfford = state.userPoints >= reward.custo;
+      const canAfford = state.userPoints >= reward.cost;
       
       return `
         <div class="reward-item ${!canAfford && !isAdmin ? 'unavailable' : ''}">
           <div class="reward-header">
-            <h4>${escapeHtml(reward.nome)}</h4>
-            <span class="reward-cost">${reward.custo} pts</span>
+            <h4>${escapeHtml(reward.title)}</h4>
+            <span class="reward-cost">${reward.cost} pts</span>
           </div>
           <div class="reward-description">
-            ${escapeHtml(reward.descricao)}
+            ${escapeHtml(reward.description)}
           </div>
           ${!isAdmin ? `
             <div class="reward-actions">
@@ -96,7 +97,7 @@ export class RewardsComponent {
                 class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
                 data-reward-id="${reward.id}"
                 ${!canAfford ? 'disabled' : ''}
-                onclick="window.rewardsComponent.redeemReward('${reward.id}', ${reward.custo})"
+                onclick="window.rewardsComponent.redeemReward('${reward.id}', ${reward.cost})"
               >
                 ${canAfford ? '🎁 Resgatar' : '🔒 Pontos insuficientes'}
               </button>

@@ -1,6 +1,6 @@
 // Componente de Tarefas
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { MESSAGES } from '@/utils/config.js';
 import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
@@ -69,6 +69,14 @@ export class TasksComponent {
     const createButton = this.container.querySelector('#create-task-button');
     const errorDiv = this.container.querySelector('#task-form-error');
 
+    // ✅ Verificar se é admin
+    const currentState = stateManager.getState();
+    if (!currentState.user || currentState.user.type !== 'admin') {
+      errorDiv.innerHTML = '❌ Apenas administradores podem criar tarefas';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
     const title = titleInput.value.trim();
     const description = descriptionInput.value.trim();
     const points = pointsInput.value.trim();
@@ -86,13 +94,13 @@ export class TasksComponent {
       return;
     }
 
-    const state = stateManager.getState();
-    if (!state.user) return;
+    if (!currentState.user) return;
 
     const resetButton = createLoadingButton(createButton, '🔄 Criando...');
 
     try {
-      const response = await apiService.createTask(title, description, parseInt(points), state.user.nome);
+      // ✅ Sempre usar 'admin' como criador
+      const response = await api.createTask(title, description, parseInt(points), 'admin');
       
       if (response.success) {
         // Clear form
@@ -126,7 +134,7 @@ export class TasksComponent {
     const resetButton = createLoadingButton(button, '🔄 Concluindo...');
 
     try {
-      const response = await apiService.concludeTask(taskId, state.user.nome);
+      const response = await api.concludeTask(taskId, state.user.id);
       
       if (response.success) {
         // Update user points
@@ -153,7 +161,8 @@ export class TasksComponent {
     const taskList = this.container.querySelector('#task-list');
     
     try {
-      this.tasks = await apiService.getTasks();
+      const response = await api.getTasks();
+      this.tasks = response.success ? response.data : [];
       this.renderTasks();
     } catch (error) {
       console.error('Load tasks error:', error);
@@ -174,22 +183,22 @@ export class TasksComponent {
     taskList.innerHTML = this.tasks.map(task => `
       <div class="task-item">
         <div class="task-header">
-          <h4>${escapeHtml(task.titulo)}</h4>
-          <span class="task-points">${task.pontos} pts</span>
+          <h4>${escapeHtml(task.title)}</h4>
+          <span class="task-points">${task.points} pts</span>
         </div>
         <div class="task-description">
-          ${escapeHtml(task.descricao)}
+          ${escapeHtml(task.description)}
         </div>
         ${isAdmin ? `
           <div class="task-creator">
-            <small>Criado por: ${escapeHtml(task.criador || 'Sistema')}</small>
+            <small>Criado por: ${escapeHtml(task.createdBy || 'Sistema')}</small>
           </div>
         ` : `
           <div class="task-actions">
             <button 
               class="btn btn-success" 
               data-task-id="${task.id}"
-              onclick="window.taskComponent.concludeTask('${task.id}', ${task.pontos})"
+              onclick="window.taskComponent.concludeTask('${task.id}', ${task.points})"
             >
               ✅ Concluir
             </button>

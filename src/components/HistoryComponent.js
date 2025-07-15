@@ -1,6 +1,6 @@
 // Componente de Histórico
 
-import { apiService } from '@/services/api.js';
+import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { escapeHtml } from '@/utils/helpers.js';
 
@@ -27,12 +27,14 @@ export class HistoryComponent {
     if (!state.user) return;
 
     try {
+      let response;
       if (state.userType === 'Administrador') {
-        this.history = await apiService.getAllHistory();
+        response = await api.getAllHistory();
       } else {
-        this.history = await apiService.getHistory(state.user.nome);
+        response = await api.getHistory(state.user.name);
       }
       
+      this.history = response.success ? response.data : [];
       this.renderHistory();
     } catch (error) {
       console.error('Load history error:', error);
@@ -51,27 +53,33 @@ export class HistoryComponent {
     }
 
     historyList.innerHTML = this.history.map(item => {
-      const typeIcon = item.tipo === 'Tarefa Concluída' ? '✅' : '🎁';
+      const typeIcon = item.type === 'task_completed' ? '✅' : 
+                      item.type === 'reward_redeemed' ? '🎁' : 
+                      item.type === 'user_created' ? '👤' : 
+                      item.type === 'user_deleted' ? '🗑️' : '📝';
+      
+      // Format timestamp to readable date
+      const date = new Date(item.timestamp).toLocaleString('pt-BR');
       
       return `
         <div class="history-item ${isAdmin ? 'admin-history' : ''}">
           ${isAdmin ? `
             <div class="history-header">
-              <strong>${escapeHtml(item.usuario)}</strong>
-              <span class="history-date">${escapeHtml(item.data)}</span>
+              <strong>${escapeHtml(item.userName || 'Sistema')}</strong>
+              <span class="history-date">${date}</span>
             </div>
             <div class="history-content">
-              ${typeIcon} ${escapeHtml(item.tipo)}: ${escapeHtml(item.descricao)} 
-              <span class="history-points">(${item.pontos})</span>
+              ${typeIcon} ${escapeHtml(item.description)} 
+              <span class="history-points">(${item.points > 0 ? '+' : ''}${item.points} pts)</span>
             </div>
           ` : `
             <div class="history-single">
-              <span class="history-date">${escapeHtml(item.data)}</span>
+              <span class="history-date">${date}</span>
               <span class="history-separator">—</span>
-              <span class="history-type">${typeIcon} ${escapeHtml(item.tipo)}</span>
+              <span class="history-type">${typeIcon}</span>
               <span class="history-separator">—</span>
-              <span class="history-description">${escapeHtml(item.descricao)}</span>
-              <span class="history-points">(${item.pontos})</span>
+              <span class="history-description">${escapeHtml(item.description)}</span>
+              <span class="history-points">(${item.points > 0 ? '+' : ''}${item.points} pts)</span>
             </div>
           `}
         </div>
