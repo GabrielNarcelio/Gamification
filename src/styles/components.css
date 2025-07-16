@@ -1171,3 +1171,128 @@
 .message-close:hover {
   opacity: 1;
 }
+
+/* Estilos para cabeçalho de tarefas e botões de ação */
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.tasks-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-warning:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #5a6268, #495057);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+/* Notificações */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.notification.warning {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Melhorar espaçamento dos botões existentes */
+.btn {
+  margin: 0 5px;
+}
+
+/* Responsividade para botões de ação */
+@media (max-width: 768px) {
+  .tasks-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .tasks-actions {
+    justify-content: center;
+  }
+  
+  .btn-warning,
+  .btn-secondary {
+    flex: 1;
+    min-width: 120px;
+  }
+}

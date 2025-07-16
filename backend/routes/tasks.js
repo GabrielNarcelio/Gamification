@@ -512,27 +512,68 @@ router.post('/:id/complete', async (req, res) => {
   }
 });
 
-// GET /api/tasks/user/:userId - Listar tarefas completadas por usuário
+// GET /api/tasks/user/:userId - Buscar tarefas específicas para um usuário (gerais + atribuídas)
 router.get('/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log(`📋 Listando tarefas completadas pelo usuário: ${userId}`);
+    console.log('📋 Buscando tarefas para usuário:', { userId });
     
     const data = await readData();
-    const completedTasks = data.history.filter(h => 
+    
+    // 1. Buscar tarefas atribuídas especificamente ao usuário
+    const userAssignments = data.assignments?.filter(assignment => 
+      assignment.userId === userId && assignment.status === 'assigned'
+    ) || [];
+    
+    // 2. Buscar as tarefas atribuídas com seus detalhes
+    const assignedTasks = userAssignments.map(assignment => {
+      const task = data.tasks.find(t => t.id === assignment.taskId);
+      if (!task) return null;
+      
+      return {
+        ...task,
+        isAssigned: true,
+        assignmentId: assignment.id,
+        assignedAt: assignment.assignedAt,
+        deadline: assignment.deadline,
+        notes: assignment.notes,
+        assignedBy: assignment.assignedBy,
+        isCompleted: false // Tarefas atribuídas não completadas
+      };
+    }).filter(Boolean);
+    
+    // 3. Buscar tarefas gerais (não atribuídas) que o usuário já completou
+    const completedTaskIds = data.history.filter(h => 
       h.type === 'task_completed' && h.userId === userId
-    );
+    ).map(h => h.details?.taskId).filter(Boolean);
+    
+    // 4. Buscar tarefas gerais (não atribuídas a nenhum usuário específico)
+    const allAssignedTaskIds = (data.assignments || []).map(a => a.taskId);
+    const generalTasks = data.tasks.filter(task => 
+      !allAssignedTaskIds.includes(task.id) // Não está atribuída a ninguém
+    ).map(task => ({
+      ...task,
+      isAssigned: false,
+      isCompleted: completedTaskIds.includes(task.id)
+    }));
+    
+    // 5. Combinar tarefas atribuídas + gerais
+    const allUserTasks = [...assignedTasks, ...generalTasks];
+    
+    console.log(`✅ Encontradas ${allUserTasks.length} tarefas para o usuário (${assignedTasks.length} atribuídas, ${generalTasks.length} gerais)`);
     
     res.json({ 
       success: true, 
-      data: completedTasks,
-      total: completedTasks.length
+      data: allUserTasks,
+      total: allUserTasks.length,
+      assigned: assignedTasks.length,
+      general: generalTasks.length
     });
   } catch (error) {
-    console.error('❌ Erro ao listar tarefas do usuário:', error);
+    console.error('❌ Erro ao buscar tarefas do usuário:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Erro ao listar tarefas do usuário',
+      error: 'Erro ao buscar tarefas do usuário',
       message: error.message 
     });
   }

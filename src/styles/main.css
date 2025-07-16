@@ -4,6 +4,8 @@
 /* @import './login.css'; */
 /* @import './dashboard.css'; */
 /* @import './components.css'; */
+@import './task-distribution.css';
+@import './task-assignments.css';
 
 :root {
   /* Cores */
@@ -530,4 +532,36 @@ textarea {
 
 .dev-banner strong {
   font-weight: 700;
+}
+
+/* Estilos para tarefas atribuídas */
+.task-assigned {
+  border-left: 4px solid #007bff;
+  background-color: #f8f9fa;
+}
+
+.task-assignment-info {
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+
+.task-assignment-info small {
+  display: block;
+  margin: 2px 0;
+  color: #1565c0;
+}
+
+.task-assignment-info small:first-child {
+  font-weight: bold;
+  color: #0d47a1;
+}
+
+/* Ícone especial para tarefas atribuídas */
+.task-assigned .task-header h4::before {
+  content: '📌 ';
+  margin-right: 4px;
 }

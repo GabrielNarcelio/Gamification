@@ -7,6 +7,7 @@ import { RankingComponent } from './RankingComponent.js';
 import { HistoryComponent } from './HistoryComponent.js';
 import { AdminPanelComponent } from './AdminPanelComponent.js';
 import { AchievementsComponent } from './AchievementsComponent.js';
+import { TaskDistributionComponent } from './TaskDistributionComponent.js';
 
 export class DashboardComponent {
   constructor(container) {
@@ -35,6 +36,13 @@ export class DashboardComponent {
               <span class="type" id="user-type"></span>
             </div>
           </div>
+          <div id="assigned-tasks-summary" class="assigned-tasks-summary" style="display: none;">
+            <div class="summary-content">
+              <h4>📌 Suas Tarefas Atribuídas</h4>
+              <div id="assigned-tasks-count" class="assigned-count">Carregando...</div>
+              <div id="assigned-tasks-list" class="assigned-list"></div>
+            </div>
+          </div>
           <button id="logout-button" class="btn btn-secondary">Sair</button>
         </header>
 
@@ -55,6 +63,11 @@ export class DashboardComponent {
             <section class="dashboard-section">
               <h3>🏆 Conquistas</h3>
               <div id="achievements-container"></div>
+            </section>
+
+            <section class="dashboard-section" id="task-distribution-section" style="display: none;">
+              <h3>📊 Distribuição de Tarefas</h3>
+              <div id="task-distribution-container"></div>
             </section>
 
             <section class="dashboard-section">
@@ -83,6 +96,7 @@ export class DashboardComponent {
     const tasksContainer = this.container.querySelector('#tasks-container');
     const rewardsContainer = this.container.querySelector('#rewards-container');
     const achievementsContainer = this.container.querySelector('#achievements-container');
+    const taskDistributionContainer = this.container.querySelector('#task-distribution-container');
     const rankingContainer = this.container.querySelector('#ranking-container');
     const historyContainer = this.container.querySelector('#history-container');
 
@@ -93,8 +107,12 @@ export class DashboardComponent {
     this.rankingComponent = new RankingComponent(rankingContainer);
     this.historyComponent = new HistoryComponent(historyContainer);
     
+    // Inicializar componente de distribuição de tarefas apenas para admins
+    this.taskDistributionComponent = new TaskDistributionComponent(taskDistributionContainer);
+    
     // Expor para debug global
     window.achievementsComponent = this.achievementsComponent;
+    window.taskDistribution = this.taskDistributionComponent;
   }
 
   async checkAndShowDevBanner() {
@@ -122,14 +140,16 @@ export class DashboardComponent {
     const userTypeElement = this.container.querySelector('#user-type');
     const historyTitle = this.container.querySelector('#history-title');
     const adminPanelContainer = this.container.querySelector('#admin-panel-container');
+    const taskDistributionSection = this.container.querySelector('#task-distribution-section');
 
     userNameElement.textContent = currentState.user.name || currentState.user.nome;
     userPointsElement.textContent = currentState.user.points?.toString() || currentState.userPoints?.toString() || '0';
     userTypeElement.textContent = currentState.user.type === 'admin' ? 'Administrador' : 'Usuário';
 
-    // Handle admin panel
+    // Handle admin features
     if (currentState.user.type === 'admin' || currentState.userType === 'Administrador') {
       adminPanelContainer.style.display = 'block';
+      taskDistributionSection.style.display = 'block';
       historyTitle.textContent = '📊 Histórico de Todos os Usuários';
       
       if (!this.adminPanelComponent) {
@@ -137,12 +157,80 @@ export class DashboardComponent {
       }
     } else {
       adminPanelContainer.style.display = 'none';
+      taskDistributionSection.style.display = 'none';
       historyTitle.textContent = '📊 Histórico de Atividades';
       this.adminPanelComponent = null;
     }
 
     // Refresh all components
     this.refreshComponents();
+    
+    // Carregar resumo de tarefas atribuídas
+    this.loadAssignedTasksSummary();
+  }
+
+  async loadAssignedTasksSummary() {
+    const currentState = stateManager.getState();
+    const summaryContainer = this.container.querySelector('#assigned-tasks-summary');
+    const countElement = this.container.querySelector('#assigned-tasks-count');
+    const listElement = this.container.querySelector('#assigned-tasks-list');
+    
+    // Só mostrar para usuários não-admin
+    if (currentState.userType === 'Administrador') {
+      summaryContainer.style.display = 'none';
+      return;
+    }
+
+    try {
+      const { api } = await import('../services/api.js');
+      const userId = currentState.user?.id;
+      
+      if (!userId) return;
+
+      // Buscar tarefas atribuídas específicamente
+      const assignmentsResponse = await api.getUserAssignments(userId, 'assigned');
+      const assignments = assignmentsResponse.success ? assignmentsResponse.data : [];
+
+      if (assignments.length === 0) {
+        summaryContainer.style.display = 'none';
+        return;
+      }
+
+      // Buscar detalhes das tarefas
+      const tasksResponse = await api.getAllTasks();
+      const allTasks = tasksResponse.success ? tasksResponse.data : [];
+
+      const assignedTasksDetails = assignments.map(assignment => {
+        const task = allTasks.find(t => t.id === assignment.taskId);
+        return task ? { ...task, ...assignment } : null;
+      }).filter(Boolean);
+
+      summaryContainer.style.display = 'flex';
+      countElement.textContent = `${assignedTasksDetails.length} tarefa${assignedTasksDetails.length > 1 ? 's' : ''} atribuída${assignedTasksDetails.length > 1 ? 's' : ''}`;
+      
+      listElement.innerHTML = assignedTasksDetails.slice(0, 3).map(task => {
+        const isOverdue = task.deadline && new Date(task.deadline) < new Date();
+        return `
+          <div class="assigned-task-item ${isOverdue ? 'overdue' : ''}">
+            <span class="task-title">${task.title}</span>
+            <span class="task-points">${task.points}pts</span>
+            ${task.deadline ? `
+              <span class="task-deadline ${isOverdue ? 'overdue' : ''}">
+                ${isOverdue ? '⚠️' : '⏰'} ${new Date(task.deadline).toLocaleDateString('pt-BR')}
+              </span>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      if (assignedTasksDetails.length > 3) {
+        listElement.innerHTML += `<div class="more-tasks">+ ${assignedTasksDetails.length - 3} mais</div>`;
+      }
+
+    } catch (error) {
+      console.error('Erro ao carregar resumo de tarefas atribuídas:', error);
+      summaryContainer.style.display = 'none';
+    }
   }
 
   refreshComponents() {

@@ -4,6 +4,7 @@ import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { MESSAGES } from '@/utils/config.js';
 import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
+import { CacheManager } from '../utils/cache-manager.js';
 
 export class TasksComponent {
   constructor(container) {
@@ -40,6 +41,17 @@ export class TasksComponent {
     const isAdmin = state.userType === 'Administrador';
 
     this.container.innerHTML = `
+      <div class="tasks-header">
+        <div class="tasks-actions">
+          <button id="refresh-tasks-btn" class="btn btn-secondary">
+            🔄 Atualizar
+          </button>
+          <button id="clear-cache-btn" class="btn btn-warning" title="Limpar cache se houver problemas">
+            🧹 Limpar Cache
+          </button>
+        </div>
+      </div>
+      
       ${isAdmin ? `
         <div class="task-form">
           <h4>➕ Criar Nova Tarefa</h4>
@@ -65,6 +77,15 @@ export class TasksComponent {
 
   setupEventListeners() {
     const state = stateManager.getState();
+    
+    // Botão de atualizar tarefas
+    const refreshBtn = this.container.querySelector('#refresh-tasks-btn');
+    refreshBtn?.addEventListener('click', () => this.refreshTasks());
+    
+    // Botão de limpar cache
+    const clearCacheBtn = this.container.querySelector('#clear-cache-btn');
+    clearCacheBtn?.addEventListener('click', () => this.clearCache());
+    
     if (state.userType === 'Administrador') {
       const createButton = this.container.querySelector('#create-task-button');
       createButton?.addEventListener('click', () => this.handleCreateTask());
@@ -243,13 +264,41 @@ export class TasksComponent {
     const state = stateManager.getState();
     
     try {
-      // ✅ Passar userId para verificar status de completada
       const userId = state.user?.id;
-      const response = await api.getTasks(userId);
+      const isAdmin = state.userType === 'Administrador';
+      
+      console.log('🔄 Carregando tarefas para usuário:', userId, '(Admin:', isAdmin, ')');
+      
+      let response;
+      if (isAdmin) {
+        // Admin vê todas as tarefas
+        response = await api.getTasks(userId);
+      } else {
+        // Usuários veem suas tarefas atribuídas + tarefas gerais
+        response = await api.getUserTasks(userId);
+      }
+      
       this.tasks = response.success ? response.data : [];
+      console.log('📋 Tarefas carregadas:', this.tasks.length, 'tarefas');
+      
+      // Para usuários normais, verificar status real das tarefas completadas
+      if (!isAdmin && userId) {
+        console.log('🔍 Verificando status real das tarefas...');
+        for (let task of this.tasks) {
+          if (task.isCompleted) {
+            // Verificar no servidor se realmente foi completada
+            const reallyCompleted = await CacheManager.isTaskCompleted(task.id, userId);
+            if (!reallyCompleted) {
+              console.log('⚠️ Tarefa', task.id, 'marcada como completada no cache mas não no servidor');
+              task.isCompleted = false; // Corrigir status
+            }
+          }
+        }
+      }
+      
       this.renderTasks();
     } catch (error) {
-      console.error('Load tasks error:', error);
+      console.error('❌ Erro ao carregar tarefas:', error);
       taskList.innerHTML = '<div class="error">Erro ao carregar tarefas.</div>';
     }
   }
@@ -270,11 +319,20 @@ export class TasksComponent {
     }
 
     taskList.innerHTML = tasksToShow.map(task => `
-      <div class="task-item ${task.isCompleted ? 'task-completed' : ''}">
+      <div class="task-item ${task.isCompleted ? 'task-completed' : ''} ${task.isAssigned ? 'task-assigned' : ''}">
         <div class="task-header">
-          <h4>${escapeHtml(task.title)} ${task.isCompleted ? '✅' : ''}</h4>
+          <h4>
+            ${task.isAssigned ? '📌 ' : ''}${escapeHtml(task.title)} ${task.isCompleted ? '✅' : ''}
+          </h4>
           <span class="task-points">${task.points} pts</span>
         </div>
+        ${task.isAssigned ? `
+          <div class="task-assignment-info">
+            <small>📌 Tarefa atribuída a você</small>
+            ${task.deadline ? `<small>⏰ Prazo: ${new Date(task.deadline).toLocaleDateString('pt-BR')}</small>` : ''}
+            ${task.notes ? `<small>📝 Observações: ${escapeHtml(task.notes)}</small>` : ''}
+          </div>
+        ` : ''}
         <div class="task-description">
           ${escapeHtml(task.description)}
         </div>
@@ -363,6 +421,49 @@ export class TasksComponent {
         }
       }, 5000);
     }
+  }
+
+  async refreshTasks() {
+    console.log('🔄 Atualizando tarefas...');
+    
+    // Limpar cache específico de tarefas
+    await CacheManager.clearSpecificCache('/api/tasks');
+    await CacheManager.clearSpecificCache('/api/history');
+    
+    // Recarregar tarefas
+    await this.loadTasks();
+    
+    this.showSuccessMessage('✅ Tarefas atualizadas!');
+  }
+
+  async clearCache() {
+    if (confirm('🧹 Isso vai limpar todo o cache e recarregar a página. Continuar?')) {
+      await CacheManager.clearAllCache();
+    }
+  }
+
+  showSuccessMessage(message) {
+    // Criar elemento de notificação temporária
+    const notification = document.createElement('div');
+    notification.className = 'notification success';
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
   }
 
   refresh() {

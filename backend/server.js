@@ -56,6 +56,7 @@ app.use('/api/rewards', require('./routes/rewards'));
 app.use('/api/history', require('./routes/history'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/ranking', require('./routes/ranking'));
+app.use('/api/assignments', require('./routes/assignments'));
 
 // Rota de health check
 app.get('/api/health', (req, res) => {

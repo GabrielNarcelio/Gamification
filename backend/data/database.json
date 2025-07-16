@@ -1139,6 +1139,129 @@
         "username": "aaaaaaaaaaaa",
         "type": "user"
       }
+    },
+    {
+      "id": "1752628637139cwto13832",
+      "userId": "1",
+      "type": "task_assigned",
+      "description": "Tarefa 'Documentação API' atribuída ao usuário 'gabriel'",
+      "points": 0,
+      "details": {
+        "taskId": "3",
+        "taskTitle": "Documentação API",
+        "assignedUserId": "1752623211066jgwi5iicl",
+        "assignedUserName": "gabriel",
+        "deadline": "2025-07-25T23:59:59Z",
+        "notes": "Tarefa de teste para demonstrar o sistema de distribui��o"
+      },
+      "userName": "Administrador",
+      "timestamp": "2025-07-16T01:17:17.139Z"
+    },
+    {
+      "id": "1752628812413ae7qj4she",
+      "userId": "system",
+      "type": "task_assigned",
+      "description": "Tarefa 'Testes Unitários' atribuída ao usuário 'aaaaaaaaaaaa'",
+      "points": 0,
+      "details": {
+        "taskId": "4",
+        "taskTitle": "Testes Unitários",
+        "assignedUserId": "1752626270016j4069frau",
+        "assignedUserName": "aaaaaaaaaaaa",
+        "deadline": null,
+        "notes": null
+      },
+      "userName": "Sistema",
+      "timestamp": "2025-07-16T01:20:12.413Z"
+    },
+    {
+      "id": "1752628843194np7vlkd8l",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:20:43.194Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752628891977zztn8ox1p",
+      "userId": "system",
+      "type": "task_assigned",
+      "description": "Tarefa 'Arrumar a requisição' atribuída ao usuário 'gabriel'",
+      "points": 0,
+      "details": {
+        "taskId": "175260363033087sm8fhki",
+        "taskTitle": "Arrumar a requisição",
+        "assignedUserId": "1752623211066jgwi5iicl",
+        "assignedUserName": "gabriel",
+        "deadline": null,
+        "notes": null
+      },
+      "userName": "Sistema",
+      "timestamp": "2025-07-16T01:21:31.977Z"
+    },
+    {
+      "id": "175262890165402a23m3h2",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:21:41.654Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752630021431ef34kc3jq",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:40:21.431Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752630086467xhtwmigyl",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:41:26.467Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752630870524vy79po9bq",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:54:30.524Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "17526308802090gatw7fjh",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T01:54:40.209Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
     }
   ],
   "achievements": [
@@ -1311,6 +1434,41 @@
       "achievementId": "points_millionaire",
       "unlockedAt": "2025-07-15T23:51:47.799Z",
       "progress": 1000
+    }
+  ],
+  "assignments": [
+    {
+      "id": "1752628637135ugdolptcf",
+      "taskId": "3",
+      "userId": "1752623211066jgwi5iicl",
+      "status": "assigned",
+      "assignedAt": "2025-07-16T01:17:17.135Z",
+      "assignedBy": "1",
+      "deadline": "2025-07-25T23:59:59Z",
+      "notes": "Tarefa de teste para demonstrar o sistema de distribui��o",
+      "completedAt": null
+    },
+    {
+      "id": "1752628812410ztdrayg9b",
+      "taskId": "4",
+      "userId": "1752626270016j4069frau",
+      "status": "assigned",
+      "assignedAt": "2025-07-16T01:20:12.410Z",
+      "assignedBy": "system",
+      "deadline": null,
+      "notes": null,
+      "completedAt": null
+    },
+    {
+      "id": "17526288919745ngxz527t",
+      "taskId": "175260363033087sm8fhki",
+      "userId": "1752623211066jgwi5iicl",
+      "status": "assigned",
+      "assignedAt": "2025-07-16T01:21:31.974Z",
+      "assignedBy": "system",
+      "deadline": null,
+      "notes": null,
+      "completedAt": null
     }
   ]
 }

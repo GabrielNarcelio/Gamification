@@ -115,6 +115,29 @@ export class ApiService {
     }
   }
 
+  // ✅ Método para limpar cache completamente
+  async clearAllCache() {
+    try {
+      if ('serviceWorker' in navigator && 'caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            console.log(`🗑️ Removendo cache: ${cacheName}`);
+            return caches.delete(cacheName);
+          })
+        );
+        console.log('✅ Todos os caches removidos');
+        
+        // Recarregar a página para forçar dados frescos
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao limpar cache:', error);
+    }
+  }
+
   // === MÉTODOS DE AUTENTICAÇÃO ===
 
   async login(username, password) {
@@ -502,10 +525,15 @@ export class ApiService {
 
       // ✅ Invalidate cache after successful task completion
       if (response.success) {
+        // Invalidar caches específicos e críticos
         await this.invalidateCache('/api/tasks');
+        await this.invalidateCache('/tasks/user/');
         await this.invalidateCache('/api/users');
         await this.invalidateCache('/api/ranking');
         await this.invalidateCache('/api/history');
+        await this.invalidateCache('/assignments');
+        
+        console.log('🧹 Cache invalidado após conclusão de tarefa');
       }
 
       return response;
@@ -1241,21 +1269,330 @@ export class ApiService {
     }
   }
 
-  // === MÉTODOS AUXILIARES ===
+  // === MÉTODOS DE ATRIBUIÇÃO DE TAREFAS ===
 
-  getBadge(position) {
-    switch (position) {
-      case 1:
-        return { emoji: '🥇', name: 'Ouro', color: '#FFD700' };
-      case 2:
-        return { emoji: '🥈', name: 'Prata', color: '#C0C0C0' };
-      case 3:
-        return { emoji: '🥉', name: 'Bronze', color: '#CD7F32' };
-      default:
-        return { emoji: '🏅', name: 'Participante', color: '#6B73FF' };
+  async getTaskAssignments(params = {}) {
+    console.log('📋 Buscando atribuições de tarefas...', params);
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        // Mock data para atribuições - para demonstração
+        const mockAssignments = [
+          {
+            id: 'assign1',
+            taskId: '1',
+            userId: '2',
+            status: 'assigned',
+            assignedAt: '2025-01-10T10:00:00Z',
+            assignedBy: 'admin1',
+            deadline: '2025-01-20T23:59:59Z',
+            notes: 'Prioridade alta',
+            completedAt: null
+          },
+          {
+            id: 'assign2',
+            taskId: '2',
+            userId: '3',
+            status: 'completed',
+            assignedAt: '2025-01-08T09:00:00Z',
+            assignedBy: 'admin1',
+            deadline: null,
+            notes: null,
+            completedAt: '2025-01-15T14:30:00Z'
+          }
+        ];
+        
+        let assignments = mockAssignments;
+        
+        // Filtrar por parâmetros se fornecidos
+        if (params.userId) {
+          assignments = assignments.filter(a => a.userId === params.userId);
+        }
+        if (params.status) {
+          assignments = assignments.filter(a => a.status === params.status);
+        }
+        
+        return { success: true, data: assignments };
+      }
+
+      // REST API call
+      const cleanParams = {};
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          cleanParams[key] = params[key];
+        }
+      });
+      
+      const queryString = new URLSearchParams(cleanParams).toString();
+      const url = queryString ? `/assignments?${queryString}` : '/assignments';
+      const response = await this.makeRequest(url);
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getTaskAssignments', []);
+    }
+  }
+
+  async assignTask({ taskId, userId, deadline, notes, assignedBy }) {
+    console.log('👤 Atribuindo tarefa:', { taskId, userId, deadline, notes, assignedBy });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        
+        const task = mockData.tasks.find(t => t.id === taskId);
+        const user = mockData.users.find(u => u.id === userId);
+        
+        if (!task || !user) {
+          return { success: false, error: 'Tarefa ou usuário não encontrado' };
+        }
+
+        const assignment = {
+          id: generateId(),
+          taskId,
+          userId,
+          status: 'assigned',
+          assignedAt: new Date().toISOString(),
+          assignedBy: assignedBy || 'system',
+          deadline: deadline || null,
+          notes: notes || null,
+          completedAt: null
+        };
+
+        // Para mock data, apenas simular sucesso
+        return { success: true, data: assignment };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/assignments', {
+        method: 'POST',
+        body: JSON.stringify({ taskId, userId, deadline, notes, assignedBy })
+      });
+
+      // ✅ Invalidate cache after successful assignment
+      if (response.success) {
+        await this.invalidateCache('/api/assignments');
+        await this.invalidateCache('/api/tasks');
+        await this.invalidateCache('/api/history');
+      }
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'assignTask', { 
+        success: false, 
+        error: 'Erro ao atribuir tarefa' 
+      });
+    }
+  }
+
+  async bulkAssignTasks(assignments, assignedBy) {
+    console.log('🎯 Atribuindo tarefas em massa:', { count: assignments.length, assignedBy });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        
+        const createdAssignments = assignments.map(assignment => ({
+          id: generateId(),
+          ...assignment,
+          status: 'assigned',
+          assignedAt: new Date().toISOString(),
+          assignedBy: assignedBy || 'system',
+          completedAt: null
+        }));
+
+        return { 
+          success: true, 
+          data: {
+            created: createdAssignments,
+            createdCount: createdAssignments.length,
+            errors: []
+          }
+        };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/assignments/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ assignments, assignedBy })
+      });
+
+      // ✅ Invalidate cache after successful bulk assignment
+      if (response.success) {
+        await this.invalidateCache('/api/assignments');
+        await this.invalidateCache('/api/tasks');
+        await this.invalidateCache('/api/history');
+      }
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'bulkAssignTasks', { 
+        success: false, 
+        error: 'Erro na atribuição em massa' 
+      });
+    }
+  }
+
+  async updateAssignment(assignmentId, updates) {
+    console.log('📝 Atualizando atribuição:', { assignmentId, updates });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        
+        // Mock: simular atualização bem-sucedida
+        const updatedAssignment = {
+          id: assignmentId,
+          ...updates,
+          updatedAt: new Date().toISOString()
+        };
+
+        return { success: true, data: updatedAssignment };
+      }
+
+      // REST API call
+      const response = await this.makeRequest(`/assignments/${assignmentId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+
+      // ✅ Invalidate cache after successful update
+      if (response.success) {
+        await this.invalidateCache('/api/assignments');
+        if (updates.status === 'completed') {
+          await this.invalidateCache('/api/users');
+          await this.invalidateCache('/api/ranking');
+          await this.invalidateCache('/api/history');
+        }
+      }
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'updateAssignment', { 
+        success: false, 
+        error: 'Erro ao atualizar atribuição' 
+      });
+    }
+  }
+
+  async removeAssignment(assignmentId, removedBy) {
+    console.log('❌ Removendo atribuição:', { assignmentId, removedBy });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        return { success: true, message: 'Atribuição removida com sucesso' };
+      }
+
+      // REST API call
+      const response = await this.makeRequest(`/assignments/${assignmentId}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ removedBy })
+      });
+
+      // ✅ Invalidate cache after successful removal
+      if (response.success) {
+        await this.invalidateCache('/api/assignments');
+        await this.invalidateCache('/api/history');
+      }
+
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'removeAssignment', { 
+        success: false, 
+        error: 'Erro ao remover atribuição' 
+      });
+    }
+  }
+
+  async getUserAssignments(userId, status = null) {
+    console.log('👤 Buscando atribuições do usuário:', { userId, status });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        
+        // Mock: retornar array vazio para demonstração
+        return { success: true, data: [] };
+      }
+
+      // REST API call
+      const params = { };
+      if (status) params.status = status;
+      
+      const queryString = new URLSearchParams(params).toString();
+      const url = queryString ? `/assignments/user/${userId}?${queryString}` : `/assignments/user/${userId}`;
+      
+      const response = await this.makeRequest(url);
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getUserAssignments', []);
+    }
+  }
+
+  // === NOVO: Método para buscar tarefas específicas para o usuário ===
+  async getUserTasks(userId) {
+    console.log('📋 Buscando tarefas para o usuário:', { userId });
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        
+        // Mock: retornar tarefas gerais mais as atribuídas
+        return { success: true, data: mockData.tasks };
+      }
+
+      // REST API call - nova rota que combina tarefas gerais + atribuídas
+      const response = await this.makeRequest(`/tasks/user/${userId}`);
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getUserTasks', mockData.tasks);
+    }
+  }
+
+  // === MÉTODOS AUXILIARES PARA TAREFAS ===
+
+  async getAllTasks() {
+    console.log('📋 Buscando todas as tarefas...');
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        return { success: true, data: mockData.tasks };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/tasks');
+      return response;
+    } catch (error) {
+      return await this.handleCorsError(error, 'getAllTasks', mockData.tasks);
+    }
+  }
+
+  async getAllUsers() {
+    console.log('👥 Buscando todos os usuários...');
+    
+    try {
+      if (await this.shouldUseMockData()) {
+        await simulateNetworkDelay();
+        const usersWithoutPassword = mockData.users.map(user => {
+          const { password, ...userWithoutPassword } = user;
+          return userWithoutPassword;
+        });
+        return { success: true, data: usersWithoutPassword };
+      }
+
+      // REST API call
+      const response = await this.makeRequest('/users');
+      return response;
+    } catch (error) {
+      const usersWithoutPassword = mockData.users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      return await this.handleCorsError(error, 'getAllUsers', usersWithoutPassword);
     }
   }
 }
 
-// Criar instância global
 export const api = new ApiService();

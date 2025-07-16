@@ -1,7 +1,7 @@
 // Service Worker para PWA - Sistema de Gamificação
-const CACHE_NAME = 'gamification-v3.1.0'; // ✅ Nova versão com ícone SVG
-const CACHE_STATIC_NAME = 'gamification-static-v3.1.0';
-const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v3.1.0';
+const CACHE_NAME = 'gamification-v3.3.0'; // ✅ Versão atualizada para limpar cache
+const CACHE_STATIC_NAME = 'gamification-static-v3.3.0';
+const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v3.3.0';
 
 // URLs para cache estático (sempre disponível offline)
 const STATIC_URLS = [
@@ -43,6 +43,15 @@ const API_URLS = [
   '/api/achievements',
   '/api/ranking',
   '/api/history'
+];
+
+// URLs que NUNCA devem ser cacheadas (operações críticas)
+const NEVER_CACHE = [
+  '/api/tasks/complete',
+  '/api/tasks/user/',
+  '/api/history?',
+  '/api/users/points',
+  '/api/assignments'
 ];
 
 // Instalar Service Worker
@@ -103,6 +112,13 @@ self.addEventListener('fetch', event => {
   // Ignorar extensões do Chrome
   if (url.protocol === 'chrome-extension:') return;
   
+  // NUNCA cachear URLs críticas
+  if (shouldNeverCache(request.url)) {
+    console.log('🚫 SW: Bypass cache para URL crítica:', request.url);
+    event.respondWith(networkOnly(request));
+    return;
+  }
+  
   // Estratégia Cache First para arquivos estáticos
   if (request.method === 'GET' && isStaticResource(request.url)) {
     event.respondWith(cacheFirst(request));
@@ -138,6 +154,11 @@ function isStaticResource(url) {
          url.includes('.jpeg') ||
          url.includes('.svg') ||
          url.includes('.ico');
+}
+
+// Verificar se NUNCA deve ser cacheado
+function shouldNeverCache(url) {
+  return NEVER_CACHE.some(neverCacheUrl => url.includes(neverCacheUrl));
 }
 
 // Verificar se é requisição de API
@@ -176,17 +197,43 @@ async function cacheFirst(request) {
 // Estratégia Network First
 async function networkFirst(request) {
   try {
+    // ✅ Para operações críticas (complete, assign, etc.), sempre usar network fresh
+    const isCriticalOperation = request.url.includes('/complete') || 
+                               request.url.includes('/assign') || 
+                               request.url.includes('/users/') ||
+                               request.url.includes('/tasks/user/');
+    
     const networkResponse = await fetch(request);
     
-    if (networkResponse.ok && request.method === 'GET') {
+    if (networkResponse.ok && request.method === 'GET' && !isCriticalOperation) {
       const cache = await caches.open(CACHE_DYNAMIC_NAME);
       cache.put(request, networkResponse.clone());
       console.log('🌐 SW: Resposta da rede cacheada:', request.url);
+    } else if (isCriticalOperation) {
+      console.log('⚡ SW: Operação crítica - sem cache:', request.url);
     }
     
     return networkResponse;
   } catch (error) {
     console.log('🔌 SW: Rede falhou - tentando cache:', request.url);
+    
+    // ✅ Para operações críticas, não usar cache em caso de falha
+    const isCriticalOperation = request.url.includes('/complete') || 
+                               request.url.includes('/assign') || 
+                               request.url.includes('/users/') ||
+                               request.url.includes('/tasks/user/');
+    
+    if (isCriticalOperation) {
+      console.log('❌ SW: Operação crítica falhou - sem fallback para cache');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Conectividade perdida - operação não pode ser completada offline'
+      }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {
