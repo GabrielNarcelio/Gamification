@@ -7,6 +7,7 @@ import './styles/login.css';
 import './styles/dashboard.css';
 import './styles/components.css';
 import './styles/forms.css';
+import './styles/emoji-picker.css';
 import './utils/pwa-manager.js'; // ✅ REABILITADO
 
 // Initialize the application when DOM is loaded

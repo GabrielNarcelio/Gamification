@@ -1,5 +1,6 @@
 import { api } from '../services/api.js';
 import { stateManager } from '../services/state.js';
+import { EmojiPicker } from './EmojiPicker.js';
 
 export class AchievementsComponent {
   constructor() {
@@ -7,6 +8,7 @@ export class AchievementsComponent {
     this.userAchievements = null;
     this.filterType = 'all'; // all, unlocked, locked
     this.isAdmin = false;
+    this.emojiPicker = new EmojiPicker();
   }
 
   async init(container) {
@@ -15,9 +17,17 @@ export class AchievementsComponent {
     // Verificar múltiplas formas de detectar admin
     const currentUser = stateManager.getCurrentUser();
     
+    console.log('🏆 AchievementsComponent - Debug admin detection:');
+    console.log('  currentUser:', currentUser);
+    console.log('  currentUser?.type:', currentUser?.type);
+    console.log('  stateManager.isAdmin():', stateManager.isAdmin());
+    console.log('  stateManager.getState().userType:', stateManager.getState().userType);
+    
     this.isAdmin = currentUser?.type === 'admin' || 
                    stateManager.isAdmin() || 
                    stateManager.getState().userType === 'Administrador';
+    
+    console.log('  Final isAdmin:', this.isAdmin);
     
     this.render();
     await this.loadAchievements();
@@ -127,7 +137,12 @@ export class AchievementsComponent {
             
             <div class="form-group">
               <label for="achievement-icon">Ícone (emoji)</label>
-              <input type="text" id="achievement-icon" placeholder="🏆" maxlength="2">
+              <div class="emoji-input-group">
+                <input type="text" id="achievement-icon" class="emoji-input-field" placeholder="🏆" maxlength="2" value="🏆">
+                <button type="button" class="emoji-picker-trigger" id="open-emoji-picker">
+                  😀 Escolher
+                </button>
+              </div>
             </div>
             
             <div class="form-row">
@@ -207,16 +222,31 @@ export class AchievementsComponent {
     });
 
     // Controles admin
+    console.log('🏆 AchievementsComponent - Setting up event listeners, isAdmin:', this.isAdmin);
     if (this.isAdmin) {
       const newAchievementBtn = this.container.querySelector('#btn-new-achievement');
       const checkAllBtn = this.container.querySelector('#btn-check-all-achievements');
       
+      console.log('🏆 Found admin elements:', {
+        newAchievementBtn: !!newAchievementBtn,
+        checkAllBtn: !!checkAllBtn
+      });
+      
       if (newAchievementBtn) {
+        console.log('🏆 Adding click listener to new achievement button');
         newAchievementBtn.addEventListener('click', (e) => {
+          console.log('🏆 New Achievement button clicked!');
           e.preventDefault();
           e.stopPropagation();
+          
+          // Teste simples primeiro
+          alert('Botão Nova Conquista clicado!');
+          
+          // Depois chamar o modal
           this.showNewAchievementModal();
         });
+      } else {
+        console.error('🏆 New Achievement button not found in DOM');
       }
       
       if (checkAllBtn) {
@@ -228,6 +258,7 @@ export class AchievementsComponent {
 
       // Modal event listeners
       this.setupModalEventListeners();
+      this.setupEmojiPickerEventListeners();
     }
   }
 
@@ -272,6 +303,60 @@ export class AchievementsComponent {
         this.updateConditionFields();
       });
     }
+  }
+
+  setupEmojiPickerEventListeners() {
+    const openEmojiPickerBtn = this.container.querySelector('#open-emoji-picker');
+
+    // Abrir seletor de emojis
+    if (openEmojiPickerBtn) {
+      openEmojiPickerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showEmojiPicker();
+      });
+    }
+  }
+
+  setupDynamicEmojiPickerListeners() {
+    // Este método é chamado após criar o emoji picker dinamicamente
+    const emojiPicker = this.container.querySelector('#emoji-picker');
+    const closeEmojiPickerBtn = this.container.querySelector('#emoji-picker-close');
+    const categoryBtns = this.container.querySelectorAll('.emoji-category-btn');
+
+    // Fechar seletor de emojis
+    if (closeEmojiPickerBtn) {
+      closeEmojiPickerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.hideEmojiPicker();
+      });
+    }
+
+    // Fechar clicando fora
+    if (emojiPicker) {
+      emojiPicker.addEventListener('click', (e) => {
+        if (e.target === emojiPicker) {
+          this.hideEmojiPicker();
+        }
+      });
+    }
+
+    // Mudança de categoria
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const category = e.target.dataset.category;
+        this.changeEmojiCategory(category);
+      });
+    });
+
+    // ESC para fechar
+    const escapeHandler = (e) => {
+      if (e.key === 'Escape' && emojiPicker && emojiPicker.style.display !== 'none') {
+        this.hideEmojiPicker();
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
   }
 
   async loadAchievements() {
@@ -535,9 +620,12 @@ export class AchievementsComponent {
 
   // Métodos para administradores
   showNewAchievementModal() {
+    console.log('🏆 showNewAchievementModal called');
     const modal = this.container.querySelector('#achievement-modal');
     
+    console.log('🏆 Modal element found:', !!modal);
     if (modal) {
+      console.log('🏆 Showing modal...');
       modal.style.display = 'flex';
       this.updateConditionFields();
     } else {
@@ -673,5 +761,120 @@ export class AchievementsComponent {
     } else {
       console.error('❌ Modal não encontrado');
     }
+  }
+
+  // Métodos do Emoji Picker
+  showEmojiPicker() {
+    // Criar o emoji picker dinamicamente se não existir
+    let emojiPicker = this.container.querySelector('#emoji-picker');
+    
+    if (!emojiPicker) {
+      // Criar o elemento do emoji picker
+      const emojiPickerHTML = `
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="modal-content">
+            <div class="emoji-picker-header">
+              <h4>Escolher Emoji</h4>
+              <button class="emoji-picker-close" id="emoji-picker-close">&times;</button>
+            </div>
+            
+            <div class="emoji-categories">
+              <button class="emoji-category-btn active" data-category="trofeus">🏆</button>
+              <button class="emoji-category-btn" data-category="esportes">⚽</button>
+              <button class="emoji-category-btn" data-category="atividades">🎨</button>
+              <button class="emoji-category-btn" data-category="trabalho">💼</button>
+              <button class="emoji-category-btn" data-category="natureza">🌱</button>
+              <button class="emoji-category-btn" data-category="comida">🍎</button>
+              <button class="emoji-category-btn" data-category="animais">🐶</button>
+              <button class="emoji-category-btn" data-category="objetos">🔥</button>
+              <button class="emoji-category-btn" data-category="simbolos">💯</button>
+              <button class="emoji-category-btn" data-category="bandeiras">🎌</button>
+            </div>
+            
+            <div class="emoji-grid" id="emoji-grid">
+              <div class="emoji-grid-header">
+                <span class="category-name">Troféus</span>
+              </div>
+              <div class="emoji-grid-content" id="emoji-grid-content">
+                <!-- Emojis serão carregados aqui -->
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Adicionar ao container
+      this.container.insertAdjacentHTML('beforeend', emojiPickerHTML);
+      emojiPicker = this.container.querySelector('#emoji-picker');
+      
+      // Configurar event listeners para o novo emoji picker
+      this.setupDynamicEmojiPickerListeners();
+    }
+    
+    if (emojiPicker) {
+      emojiPicker.style.display = 'flex';
+      
+      // Carregar categoria inicial
+      this.loadEmojiCategory('trofeus');
+      
+      // Foco no primeiro emoji
+      setTimeout(() => {
+        const firstEmoji = emojiPicker.querySelector('.emoji-btn');
+        firstEmoji?.focus();
+      }, 100);
+    }
+  }
+
+  hideEmojiPicker() {
+    const emojiPicker = this.container.querySelector('#emoji-picker');
+    if (emojiPicker) {
+      emojiPicker.remove(); // Remover completamente do DOM
+    }
+  }
+
+  changeEmojiCategory(category) {
+    // Atualizar botões de categoria
+    this.container.querySelectorAll('.emoji-category-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === category);
+    });
+
+    // Atualizar grid
+    this.loadEmojiCategory(category);
+  }
+
+  loadEmojiCategory(category) {
+    const emojis = this.emojiPicker.emojis[category] || [];
+    const categoryName = this.emojiPicker.getCategoryName(category);
+    const emojiGridContent = this.container.querySelector('#emoji-grid-content');
+    const categoryNameEl = this.container.querySelector('.category-name');
+
+    if (categoryNameEl) {
+      categoryNameEl.textContent = categoryName;
+    }
+
+    if (emojiGridContent) {
+      emojiGridContent.innerHTML = emojis.map(emoji => `
+        <button class="emoji-btn" data-emoji="${emoji}" title="${emoji}">
+          ${emoji}
+        </button>
+      `).join('');
+
+      // Adicionar event listeners aos botões de emoji
+      emojiGridContent.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const emoji = e.target.dataset.emoji;
+          this.selectEmoji(emoji);
+        });
+      });
+    }
+  }
+
+  selectEmoji(emoji) {
+    const iconInput = this.container.querySelector('#achievement-icon');
+    if (iconInput) {
+      iconInput.value = emoji;
+    }
+    this.hideEmojiPicker();
   }
 }

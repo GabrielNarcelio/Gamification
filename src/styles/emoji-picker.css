@@ -1,0 +1,233 @@
+/* Estilos específicos para o Seletor de Emojis */
+
+.achievements-container .emoji-picker {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.achievements-container .emoji-picker .modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+.achievements-container .emoji-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.achievements-container .emoji-picker-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.achievements-container .emoji-picker-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.achievements-container .emoji-picker-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.achievements-container .emoji-categories {
+  display: flex;
+  padding: 12px;
+  gap: 4px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
+  overflow-x: auto;
+}
+
+.achievements-container .emoji-category-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.achievements-container .emoji-category-btn:hover {
+  background: #e3f2fd;
+  transform: scale(1.1);
+}
+
+.achievements-container .emoji-category-btn.active {
+  background: #2196f3;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.achievements-container .emoji-grid {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.achievements-container .emoji-grid-header {
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #f8f9fa;
+}
+
+.achievements-container .category-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.achievements-container .emoji-grid-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+  padding: 12px;
+}
+
+.achievements-container .emoji-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.achievements-container .emoji-btn:hover {
+  background: #e3f2fd;
+  transform: scale(1.2);
+}
+
+.achievements-container .emoji-btn:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Campo de emoji com botão de seletor */
+.achievements-container .emoji-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.achievements-container .emoji-input-field {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 20px;
+  text-align: center;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.achievements-container .emoji-input-field:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.achievements-container .emoji-picker-trigger {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.achievements-container .emoji-picker-trigger:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .achievements-container .emoji-picker .modal-content {
+    width: 95vw;
+    height: 70vh;
+  }
+  
+  .achievements-container .emoji-grid-content {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  }
+  
+  .achievements-container .emoji-btn {
+    font-size: 20px;
+    height: 40px;
+  }
+  
+  .achievements-container .emoji-category-btn {
+    min-width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+}

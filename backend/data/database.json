@@ -17,7 +17,7 @@
       "name": "gabriel",
       "email": "ksdjaskldjakda",
       "type": "user",
-      "points": 721,
+      "points": 871,
       "createdAt": "2025-07-15T23:46:51.066Z"
     },
     {
@@ -1899,6 +1899,44 @@
         "taskTitle": "çklfsklç",
         "taskPoints": 100
       }
+    },
+    {
+      "id": "1752702936937cyfttp9l9",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T21:55:36.937Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752702937094e0wr1c29i",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "achievement_unlocked",
+      "description": "Conquista desbloqueada: sadlkasd",
+      "points": 50,
+      "timestamp": "2025-07-16T21:55:37.094Z",
+      "details": {
+        "achievementId": "175270179016100otgsjk8",
+        "achievementName": "sadlkasd",
+        "achievementRarity": "legendary"
+      }
+    },
+    {
+      "id": "17527029558151n4udg1td",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "task_completed",
+      "description": "Tarefa 'çklfsklç' concluída",
+      "points": 100,
+      "timestamp": "2025-07-16T21:55:55.815Z",
+      "details": {
+        "taskId": "1752694556474cxk0h1vs1",
+        "taskTitle": "çklfsklç",
+        "pointsEarned": 100
+      }
     }
   ],
   "achievements": [
@@ -1981,31 +2019,18 @@
       "rarity": "legendary"
     },
     {
-      "id": "daily_streak_7",
-      "name": "Semana Dedicada",
-      "description": "Complete tarefas por 7 dias consecutivos",
-      "icon": "🔥",
-      "points": 150,
-      "type": "streak",
-      "condition": {
-        "type": "daily_streak",
-        "value": 7
-      },
-      "rarity": "rare"
-    },
-    {
-      "id": "1752618861726layhis2b4",
-      "name": "zzxmvmv",
-      "description": "lxlçcz",
+      "id": "175270179016100otgsjk8",
+      "name": "sadlkasd",
+      "description": "lçskdaldka",
       "icon": "🏆",
       "points": 50,
-      "type": "task",
+      "type": "custom",
       "condition": {
         "type": "login_count",
         "value": 1
       },
-      "rarity": "common",
-      "createdAt": "2025-07-15T22:34:21.726Z"
+      "rarity": "legendary",
+      "createdAt": "2025-07-16T21:36:30.161Z"
     }
   ],
   "userAchievements": [
@@ -2014,13 +2039,6 @@
       "userId": "1752618947490nxeo7tmm9",
       "achievementId": "first_login",
       "unlockedAt": "2025-07-15T22:36:12.091Z",
-      "progress": 1
-    },
-    {
-      "id": "1752618972092vx8i1mktv",
-      "userId": "1752618947490nxeo7tmm9",
-      "achievementId": "1752618861726layhis2b4",
-      "unlockedAt": "2025-07-15T22:36:12.092Z",
       "progress": 1
     },
     {
@@ -2052,13 +2070,6 @@
       "progress": 100
     },
     {
-      "id": "1752623219029yr5b3aie7",
-      "userId": "1752623211066jgwi5iicl",
-      "achievementId": "1752618861726layhis2b4",
-      "unlockedAt": "2025-07-15T23:46:59.029Z",
-      "progress": 1
-    },
-    {
       "id": "1752623220665805ta1ryx",
       "userId": "1752623211066jgwi5iicl",
       "achievementId": "task_beginner",
@@ -2071,6 +2082,13 @@
       "achievementId": "points_millionaire",
       "unlockedAt": "2025-07-15T23:51:47.799Z",
       "progress": 1000
+    },
+    {
+      "id": "1752702937094rmyk9oxlc",
+      "userId": "1752623211066jgwi5iicl",
+      "achievementId": "175270179016100otgsjk8",
+      "unlockedAt": "2025-07-16T21:55:37.094Z",
+      "progress": 1
     }
   ],
   "assignments": [
