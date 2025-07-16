@@ -93,6 +93,28 @@ export class ApiService {
     throw error;
   }
 
+  // ✅ Método para invalidar cache do Service Worker
+  async invalidateCache(urlPattern) {
+    try {
+      if ('serviceWorker' in navigator && 'caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const cacheName of cacheNames) {
+          const cache = await caches.open(cacheName);
+          const keys = await cache.keys();
+          for (const request of keys) {
+            if (request.url.includes(urlPattern)) {
+              console.log(`🗑️ Removendo do cache: ${request.url}`);
+              await cache.delete(request);
+            }
+          }
+        }
+        console.log(`✅ Cache invalidado para: ${urlPattern}`);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao invalidar cache:', error);
+    }
+  }
+
   // === MÉTODOS DE AUTENTICAÇÃO ===
 
   async login(username, password) {
@@ -137,17 +159,27 @@ export class ApiService {
 
   // === MÉTODOS DE TAREFAS ===
 
-  async getTasks() {
-    console.log('📋 Buscando tarefas...');
+  async getTasks(userId = null) {
+    console.log('📋 Buscando tarefas...', { userId });
     
     try {
       if (await this.shouldUseMockData()) {
         await simulateNetworkDelay();
-        return { success: true, data: mockData.tasks };
+        // ✅ Simular status de completada para mock data
+        const tasksWithStatus = mockData.tasks.map(task => ({
+          ...task,
+          isCompleted: userId ? mockData.history.some(h => 
+            h.type === 'task_completed' && 
+            h.userId === userId && 
+            h.details?.taskId === task.id
+          ) : false
+        }));
+        return { success: true, data: tasksWithStatus };
       }
 
-      // REST API call
-      const response = await this.makeRequest('/tasks');
+      // REST API call com parâmetro userId
+      const url = userId ? `/tasks?userId=${userId}` : '/tasks';
+      const response = await this.makeRequest(url);
       return response;
     } catch (error) {
       return await this.handleCorsError(error, 'getTasks', mockData.tasks);
@@ -210,17 +242,39 @@ export class ApiService {
     }
   }
 
-  async getAllHistory() {
+  async getAllHistory(params = {}) {
     console.log('📜 Buscando histórico...');
     
     try {
       if (await this.shouldUseMockData()) {
         await simulateNetworkDelay();
-        return { success: true, data: mockData.history };
+        // ✅ Simular paginação para dados mock
+        const { limit = 10, offset = 0, type } = params;
+        let history = [...mockData.history];
+        
+        if (type) {
+          history = history.filter(h => h.type === type);
+        }
+        
+        const total = history.length;
+        const paginatedHistory = history.slice(offset, offset + limit);
+        
+        return { 
+          success: true, 
+          data: paginatedHistory,
+          pagination: {
+            total,
+            limit,
+            offset,
+            pages: Math.ceil(total / limit)
+          }
+        };
       }
 
-      // REST API call
-      const response = await this.makeRequest('/history');
+      // REST API call com parâmetros
+      const queryString = new URLSearchParams(params).toString();
+      const url = queryString ? `/history?${queryString}` : '/history';
+      const response = await this.makeRequest(url);
       return response;
     } catch (error) {
       return await this.handleCorsError(error, 'getAllHistory', mockData.history);
@@ -269,6 +323,10 @@ export class ApiService {
           createdAt: new Date().toISOString()
         };
         mockData.tasks.push(newTask);
+        
+        // ✅ Invalidate cache after mock data creation
+        await this.invalidateCache('/api/tasks');
+        
         return { success: true, data: newTask };
       }
 
@@ -289,6 +347,11 @@ export class ApiService {
         body: JSON.stringify(requestBody)
       });
 
+      // ✅ Invalidate cache after successful creation
+      if (response.success) {
+        await this.invalidateCache('/api/tasks');
+      }
+
       console.log('✅ Request concluído, resposta:', response);
       return response;
     } catch (error) {
@@ -303,6 +366,10 @@ export class ApiService {
         createdAt: new Date().toISOString()
       };
       mockData.tasks.push(newTask);
+      
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/tasks');
+      
       console.log('🔄 Usando fallback mock data:', newTask);
       return await this.handleCorsError(error, 'createTask', newTask);
     }
@@ -319,10 +386,14 @@ export class ApiService {
         
         const taskIndex = mockData.tasks.findIndex(t => t.id === taskId);
         if (taskIndex === -1) {
-          throw new Error('Tarefa não encontrada');
+          return { success: false, error: 'Tarefa não encontrada' };
         }
         
         const deletedTask = mockData.tasks.splice(taskIndex, 1)[0];
+        
+        // ✅ Invalidate cache for tasks endpoint
+        await this.invalidateCache('/api/tasks');
+        
         return { success: true, data: deletedTask, message: 'Tarefa deletada com sucesso' };
       }
 
@@ -333,21 +404,40 @@ export class ApiService {
         method: 'DELETE'
       });
 
+      // ✅ Invalidate cache after successful deletion
+      if (response.success) {
+        await this.invalidateCache('/api/tasks');
+      }
+
       console.log('✅ Delete concluído, resposta:', response);
       return response;
     } catch (error) {
       console.error('❌ Erro capturado em deleteTask:', error);
-      // Fallback para mock (remover da lista local)
-      const taskIndex = mockData.tasks.findIndex(t => t.id === taskId);
-      if (taskIndex !== -1) {
-        const deletedTask = mockData.tasks.splice(taskIndex, 1)[0];
-        console.log('🔄 Usando fallback mock data para delete:', deletedTask);
-        return await this.handleCorsError(error, 'deleteTask', { 
-          success: true, 
-          data: deletedTask, 
-          message: 'Tarefa deletada com sucesso (offline)' 
-        });
+      
+      // ✅ Better error handling
+      if (error.message.includes('404') || error.message.includes('não encontrada')) {
+        console.log(`⚠️ Tarefa ${taskId} já foi deletada ou não existe`);
+        return { success: false, error: 'Tarefa não encontrada ou já foi deletada' };
       }
+      
+      // Fallback para mock only for network errors
+      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        const taskIndex = mockData.tasks.findIndex(t => t.id === taskId);
+        if (taskIndex !== -1) {
+          const deletedTask = mockData.tasks.splice(taskIndex, 1)[0];
+          
+          // ✅ Invalidate cache even on fallback
+          await this.invalidateCache('/api/tasks');
+          
+          console.log('🔄 Usando fallback mock data para delete:', deletedTask);
+          return await this.handleCorsError(error, 'deleteTask', { 
+            success: true, 
+            data: deletedTask, 
+            message: 'Tarefa deletada com sucesso (offline)' 
+          });
+        }
+      }
+      
       throw error;
     }
   }
@@ -381,6 +471,12 @@ export class ApiService {
         };
         mockData.history.unshift(historyEntry);
 
+        // ✅ Invalidate cache after mock data changes
+        await this.invalidateCache('/api/tasks');
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        await this.invalidateCache('/api/history');
+
         return { 
           success: true, 
           data: { 
@@ -395,6 +491,14 @@ export class ApiService {
         method: 'POST',
         body: JSON.stringify({ userId })
       });
+
+      // ✅ Invalidate cache after successful task completion
+      if (response.success) {
+        await this.invalidateCache('/api/tasks');
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        await this.invalidateCache('/api/history');
+      }
 
       return response;
     } catch (error) {
@@ -417,6 +521,12 @@ export class ApiService {
         date: new Date().toISOString()
       };
       mockData.history.unshift(historyEntry);
+
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/tasks');
+      await this.invalidateCache('/api/users');
+      await this.invalidateCache('/api/ranking');
+      await this.invalidateCache('/api/history');
 
       return await this.handleCorsError(error, 'concludeTask', { 
         pointsEarned: task.points, 
@@ -445,6 +555,10 @@ export class ApiService {
         };
         
         mockData.rewards.push(newReward);
+        
+        // ✅ Invalidate cache after mock data creation
+        await this.invalidateCache('/api/rewards');
+        
         return { success: true, data: newReward, message: 'Prêmio criado com sucesso' };
       }
 
@@ -466,6 +580,11 @@ export class ApiService {
         body: JSON.stringify(requestBody)
       });
 
+      // ✅ Invalidate cache after successful creation
+      if (response.success) {
+        await this.invalidateCache('/api/rewards');
+      }
+
       console.log('✅ Request concluído, resposta:', response);
       return response;
     } catch (error) {
@@ -481,6 +600,10 @@ export class ApiService {
         createdAt: new Date().toISOString()
       };
       mockData.rewards.push(newReward);
+      
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/rewards');
+      
       console.log('🔄 Usando fallback mock data:', newReward);
       return await this.handleCorsError(error, 'createReward', newReward);
     }
@@ -497,10 +620,14 @@ export class ApiService {
         
         const rewardIndex = mockData.rewards.findIndex(r => r.id === rewardId);
         if (rewardIndex === -1) {
-          throw new Error('Prêmio não encontrado');
+          return { success: false, error: 'Prêmio não encontrado' };
         }
         
         const deletedReward = mockData.rewards.splice(rewardIndex, 1)[0];
+        
+        // ✅ Invalidate cache for rewards endpoint
+        await this.invalidateCache('/api/rewards');
+        
         return { success: true, data: deletedReward, message: 'Prêmio deletado com sucesso' };
       }
 
@@ -511,21 +638,40 @@ export class ApiService {
         method: 'DELETE'
       });
 
+      // ✅ Invalidate cache after successful deletion
+      if (response.success) {
+        await this.invalidateCache('/api/rewards');
+      }
+
       console.log('✅ Delete concluído, resposta:', response);
       return response;
     } catch (error) {
       console.error('❌ Erro capturado em deleteReward:', error);
-      // Fallback para mock (remover da lista local)
-      const rewardIndex = mockData.rewards.findIndex(r => r.id === rewardId);
-      if (rewardIndex !== -1) {
-        const deletedReward = mockData.rewards.splice(rewardIndex, 1)[0];
-        console.log('🔄 Usando fallback mock data para delete:', deletedReward);
-        return await this.handleCorsError(error, 'deleteReward', { 
-          success: true, 
-          data: deletedReward, 
-          message: 'Prêmio deletado com sucesso (offline)' 
-        });
+      
+      // ✅ Better error handling
+      if (error.message.includes('404') || error.message.includes('não encontrado')) {
+        console.log(`⚠️ Prêmio ${rewardId} já foi deletado ou não existe`);
+        return { success: false, error: 'Prêmio não encontrado ou já foi deletado' };
       }
+      
+      // Fallback para mock only for network errors
+      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        const rewardIndex = mockData.rewards.findIndex(r => r.id === rewardId);
+        if (rewardIndex !== -1) {
+          const deletedReward = mockData.rewards.splice(rewardIndex, 1)[0];
+          
+          // ✅ Invalidate cache even on fallback
+          await this.invalidateCache('/api/rewards');
+          
+          console.log('🔄 Usando fallback mock data para delete:', deletedReward);
+          return await this.handleCorsError(error, 'deleteReward', { 
+            success: true, 
+            data: deletedReward, 
+            message: 'Prêmio deletado com sucesso (offline)' 
+          });
+        }
+      }
+      
       throw error;
     }
   }
@@ -563,6 +709,12 @@ export class ApiService {
         };
         mockData.history.unshift(historyEntry);
 
+        // ✅ Invalidate cache after mock data changes
+        await this.invalidateCache('/api/rewards');
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        await this.invalidateCache('/api/history');
+
         return { 
           success: true, 
           data: { 
@@ -577,6 +729,14 @@ export class ApiService {
         method: 'POST',
         body: JSON.stringify({ userId })
       });
+
+      // ✅ Invalidate cache after successful reward redemption
+      if (response.success) {
+        await this.invalidateCache('/api/rewards');
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        await this.invalidateCache('/api/history');
+      }
 
       return response;
     } catch (error) {
@@ -604,6 +764,12 @@ export class ApiService {
       };
       mockData.history.unshift(historyEntry);
 
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/rewards');
+      await this.invalidateCache('/api/users');
+      await this.invalidateCache('/api/ranking');
+      await this.invalidateCache('/api/history');
+
       return await this.handleCorsError(error, 'redeemReward', { 
         pointsSpent: reward.cost, 
         remainingPoints: user.points 
@@ -611,18 +777,39 @@ export class ApiService {
     }
   }
 
-  async getHistory(userId) {
+  async getHistory(userId, params = {}) {
     console.log(`📜 Buscando histórico do usuário: ${userId}`);
     
     try {
       if (await this.shouldUseMockData()) {
         await simulateNetworkDelay();
-        const userHistory = mockData.history.filter(h => h.userId === userId);
-        return { success: true, data: userHistory };
+        // ✅ Simular paginação para dados mock
+        const { limit = 10, offset = 0, type } = params;
+        let userHistory = mockData.history.filter(h => h.userId === userId);
+        
+        if (type) {
+          userHistory = userHistory.filter(h => h.type === type);
+        }
+        
+        const total = userHistory.length;
+        const paginatedHistory = userHistory.slice(offset, offset + limit);
+        
+        return { 
+          success: true, 
+          data: paginatedHistory,
+          pagination: {
+            total,
+            limit,
+            offset,
+            pages: Math.ceil(total / limit)
+          }
+        };
       }
 
-      // REST API call
-      const response = await this.makeRequest(`/history/user/${userId}`);
+      // REST API call com parâmetros
+      const queryString = new URLSearchParams(params).toString();
+      const url = queryString ? `/history/user/${userId}?${queryString}` : `/history/user/${userId}`;
+      const response = await this.makeRequest(url);
       return response;
     } catch (error) {
       const userHistory = mockData.history.filter(h => h.userId === userId);
@@ -645,6 +832,11 @@ export class ApiService {
           createdAt: new Date().toISOString()
         };
         mockData.users.push(newUser);
+        
+        // ✅ Invalidate cache after creating user
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        
         const { password, ...userWithoutPassword } = newUser;
         return { success: true, data: userWithoutPassword };
       }
@@ -662,6 +854,12 @@ export class ApiService {
         })
       });
 
+      // ✅ Invalidate cache after successful creation
+      if (response.success) {
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+      }
+
       return response;
     } catch (error) {
       // Fallback para mock
@@ -674,6 +872,11 @@ export class ApiService {
         createdAt: new Date().toISOString()
       };
       mockData.users.push(newUser);
+      
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/users');
+      await this.invalidateCache('/api/ranking');
+      
       const { password, ...userWithoutPassword } = newUser;
       return await this.handleCorsError(error, 'createUser', userWithoutPassword);
     }
@@ -696,6 +899,11 @@ export class ApiService {
             type: user.tipo,
             points: user.pontos
           };
+          
+          // ✅ Invalidate cache after mock data update
+          await this.invalidateCache('/api/users');
+          await this.invalidateCache('/api/ranking');
+          
           const { password, ...userWithoutPassword } = mockData.users[userIndex];
           return { success: true, data: userWithoutPassword };
         }
@@ -715,6 +923,12 @@ export class ApiService {
         })
       });
 
+      // ✅ Invalidate cache after successful update
+      if (response.success) {
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+      }
+
       return response;
     } catch (error) {
       // Fallback para mock
@@ -727,6 +941,11 @@ export class ApiService {
           type: user.tipo,
           points: user.pontos
         };
+        
+        // ✅ Invalidate cache even on fallback
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+        
         const { password, ...userWithoutPassword } = mockData.users[userIndex];
         return await this.handleCorsError(error, 'updateUser', userWithoutPassword);
       }
@@ -744,6 +963,10 @@ export class ApiService {
         if (userIndex !== -1) {
           const deletedUser = mockData.users.splice(userIndex, 1)[0];
           const { password, ...userWithoutPassword } = deletedUser;
+          
+          // ✅ Invalidate cache for users endpoint
+          await this.invalidateCache('/api/users');
+          
           return { success: true, data: userWithoutPassword };
         }
         return { success: false, error: 'Usuário não encontrado' };
@@ -754,15 +977,30 @@ export class ApiService {
         method: 'DELETE'
       });
 
+      // ✅ Invalidate cache after successful deletion
+      if (response.success) {
+        await this.invalidateCache('/api/users');
+        await this.invalidateCache('/api/ranking');
+      }
+
       return response;
     } catch (error) {
-      // Fallback para mock
-      const userIndex = mockData.users.findIndex(u => u.id === userId);
-      if (userIndex !== -1) {
-        const deletedUser = mockData.users.splice(userIndex, 1)[0];
-        const { password, ...userWithoutPassword } = deletedUser;
-        return await this.handleCorsError(error, 'deleteUser', userWithoutPassword);
+      // ✅ Better error handling - don't try to delete again if user not found
+      if (error.message.includes('404') || error.message.includes('não encontrado')) {
+        console.log(`⚠️ Usuário ${userId} já foi deletado ou não existe`);
+        return { success: false, error: 'Usuário não encontrado ou já foi deletado' };
       }
+      
+      // Fallback para mock only for network errors
+      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        const userIndex = mockData.users.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+          const deletedUser = mockData.users.splice(userIndex, 1)[0];
+          const { password, ...userWithoutPassword } = deletedUser;
+          return await this.handleCorsError(error, 'deleteUser', userWithoutPassword);
+        }
+      }
+      
       throw error;
     }
   }
@@ -902,6 +1140,10 @@ export class ApiService {
         }
         
         mockData.achievements.push(newAchievement);
+        
+        // ✅ Invalidate cache after mock data creation
+        await this.invalidateCache('/api/achievements');
+        
         return { success: true, data: newAchievement };
       }
 
@@ -911,9 +1153,30 @@ export class ApiService {
         body: JSON.stringify(achievement)
       });
 
+      // ✅ Invalidate cache after successful creation
+      if (response.success) {
+        await this.invalidateCache('/api/achievements');
+      }
+
       return response;
     } catch (error) {
-      return await this.handleCorsError(error, 'createAchievement', null);
+      // Fallback para mock
+      const newAchievement = {
+        id: generateId(),
+        ...achievement,
+        createdAt: new Date().toISOString()
+      };
+      
+      if (!mockData.achievements) {
+        mockData.achievements = [];
+      }
+      
+      mockData.achievements.push(newAchievement);
+      
+      // ✅ Invalidate cache even on fallback
+      await this.invalidateCache('/api/achievements');
+      
+      return await this.handleCorsError(error, 'createAchievement', newAchievement);
     }
   }
 
@@ -926,6 +1189,10 @@ export class ApiService {
         const achievementIndex = mockData.achievements?.findIndex(a => a.id === achievementId);
         if (achievementIndex !== -1) {
           const deletedAchievement = mockData.achievements.splice(achievementIndex, 1)[0];
+          
+          // ✅ Invalidate cache after mock data deletion
+          await this.invalidateCache('/api/achievements');
+          
           return { success: true, data: deletedAchievement };
         }
         return { success: false, error: 'Conquista não encontrada' };
@@ -936,8 +1203,24 @@ export class ApiService {
         method: 'DELETE'
       });
 
+      // ✅ Invalidate cache after successful deletion
+      if (response.success) {
+        await this.invalidateCache('/api/achievements');
+      }
+
       return response;
     } catch (error) {
+      // Fallback para mock
+      const achievementIndex = mockData.achievements?.findIndex(a => a.id === achievementId);
+      if (achievementIndex !== -1) {
+        const deletedAchievement = mockData.achievements.splice(achievementIndex, 1)[0];
+        
+        // ✅ Invalidate cache even on fallback
+        await this.invalidateCache('/api/achievements');
+        
+        return await this.handleCorsError(error, 'deleteAchievement', deletedAchievement);
+      }
+      
       return await this.handleCorsError(error, 'deleteAchievement', null);
     }
   }

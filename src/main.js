@@ -8,7 +8,7 @@ import './styles/dashboard.css';
 import './styles/components.css';
 import './styles/forms.css';
 import './styles/utilities.css';
-// import './utils/pwa-manager.js'; // TEMPORARIAMENTE DESABILITADO
+import './utils/pwa-manager.js'; // ✅ REABILITADO
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

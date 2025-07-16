@@ -7,6 +7,7 @@ import { DashboardComponent } from '@/components/DashboardComponent.js';
 export class App {
   constructor(container) {
     this.container = container;
+    this.currentComponent = null; // Track current component for cleanup
     this.init();
   }
 
@@ -18,6 +19,14 @@ export class App {
     this.handleStateChange(stateManager.getState());
   }
 
+  // ✅ Cleanup current component before switching
+  cleanupCurrentComponent() {
+    if (this.currentComponent && typeof this.currentComponent.destroy === 'function') {
+      this.currentComponent.destroy();
+    }
+    this.currentComponent = null;
+  }
+
   handleStateChange(state) {
     if (state.user) {
       this.showDashboard();
@@ -27,16 +36,18 @@ export class App {
   }
 
   showLogin() {
+    this.cleanupCurrentComponent(); // ✅ Cleanup before creating new component
     this.container.innerHTML = '<div id="login-container"></div>';
     
     const loginContainer = this.container.querySelector('#login-container');
-    new LoginComponent(loginContainer);
+    this.currentComponent = new LoginComponent(loginContainer);
   }
 
   showDashboard() {
+    this.cleanupCurrentComponent(); // ✅ Cleanup before creating new component
     this.container.innerHTML = '<div id="dashboard-container"></div>';
     
     const dashboardContainer = this.container.querySelector('#dashboard-container');
-    new DashboardComponent(dashboardContainer);
+    this.currentComponent = new DashboardComponent(dashboardContainer);
   }
 }

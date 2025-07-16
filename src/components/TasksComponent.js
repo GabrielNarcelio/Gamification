@@ -12,6 +12,27 @@ export class TasksComponent {
     this.render();
     this.setupEventListeners();
     this.loadTasks();
+    
+    // ✅ Subscribe to state changes to auto-reload tasks
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    console.log('📋 TasksComponent received state change:', { lastUpdate: newState.lastUpdate, myLastUpdate: this.lastUpdate });
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      console.log('📋 TasksComponent reloading tasks...');
+      this.lastUpdate = newState.lastUpdate;
+      this.loadTasks();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
@@ -108,8 +129,8 @@ export class TasksComponent {
         descriptionInput.value = '';
         pointsInput.value = '';
         
-        // Reload tasks
-        await this.loadTasks();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage(MESSAGES.TASK_CREATED);
@@ -145,8 +166,8 @@ export class TasksComponent {
       const response = await api.deleteTask(taskId);
       
       if (response.success) {
-        // Reload tasks para atualizar a lista
-        await this.loadTasks();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage(`✅ Tarefa "${taskTitle}" deletada com sucesso!`);
@@ -178,21 +199,40 @@ export class TasksComponent {
       const response = await api.concludeTask(taskId, state.user.id);
       
       if (response.success) {
-        // Update user points
-        const newPoints = state.userPoints + points;
+        // Update user points using the backend response
+        const newPoints = response.data?.newUserPoints || (state.userPoints + points);
         stateManager.updatePoints(newPoints);
         
-        // Reload tasks
-        await this.loadTasks();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage(MESSAGES.TASK_COMPLETED);
       } else {
-        alert(response.message || 'Erro ao concluir tarefa.');
+        // ✅ Melhor tratamento de erros específicos
+        const errorMessage = response.error || response.message || 'Erro ao concluir tarefa.';
+        if (errorMessage.includes('já foi completada')) {
+          this.showWarningMessage('⚠️ Você já completou esta tarefa!');
+          // Recarregar tarefas para atualizar o status
+          await this.loadTasks();
+        } else {
+          this.showErrorMessage(errorMessage);
+        }
       }
     } catch (error) {
       console.error('Conclude task error:', error);
-      alert(MESSAGES.GENERIC_ERROR);
+      
+      // ✅ Tratar erros HTTP específicos
+      if (error.message.includes('409')) {
+        this.showWarningMessage('⚠️ Esta tarefa já foi completada por você!');
+        await this.loadTasks(); // Recarregar para atualizar o status
+      } else if (error.message.includes('404')) {
+        this.showErrorMessage('❌ Tarefa não encontrada!');
+      } else if (error.message.includes('403')) {
+        this.showErrorMessage('❌ Você não tem permissão para completar esta tarefa!');
+      } else {
+        this.showErrorMessage('❌ Erro ao conectar com o servidor. Tente novamente.');
+      }
     } finally {
       resetButton();
     }
@@ -200,9 +240,12 @@ export class TasksComponent {
 
   async loadTasks() {
     const taskList = this.container.querySelector('#task-list');
+    const state = stateManager.getState();
     
     try {
-      const response = await api.getTasks();
+      // ✅ Passar userId para verificar status de completada
+      const userId = state.user?.id;
+      const response = await api.getTasks(userId);
       this.tasks = response.success ? response.data : [];
       this.renderTasks();
     } catch (error) {
@@ -216,20 +259,30 @@ export class TasksComponent {
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
-    if (this.tasks.length === 0) {
-      taskList.innerHTML = '<div class="empty">Nenhuma tarefa disponível.</div>';
+    // Para usuários normais, filtrar tarefas completadas
+    // Para admins, mostrar todas as tarefas
+    const tasksToShow = isAdmin ? this.tasks : this.tasks.filter(task => !task.isCompleted);
+
+    if (tasksToShow.length === 0) {
+      const message = isAdmin ? 'Nenhuma tarefa disponível.' : 'Nenhuma tarefa pendente. Você completou todas as tarefas disponíveis!';
+      taskList.innerHTML = `<div class="empty">${message}</div>`;
       return;
     }
 
-    taskList.innerHTML = this.tasks.map(task => `
-      <div class="task-item">
+    taskList.innerHTML = tasksToShow.map(task => `
+      <div class="task-item ${task.isCompleted ? 'task-completed' : ''}">
         <div class="task-header">
-          <h4>${escapeHtml(task.title)}</h4>
+          <h4>${escapeHtml(task.title)} ${task.isCompleted ? '✅' : ''}</h4>
           <span class="task-points">${task.points} pts</span>
         </div>
         <div class="task-description">
           ${escapeHtml(task.description)}
         </div>
+        ${task.isCompleted ? `
+          <div class="task-completed-info">
+            <small>✅ Tarefa já completada!</small>
+          </div>
+        ` : ''}
         ${isAdmin ? `
           <div class="task-creator">
             <small>Criado por: ${escapeHtml(task.createdBy || 'Sistema')}</small>
@@ -247,11 +300,12 @@ export class TasksComponent {
         ` : `
           <div class="task-actions">
             <button 
-              class="btn btn-success" 
+              class="btn ${task.isCompleted ? 'btn-secondary' : 'btn-success'}" 
               data-task-id="${task.id}"
               onclick="window.taskComponent.concludeTask('${task.id}', ${task.points})"
+              ${task.isCompleted ? 'disabled title="Você já completou esta tarefa"' : ''}
             >
-              ✅ Concluir
+              ${task.isCompleted ? '✅ Completada' : '✅ Concluir'}
             </button>
           </div>
         `}
@@ -265,17 +319,50 @@ export class TasksComponent {
     };
   }
 
+  // ✅ Métodos para mostrar diferentes tipos de mensagens
   showSuccessMessage(message) {
-    const taskList = this.container.querySelector('#task-list');
-    const successDiv = document.createElement('div');
-    successDiv.className = 'success-message';
-    successDiv.textContent = message;
-    
-    taskList.prepend(successDiv);
-    
-    setTimeout(() => {
-      successDiv.remove();
-    }, 3000);
+    this.showMessage(message, 'success');
+  }
+
+  showWarningMessage(message) {
+    this.showMessage(message, 'warning');
+  }
+
+  showErrorMessage(message) {
+    this.showMessage(message, 'error');
+  }
+
+  showMessage(message, type = 'info') {
+    // Remover mensagem anterior se existir
+    const existingMessage = this.container.querySelector('.task-message');
+    if (existingMessage) {
+      existingMessage.remove();
+    }
+
+    // Criar nova mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `task-message task-message-${type}`;
+    messageDiv.innerHTML = `
+      <span class="message-text">${message}</span>
+      <button class="message-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    // Inserir no topo do container
+    const header = this.container.querySelector('.tasks-header');
+    if (header) {
+      header.insertAdjacentElement('afterend', messageDiv);
+    } else {
+      this.container.insertBefore(messageDiv, this.container.firstChild);
+    }
+
+    // Auto-remover após 5 segundos (exceto para erros)
+    if (type !== 'error') {
+      setTimeout(() => {
+        if (messageDiv.parentElement) {
+          messageDiv.remove();
+        }
+      }, 5000);
+    }
   }
 
   refresh() {

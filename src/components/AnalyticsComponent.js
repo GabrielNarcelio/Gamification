@@ -1,10 +1,30 @@
 import { Chart } from 'chart.js/auto';
+import { stateManager } from '@/services/state.js';
 
 export class AnalyticsComponent {
   constructor(container) {
     this.container = container;
     this.render();
     this.loadAnalytics();
+    
+    // ✅ Subscribe to state changes to auto-reload analytics
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      this.lastUpdate = newState.lastUpdate;
+      this.loadAnalytics();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {

@@ -17,7 +17,16 @@ class StateManager {
   }
 
   setState(newState) {
+    const oldState = { ...this.state };
     this.state = { ...this.state, ...newState };
+    // Only log if there's a significant change (like lastUpdate)
+    if (newState.lastUpdate || newState.user !== oldState.user) {
+      console.log('🔄 State updated:', { 
+        userChanged: newState.user !== oldState.user,
+        lastUpdate: newState.lastUpdate,
+        listeners: this.listeners.size 
+      });
+    }
     this.notifyListeners();
   }
 
@@ -27,7 +36,17 @@ class StateManager {
   }
 
   notifyListeners() {
-    this.listeners.forEach(listener => listener(this.getState()));
+    // Only log when there are actual listeners and significant changes
+    if (this.listeners.size > 0 && (this.state.lastUpdate || this.state.user)) {
+      console.log('📢 Notifying', this.listeners.size, 'listeners');
+    }
+    this.listeners.forEach((listener, index) => {
+      try {
+        listener(this.getState());
+      } catch (error) {
+        console.error(`❌ Error in listener ${index}:`, error);
+      }
+    });
   }
 
   // Métodos específicos para login/logout
@@ -64,7 +83,21 @@ class StateManager {
   }
 
   updatePoints(points) {
-    this.setState({ userPoints: points });
+    // Update both userPoints and user.points if user exists
+    const updatedState = { userPoints: points };
+    if (this.state.user) {
+      updatedState.user = { ...this.state.user, points };
+    }
+    this.setState(updatedState);
+  }
+
+  // ✅ Method to trigger data refresh across all components
+  triggerDataRefresh() {
+    // Force notify all listeners with current state plus a refresh flag
+    this.setState({ 
+      ...this.state, 
+      lastUpdate: Date.now() // Add timestamp to force component updates
+    });
   }
 
   isLoggedIn() {

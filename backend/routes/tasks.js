@@ -33,22 +33,35 @@ const generateId = () => {
 // GET /api/tasks - Listar todas as tarefas
 router.get('/', async (req, res) => {
   try {
-    console.log('📋 Listando tarefas...');
+    const { userId } = req.query; // ✅ Parâmetro opcional para incluir status de completada
+    console.log('📋 Listando tarefas...', { userId });
     const data = await readData();
     
-    // Adicionar informações do criador
-    const tasksWithCreator = data.tasks.map(task => {
+    // Adicionar informações do criador e status de completada
+    const tasksWithInfo = data.tasks.map(task => {
       const creator = data.users.find(u => u.id === task.createdBy);
+      
+      // Verificar se a tarefa foi completada pelo usuário (se userId fornecido)
+      let isCompleted = false;
+      if (userId) {
+        isCompleted = data.history.some(h => 
+          h.type === 'task_completed' && 
+          h.userId === userId && 
+          h.details?.taskId === task.id
+        );
+      }
+      
       return {
         ...task,
-        creatorName: creator ? creator.name : 'Usuário removido'
+        creatorName: creator ? creator.name : 'Usuário removido',
+        isCompleted // ✅ Incluir status de completada
       };
     });
     
     res.json({ 
       success: true, 
-      data: tasksWithCreator,
-      total: tasksWithCreator.length
+      data: tasksWithInfo,
+      total: tasksWithInfo.length
     });
   } catch (error) {
     console.error('❌ Erro ao listar tarefas:', error);

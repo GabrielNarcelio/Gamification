@@ -11,9 +11,32 @@ export class HistoryComponent {
     this.users = [];
     this.selectedUserId = null;
     this.selectedType = null;
+    // ✅ Propriedades de paginação
+    this.currentPage = 1;
+    this.itemsPerPage = 10;
+    this.totalItems = 0;
+    this.totalPages = 0;
     this.render();
     this.loadUsers();
-    this.loadHistory();
+    
+    // ✅ Subscribe to state changes to auto-reload history
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      this.lastUpdate = newState.lastUpdate;
+      this.loadHistory();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
@@ -26,6 +49,21 @@ export class HistoryComponent {
       </div>
       <div id="history-list" class="history-list">
         <div class="loading">Carregando histórico...</div>
+      </div>
+      <!-- ✅ Controles de paginação -->
+      <div id="pagination-controls" class="pagination-controls" style="display: none;">
+        <div class="pagination-info">
+          <span id="pagination-info-text"></span>
+        </div>
+        <div class="pagination-buttons">
+          <button id="prev-page" class="btn btn-secondary" disabled>
+            ◀ Anterior
+          </button>
+          <span id="page-numbers" class="page-numbers"></span>
+          <button id="next-page" class="btn btn-secondary" disabled>
+            Próxima ▶
+          </button>
+        </div>
       </div>
     `;
   }
@@ -88,17 +126,20 @@ export class HistoryComponent {
 
     userFilter.addEventListener('change', (e) => {
       this.selectedUserId = e.target.value || null;
+      this.currentPage = 1; // ✅ Reset para primeira página
       this.loadHistory();
     });
 
     typeFilter.addEventListener('change', (e) => {
       this.selectedType = e.target.value || null;
+      this.currentPage = 1; // ✅ Reset para primeira página
       this.loadHistory();
     });
 
     clearButton.addEventListener('click', () => {
       this.selectedUserId = null;
       this.selectedType = null;
+      this.currentPage = 1; // ✅ Reset para primeira página
       userFilter.value = '';
       typeFilter.value = '';
       this.loadHistory();
@@ -111,30 +152,68 @@ export class HistoryComponent {
     
     if (!state.user) return;
 
+    console.log('🔍 DEBUG: Carregando histórico...', {
+      userId: state.user.id,
+      userType: state.userType,
+      currentPage: this.currentPage,
+      itemsPerPage: this.itemsPerPage,
+      selectedUserId: this.selectedUserId,
+      selectedType: this.selectedType
+    });
+
     try {
       let response;
+      const offset = (this.currentPage - 1) * this.itemsPerPage;
+      
       if (state.userType === 'Administrador') {
         // Para admin, usar filtros se especificados
         if (this.selectedUserId) {
-          response = await api.getHistory(this.selectedUserId);
+          console.log('🔍 DEBUG: Admin buscando histórico de usuário específico');
+          response = await api.getHistory(this.selectedUserId, {
+            limit: this.itemsPerPage,
+            offset: offset,
+            type: this.selectedType
+          });
         } else {
-          response = await api.getAllHistory();
+          console.log('🔍 DEBUG: Admin buscando histórico geral');
+          response = await api.getAllHistory({
+            limit: this.itemsPerPage,
+            offset: offset,
+            type: this.selectedType
+          });
         }
       } else {
-        response = await api.getHistory(state.user.id);
+        console.log('🔍 DEBUG: Usuário comum buscando próprio histórico');
+        response = await api.getHistory(state.user.id, {
+          limit: this.itemsPerPage,
+          offset: offset,
+          type: this.selectedType
+        });
       }
       
-      let history = response.success ? response.data : [];
+      console.log('🔍 DEBUG: Resposta da API:', response);
       
-      // Aplicar filtro de tipo se especificado
-      if (this.selectedType) {
-        history = history.filter(item => item.type === this.selectedType);
+      if (response && response.success) {
+        this.history = response.data || [];
+        this.totalItems = response.pagination?.total || this.history.length;
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+        console.log('🔍 DEBUG: Dados processados:', {
+          historyCount: this.history.length,
+          totalItems: this.totalItems,
+          totalPages: this.totalPages
+        });
+        this.renderHistory();
+        this.renderPagination();
+      } else {
+        console.warn('⚠️ Resposta da API sem sucesso, usando dados vazios');
+        this.history = [];
+        this.totalItems = 0;
+        this.totalPages = 0;
+        this.renderHistory();
+        this.renderPagination();
       }
-      
-      this.history = history;
-      this.renderHistory();
     } catch (error) {
-      console.error('Load history error:', error);
+      console.error('❌ Load history error:', error);
       historyList.innerHTML = '<div class="error">Erro ao carregar histórico.</div>';
     }
   }
@@ -149,7 +228,12 @@ export class HistoryComponent {
       return;
     }
 
-    historyList.innerHTML = this.history.map(item => {
+    // Paginar histórico
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    const paginatedHistory = this.history.slice(start, end);
+
+    historyList.innerHTML = paginatedHistory.map(item => {
       const typeIcon = item.type === 'task_completed' ? '✅' : 
                       item.type === 'reward_redeemed' ? '🎁' : 
                       item.type === 'user_created' ? '👤' : 
@@ -183,6 +267,54 @@ export class HistoryComponent {
         </div>
       `;
     }).join('');
+  }
+
+  renderPagination() {
+    const paginationControls = this.container.querySelector('#pagination-controls');
+    const prevButton = paginationControls.querySelector('#prev-page');
+    const nextButton = paginationControls.querySelector('#next-page');
+    const pageNumbers = paginationControls.querySelector('#page-numbers');
+    const infoText = paginationControls.querySelector('#pagination-info-text');
+
+    // Atualizar texto de informação da página
+    const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+    const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+    infoText.textContent = `Mostrando ${startItem}-${endItem} de ${this.totalItems} registros`;
+
+    // Habilitar/desabilitar botões de navegação
+    prevButton.disabled = this.currentPage === 1;
+    nextButton.disabled = this.currentPage === this.totalPages || this.totalPages === 0;
+
+    // ✅ Event listeners para botões de navegação
+    prevButton.onclick = () => {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.loadHistory();
+      }
+    };
+
+    nextButton.onclick = () => {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.loadHistory();
+      }
+    };
+
+    // Renderizar números das páginas
+    pageNumbers.innerHTML = '';
+    for (let i = 1; i <= this.totalPages; i++) {
+      const pageButton = document.createElement('button');
+      pageButton.className = 'btn btn-pagination';
+      pageButton.textContent = i;
+      pageButton.disabled = i === this.currentPage;
+      pageButton.addEventListener('click', () => {
+        this.currentPage = i;
+        this.loadHistory();
+      });
+      pageNumbers.appendChild(pageButton);
+    }
+
+    paginationControls.style.display = this.totalPages > 1 ? 'flex' : 'none';
   }
 
   refresh() {

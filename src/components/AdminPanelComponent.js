@@ -1,6 +1,7 @@
 // Componente do Painel Administrativo
 
 import { api } from '@/services/api.js';
+import { stateManager } from '@/services/state.js';
 import { MESSAGES } from '@/utils/config.js';
 import { validateRequired, validatePoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
@@ -13,6 +14,26 @@ export class AdminPanelComponent {
     this.render();
     this.setupEventListeners();
     this.loadUsers();
+    
+    // ✅ Subscribe to state changes to auto-reload users
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      console.log('👨‍💼 AdminPanelComponent reloading users...');
+      this.lastUpdate = newState.lastUpdate;
+      this.loadUsers();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
@@ -209,7 +230,9 @@ export class AdminPanelComponent {
 
       if (response.success) {
         this.hideUserForm();
-        await this.loadUsers();
+        
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         const message = this.currentFormMode === 'create' ? MESSAGES.USER_CREATED : MESSAGES.USER_UPDATED;
         this.showSuccessMessage(message);
@@ -238,14 +261,31 @@ export class AdminPanelComponent {
       const response = await api.deleteUser(userId);
       
       if (response.success) {
-        await this.loadUsers();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
+        
         this.showSuccessMessage(MESSAGES.USER_DELETED);
       } else {
-        alert(response.message || 'Erro ao excluir usuário.');
+        // ✅ Better error handling for specific cases
+        const errorMessage = response.error || response.message || 'Erro ao excluir usuário.';
+        if (errorMessage.includes('não encontrado') || errorMessage.includes('já foi deletado')) {
+          this.showWarningMessage('⚠️ Este usuário já foi deletado ou não existe mais.');
+          // Still trigger refresh to update the UI
+          stateManager.triggerDataRefresh();
+        } else {
+          this.showErrorMessage(errorMessage);
+        }
       }
     } catch (error) {
       console.error('Delete user error:', error);
-      alert(MESSAGES.GENERIC_ERROR);
+      
+      // ✅ Handle specific error types
+      if (error.message.includes('404') || error.message.includes('não encontrado')) {
+        this.showWarningMessage('⚠️ Este usuário já foi deletado ou não existe mais.');
+        stateManager.triggerDataRefresh();
+      } else {
+        this.showErrorMessage(MESSAGES.GENERIC_ERROR);
+      }
     } finally {
       resetButton();
     }
@@ -363,6 +403,34 @@ export class AdminPanelComponent {
     
     setTimeout(() => {
       successDiv.remove();
+    }, 3000);
+  }
+
+  // ✅ Add warning message method
+  showWarningMessage(message) {
+    const usersList = this.container.querySelector('#users-list');
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'warning-message';
+    warningDiv.textContent = message;
+    
+    usersList.prepend(warningDiv);
+    
+    setTimeout(() => {
+      warningDiv.remove();
+    }, 3000);
+  }
+
+  // ✅ Add error message method
+  showErrorMessage(message) {
+    const usersList = this.container.querySelector('#users-list');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    
+    usersList.prepend(errorDiv);
+    
+    setTimeout(() => {
+      errorDiv.remove();
     }, 3000);
   }
 

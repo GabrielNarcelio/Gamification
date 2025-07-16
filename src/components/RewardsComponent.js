@@ -11,6 +11,25 @@ export class RewardsComponent {
     this.rewards = [];
     this.render();
     this.loadRewards();
+    
+    // ✅ Subscribe to state changes to auto-reload rewards
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      this.lastUpdate = newState.lastUpdate;
+      this.loadRewards();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
@@ -116,8 +135,8 @@ export class RewardsComponent {
         categoryInput.value = 'Geral';
         stockInput.value = '';
         
-        // Reload rewards
-        await this.loadRewards();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage('✅ Prêmio criado com sucesso!');
@@ -153,8 +172,8 @@ export class RewardsComponent {
       const response = await api.deleteReward(rewardId);
       
       if (response.success) {
-        // Reload rewards para atualizar a lista
-        await this.loadRewards();
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage(`✅ Prêmio "${rewardTitle}" deletado com sucesso!`);
@@ -194,6 +213,9 @@ export class RewardsComponent {
         // Update user points
         const newPoints = state.userPoints - cost;
         stateManager.updatePoints(newPoints);
+        
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
         
         // Show success message
         this.showSuccessMessage(MESSAGES.REWARD_REDEEMED);

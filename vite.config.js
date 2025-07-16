@@ -7,7 +7,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,  // Corrigido para porta atual
+    port: 5175,  // Porta atualizada conforme terminal
     open: true,
     cors: true,
     // Força limpeza de cache

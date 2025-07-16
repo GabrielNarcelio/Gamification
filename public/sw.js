@@ -1,7 +1,7 @@
 // Service Worker para PWA - Sistema de Gamificação
-const CACHE_NAME = 'gamification-v1.1.0';
-const CACHE_STATIC_NAME = 'gamification-static-v1.1.0';
-const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v1.1.0';
+const CACHE_NAME = 'gamification-v3.1.0'; // ✅ Nova versão com ícone SVG
+const CACHE_STATIC_NAME = 'gamification-static-v3.1.0';
+const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v3.1.0';
 
 // URLs para cache estático (sempre disponível offline)
 const STATIC_URLS = [
@@ -31,6 +31,7 @@ const STATIC_URLS = [
   '/src/utils/helpers.js',
   '/favicon.ico',
   '/vite.svg',
+  '/icon.svg', // ✅ Novo ícone SVG
   '/manifest.json'
 ];
 

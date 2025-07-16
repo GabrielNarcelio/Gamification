@@ -26,6 +26,25 @@ export class AchievementsComponent {
     if (currentUser && !this.isAdmin) {
       await this.checkAchievements();
     }
+    
+    // ✅ Subscribe to state changes to auto-reload achievements
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      this.lastUpdate = newState.lastUpdate;
+      this.loadAchievements();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
@@ -572,7 +591,9 @@ export class AchievementsComponent {
       if (response.success) {
         this.showSuccess('Conquista criada com sucesso!');
         this.hideNewAchievementModal();
-        await this.loadAchievements();
+        
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
       } else {
         this.showError('Erro ao criar conquista: ' + response.error);
       }
@@ -589,7 +610,9 @@ export class AchievementsComponent {
       const response = await api.deleteAchievement(achievementId);
       if (response.success) {
         this.showSuccess('Conquista deletada com sucesso!');
-        await this.loadAchievements();
+        
+        // ✅ Trigger data refresh across all components
+        stateManager.triggerDataRefresh();
       } else {
         this.showError('Erro ao deletar conquista: ' + response.error);
       }

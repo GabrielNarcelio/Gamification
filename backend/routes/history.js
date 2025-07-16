@@ -19,7 +19,7 @@ const readData = async () => {
 // GET /api/history - Listar histórico completo ou filtrado
 router.get('/', async (req, res) => {
   try {
-    const { userId, type, limit = 50, offset = 0 } = req.query;
+    const { userId, type, limit = 10, offset = 0 } = req.query; // ✅ Reduzido para 10
     console.log('📜 Listando histórico...', { userId, type, limit, offset });
     
     const data = await readData();

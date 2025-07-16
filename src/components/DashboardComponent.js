@@ -160,4 +160,40 @@ export class DashboardComponent {
   refresh() {
     this.refreshComponents();
   }
+
+  // ✅ Cleanup method to destroy all sub-components
+  destroy() {
+    // Cleanup state subscription
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+
+    // Cleanup all sub-components
+    if (this.tasksComponent && typeof this.tasksComponent.destroy === 'function') {
+      this.tasksComponent.destroy();
+    }
+    if (this.rewardsComponent && typeof this.rewardsComponent.destroy === 'function') {
+      this.rewardsComponent.destroy();
+    }
+    if (this.achievementsComponent && typeof this.achievementsComponent.destroy === 'function') {
+      this.achievementsComponent.destroy();
+    }
+    if (this.rankingComponent && typeof this.rankingComponent.destroy === 'function') {
+      this.rankingComponent.destroy();
+    }
+    if (this.historyComponent && typeof this.historyComponent.destroy === 'function') {
+      this.historyComponent.destroy();
+    }
+    if (this.adminPanelComponent && typeof this.adminPanelComponent.destroy === 'function') {
+      this.adminPanelComponent.destroy();
+    }
+
+    // Clear component references
+    this.tasksComponent = null;
+    this.rewardsComponent = null;
+    this.achievementsComponent = null;
+    this.rankingComponent = null;
+    this.historyComponent = null;
+    this.adminPanelComponent = null;
+  }
 }

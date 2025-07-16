@@ -10,6 +10,25 @@ export class RankingComponent {
     this.ranking = [];
     this.render();
     this.loadRanking();
+    
+    // ✅ Subscribe to state changes to auto-reload ranking
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+  }
+
+  // ✅ Handle state changes
+  handleStateChange(newState) {
+    if (newState.user && newState.lastUpdate && this.lastUpdate !== newState.lastUpdate) {
+      // Only reload if there's a lastUpdate timestamp and it's different from our last one
+      this.lastUpdate = newState.lastUpdate;
+      this.loadRanking();
+    }
+  }
+
+  // ✅ Cleanup method
+  destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 
   render() {
