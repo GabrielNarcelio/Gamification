@@ -4,122 +4,147 @@ export const mockData = {
   // Usuários simulados
   users: [
     {
-      id: 1,
-      nome: "admin",
-      senha: "admin123",
-      tipo: "Administrador",
-      pontos: 0
+      id: "1",
+      username: "admin",
+      password: "admin123",
+      name: "Administrador",
+      email: "admin@sistema.com",
+      type: "admin",
+      points: 0
     },
     {
-      id: 2,
-      nome: "João Silva",
-      senha: "123456",
-      tipo: "Usuario",
-      pontos: 250
+      id: "2",
+      username: "joao",
+      password: "123456",
+      name: "João Silva",
+      email: "joao@sistema.com",
+      type: "user",
+      points: 250
     },
     {
-      id: 3,
-      nome: "Maria Santos",
-      senha: "654321",
-      tipo: "Usuario",
-      pontos: 180
+      id: "3",
+      username: "maria",
+      password: "654321",
+      name: "Maria Santos",
+      email: "maria@sistema.com",
+      type: "user",
+      points: 180
     },
     {
-      id: 4,
-      nome: "Pedro Costa",
-      senha: "abc123",
-      tipo: "Usuario",
-      pontos: 320
+      id: "4",
+      username: "pedro",
+      password: "abc123",
+      name: "Pedro Costa",
+      email: "pedro@sistema.com",
+      type: "user",
+      points: 320
     }
   ],
 
   // Tarefas simuladas
   tasks: [
     {
-      id: 1,
-      titulo: "Completar projeto frontend",
-      descricao: "Desenvolver interface do usuário para o sistema de gamificação",
-      pontos: 50,
-      ativa: true,
-      criador: "admin"
+      id: "1",
+      title: "Completar projeto frontend",
+      description: "Desenvolver interface do usuário para o sistema de gamificação",
+      points: 50,
+      category: "Desenvolvimento",
+      active: true,
+      createdBy: "admin"
     },
     {
-      id: 2,
-      titulo: "Revisar documentação",
-      descricao: "Atualizar documentação técnica do projeto",
-      pontos: 30,
-      ativa: true,
-      criador: "admin"
+      id: "2",
+      title: "Revisar documentação",
+      description: "Atualizar documentação técnica do projeto",
+      points: 30,
+      category: "Documentação",
+      active: true,
+      createdBy: "admin"
     },
     {
-      id: 3,
-      titulo: "Teste de integração",
-      descricao: "Executar testes de integração entre componentes",
-      pontos: 40,
-      ativa: true,
-      criador: "admin"
+      id: "3",
+      title: "Teste de integração",
+      description: "Executar testes de integração entre componentes",
+      points: 40,
+      category: "Qualidade",
+      active: true,
+      createdBy: "admin"
     },
     {
-      id: 4,
-      titulo: "Implementar responsividade",
-      descricao: "Adaptar interface para dispositivos móveis",
-      pontos: 35,
-      ativa: true,
-      criador: "admin"
+      id: "4",
+      title: "Implementar responsividade",
+      description: "Adaptar interface para dispositivos móveis",
+      points: 35,
+      category: "UI/UX",
+      active: true,
+      createdBy: "admin"
     },
     {
-      id: 5,
-      titulo: "Otimizar performance",
-      descricao: "Melhorar velocidade de carregamento da aplicação",
-      pontos: 45,
-      ativa: true,
-      criador: "admin"
+      id: "5",
+      title: "Otimizar performance",
+      description: "Melhorar velocidade de carregamento das páginas",
+      points: 45,
+      category: "Performance",
+      active: true,
+      createdBy: "admin"
     }
   ],
 
   // Prêmios simulados
   rewards: [
     {
-      id: 1,
-      nome: "Vale Café",
-      descricao: "Vale para café na cantina da empresa",
-      pontos: 50,
-      disponivel: true
+      id: "1",
+      title: "Vale Café",
+      description: "Vale para café na cantina da empresa",
+      cost: 50,
+      category: "Alimentação",
+      stock: 10,
+      available: true
     },
     {
-      id: 2,
-      nome: "Dia de Home Office",
-      descricao: "Um dia adicional de trabalho remoto",
-      pontos: 100,
-      disponivel: true
+      id: "2",
+      title: "Dia de Home Office",
+      description: "Um dia adicional de trabalho remoto",
+      cost: 100,
+      category: "Benefícios",
+      stock: 5,
+      available: true
     },
     {
-      id: 3,
-      nome: "Voucher Almoço",
-      descricao: "Almoço grátis no restaurante parceiro",
-      pontos: 80,
-      disponivel: true
+      id: "3",
+      title: "Voucher Almoço",
+      description: "Almoço grátis no restaurante parceiro",
+      cost: 80,
+      category: "Alimentação",
+      stock: 8,
+      available: true
     },
     {
-      id: 4,
-      nome: "Curso Online",
-      descricao: "Acesso a curso de capacitação profissional",
-      pontos: 150,
-      disponivel: true
+      id: "4",
+      title: "Curso Online",
+      description: "Acesso a curso de capacitação profissional",
+      cost: 150,
+      category: "Educação",
+      stock: 3,
+      available: true
     },
     {
-      id: 5,
-      nome: "Kit Escritório",
-      descricao: "Kit com material de escritório personalizado",
-      pontos: 120,
-      disponivel: true
+      id: "5",
+      title: "Kit Escritório",
+      description: "Kit com material de escritório personalizado",
+      cost: 120,
+      category: "Material",
+      stock: 6,
+      available: true
     },
     {
-      id: 6,
-      nome: "Tarde Livre",
-      descricao: "Liberação antecipada em uma tarde",
-      pontos: 90,
-      disponivel: true
+      id: "6",
+      title: "Tarde Livre",
+      description: "Liberação antecipada em uma tarde",
+      cost: 90,
+      category: "Benefícios",
+      stock: 4,
+      available: true
     }
   ],
 
@@ -127,43 +152,48 @@ export const mockData = {
   history: [
     {
       id: 1,
-      usuario: "João Silva",
-      acao: "Tarefa Concluída",
-      detalhes: "Completar projeto frontend",
-      pontos: 50,
-      data: new Date().toISOString()
+      userId: "2",
+      userName: "João Silva",
+      type: "task_completed",
+      description: "Completou a tarefa: Completar projeto frontend",
+      points: 50,
+      timestamp: new Date().toISOString()
     },
     {
       id: 2,
-      usuario: "Maria Santos",
-      acao: "Prêmio Resgatado",
-      detalhes: "Vale Café",
-      pontos: -50,
-      data: new Date(Date.now() - 86400000).toISOString()
+      userId: "3",
+      userName: "Maria Santos",
+      type: "reward_redeemed",
+      description: "Resgatou o prêmio: Vale Café",
+      points: -50,
+      timestamp: new Date(Date.now() - 86400000).toISOString()
     },
     {
       id: 3,
-      usuario: "Pedro Costa",
-      acao: "Tarefa Concluída",
-      detalhes: "Revisar documentação",
-      pontos: 30,
-      data: new Date(Date.now() - 172800000).toISOString()
+      userId: "4",
+      userName: "Pedro Costa",
+      type: "task_completed",
+      description: "Completou a tarefa: Revisar documentação",
+      points: 30,
+      timestamp: new Date(Date.now() - 172800000).toISOString()
     },
     {
       id: 4,
-      usuario: "João Silva",
-      acao: "Prêmio Resgatado",
-      detalhes: "Voucher Almoço",
-      pontos: -80,
-      data: new Date(Date.now() - 259200000).toISOString()
+      userId: "2",
+      userName: "João Silva",
+      type: "reward_redeemed",
+      description: "Resgatou o prêmio: Voucher Almoço",
+      points: -80,
+      timestamp: new Date(Date.now() - 259200000).toISOString()
     },
     {
       id: 5,
-      usuario: "Maria Santos",
-      acao: "Tarefa Concluída",
-      detalhes: "Teste de integração",
-      pontos: 40,
-      data: new Date(Date.now() - 345600000).toISOString()
+      userId: "3",
+      userName: "Maria Santos",
+      type: "task_completed",
+      description: "Completou a tarefa: Teste de integração",
+      points: 40,
+      timestamp: new Date(Date.now() - 345600000).toISOString()
     }
   ],
 

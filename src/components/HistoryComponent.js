@@ -12,7 +12,7 @@ export class HistoryComponent {
     this.selectedUserId = null;
     this.selectedType = null;
     // ✅ Propriedades de paginação
-    this.currentPage = 1;
+    this.currentPage = 0; // 0-based page index
     this.itemsPerPage = 10;
     this.totalItems = 0;
     this.totalPages = 0;
@@ -126,20 +126,20 @@ export class HistoryComponent {
 
     userFilter.addEventListener('change', (e) => {
       this.selectedUserId = e.target.value || null;
-      this.currentPage = 1; // ✅ Reset para primeira página
+      this.currentPage = 0; // ✅ Reset para primeira página (0-based)
       this.loadHistory();
     });
 
     typeFilter.addEventListener('change', (e) => {
       this.selectedType = e.target.value || null;
-      this.currentPage = 1; // ✅ Reset para primeira página
+      this.currentPage = 0; // ✅ Reset para primeira página (0-based)
       this.loadHistory();
     });
 
     clearButton.addEventListener('click', () => {
       this.selectedUserId = null;
       this.selectedType = null;
-      this.currentPage = 1; // ✅ Reset para primeira página
+      this.currentPage = 0; // ✅ Reset para primeira página (0-based)
       userFilter.value = '';
       typeFilter.value = '';
       this.loadHistory();
@@ -158,50 +158,72 @@ export class HistoryComponent {
       currentPage: this.currentPage,
       itemsPerPage: this.itemsPerPage,
       selectedUserId: this.selectedUserId,
-      selectedType: this.selectedType
+      selectedType: this.selectedType,
+      offset: this.currentPage * this.itemsPerPage
     });
+
+    // ✅ Add detailed logging
+    console.log('🔍 DEBUG: Estado completo do usuário:', state);
+    console.log('🔍 DEBUG: É administrador?', state.userType === 'Administrador');
 
     try {
       let response;
-      const offset = (this.currentPage - 1) * this.itemsPerPage;
+      const offset = this.currentPage * this.itemsPerPage; // ✅ Correção: usar currentPage diretamente (0-based)
       
       if (state.userType === 'Administrador') {
         // Para admin, usar filtros se especificados
         if (this.selectedUserId) {
           console.log('🔍 DEBUG: Admin buscando histórico de usuário específico');
-          response = await api.getHistory(this.selectedUserId, {
+          const params = {
             limit: this.itemsPerPage,
-            offset: offset,
-            type: this.selectedType
-          });
+            offset: offset
+          };
+          // ✅ Só adicionar type se houver filtro selecionado
+          if (this.selectedType) {
+            params.type = this.selectedType;
+          }
+          response = await api.getHistory(this.selectedUserId, params);
         } else {
           console.log('🔍 DEBUG: Admin buscando histórico geral');
-          response = await api.getAllHistory({
+          const params = {
             limit: this.itemsPerPage,
-            offset: offset,
-            type: this.selectedType
-          });
+            offset: offset
+          };
+          // ✅ Só adicionar type se houver filtro selecionado
+          if (this.selectedType) {
+            params.type = this.selectedType;
+          }
+          response = await api.getAllHistory(params);
         }
       } else {
         console.log('🔍 DEBUG: Usuário comum buscando próprio histórico');
-        response = await api.getHistory(state.user.id, {
+        const params = {
           limit: this.itemsPerPage,
-          offset: offset,
-          type: this.selectedType
-        });
+          offset: offset
+        };
+        // ✅ Só adicionar type se houver filtro selecionado
+        if (this.selectedType) {
+          params.type = this.selectedType;
+        }
+        response = await api.getHistory(state.user.id, params);
       }
       
       console.log('🔍 DEBUG: Resposta da API:', response);
       
       if (response && response.success) {
         this.history = response.data || [];
+        // ✅ CORREÇÃO: Usar total da paginação da API se disponível
         this.totalItems = response.pagination?.total || this.history.length;
-        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+        this.totalPages = response.pagination?.pages || Math.ceil(this.totalItems / this.itemsPerPage);
+        
         console.log('🔍 DEBUG: Dados processados:', {
           historyCount: this.history.length,
           totalItems: this.totalItems,
-          totalPages: this.totalPages
+          totalPages: this.totalPages,
+          currentPage: this.currentPage,
+          pagination: response.pagination
         });
+        
         this.renderHistory();
         this.renderPagination();
       } else {
@@ -228,12 +250,8 @@ export class HistoryComponent {
       return;
     }
 
-    // Paginar histórico
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    const paginatedHistory = this.history.slice(start, end);
-
-    historyList.innerHTML = paginatedHistory.map(item => {
+    // ✅ CORREÇÃO: Não paginar novamente - os dados já vêm paginados da API
+    historyList.innerHTML = this.history.map(item => {
       const typeIcon = item.type === 'task_completed' ? '✅' : 
                       item.type === 'reward_redeemed' ? '🎁' : 
                       item.type === 'user_created' ? '👤' : 
@@ -276,45 +294,103 @@ export class HistoryComponent {
     const pageNumbers = paginationControls.querySelector('#page-numbers');
     const infoText = paginationControls.querySelector('#pagination-info-text');
 
-    // Atualizar texto de informação da página
-    const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-    const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+    // ✅ CORREÇÃO: Usar dados da paginação real da API
+    const offset = this.currentPage * this.itemsPerPage; // ✅ 0-based
+    const startItem = offset + 1;
+    const endItem = Math.min(offset + this.history.length, this.totalItems);
+    
     infoText.textContent = `Mostrando ${startItem}-${endItem} de ${this.totalItems} registros`;
 
     // Habilitar/desabilitar botões de navegação
-    prevButton.disabled = this.currentPage === 1;
-    nextButton.disabled = this.currentPage === this.totalPages || this.totalPages === 0;
+    prevButton.disabled = this.currentPage === 0; // ✅ 0-based
+    nextButton.disabled = this.currentPage === this.totalPages - 1 || this.totalPages === 0; // ✅ 0-based
 
     // ✅ Event listeners para botões de navegação
     prevButton.onclick = () => {
-      if (this.currentPage > 1) {
+      if (this.currentPage > 0) { // ✅ 0-based
         this.currentPage--;
         this.loadHistory();
       }
     };
 
     nextButton.onclick = () => {
-      if (this.currentPage < this.totalPages) {
+      if (this.currentPage < this.totalPages - 1) { // ✅ 0-based
         this.currentPage++;
         this.loadHistory();
       }
     };
 
-    // Renderizar números das páginas
+    // ✅ CORREÇÃO: Limitar número de páginas mostradas para evitar sobrecarga visual
     pageNumbers.innerHTML = '';
-    for (let i = 1; i <= this.totalPages; i++) {
+    
+    if (this.totalPages <= 1) {
+      paginationControls.style.display = 'none';
+      return;
+    }
+    
+    // Mostrar no máximo 5 páginas por vez (convertendo de 0-based para 1-based para exibição)
+    const maxVisiblePages = 5;
+    const currentPageDisplay = this.currentPage + 1; // Converter para 1-based para exibição
+    let startPage = Math.max(1, currentPageDisplay - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+    
+    // Ajustar startPage se estivermos próximos do final
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // Botão "Primeira página" se necessário
+    if (startPage > 1) {
+      const firstButton = document.createElement('button');
+      firstButton.className = 'btn btn-pagination';
+      firstButton.textContent = '1';
+      firstButton.addEventListener('click', () => {
+        this.currentPage = 0; // 0-based
+        this.loadHistory();
+      });
+      pageNumbers.appendChild(firstButton);
+      
+      if (startPage > 2) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.className = 'pagination-ellipsis';
+        pageNumbers.appendChild(ellipsis);
+      }
+    }
+    
+    // Páginas visíveis
+    for (let i = startPage; i <= endPage; i++) {
       const pageButton = document.createElement('button');
       pageButton.className = 'btn btn-pagination';
-      pageButton.textContent = i;
-      pageButton.disabled = i === this.currentPage;
+      pageButton.textContent = i; // Mostrar 1-based
+      pageButton.disabled = i === currentPageDisplay; // Comparar com valor 1-based
       pageButton.addEventListener('click', () => {
-        this.currentPage = i;
+        this.currentPage = i - 1; // Converter para 0-based
         this.loadHistory();
       });
       pageNumbers.appendChild(pageButton);
     }
+    
+    // Botão "Última página" se necessário
+    if (endPage < this.totalPages) {
+      if (endPage < this.totalPages - 1) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.className = 'pagination-ellipsis';
+        pageNumbers.appendChild(ellipsis);
+      }
+      
+      const lastButton = document.createElement('button');
+      lastButton.className = 'btn btn-pagination';
+      lastButton.textContent = this.totalPages;
+      lastButton.addEventListener('click', () => {
+        this.currentPage = this.totalPages - 1; // Converter para 0-based
+        this.loadHistory();
+      });
+      pageNumbers.appendChild(lastButton);
+    }
 
-    paginationControls.style.display = this.totalPages > 1 ? 'flex' : 'none';
+    paginationControls.style.display = 'flex';
   }
 
   refresh() {

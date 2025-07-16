@@ -272,7 +272,15 @@ export class ApiService {
       }
 
       // REST API call com parâmetros
-      const queryString = new URLSearchParams(params).toString();
+      // ✅ Limpar parâmetros nulos/vazios antes de criar queryString
+      const cleanParams = {};
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          cleanParams[key] = params[key];
+        }
+      });
+      
+      const queryString = new URLSearchParams(cleanParams).toString();
       const url = queryString ? `/history?${queryString}` : '/history';
       const response = await this.makeRequest(url);
       return response;
@@ -807,7 +815,15 @@ export class ApiService {
       }
 
       // REST API call com parâmetros
-      const queryString = new URLSearchParams(params).toString();
+      // ✅ Limpar parâmetros nulos/vazios antes de criar queryString
+      const cleanParams = {};
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          cleanParams[key] = params[key];
+        }
+      });
+      
+      const queryString = new URLSearchParams(cleanParams).toString();
       const url = queryString ? `/history/user/${userId}?${queryString}` : `/history/user/${userId}`;
       const response = await this.makeRequest(url);
       return response;
