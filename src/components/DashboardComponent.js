@@ -17,7 +17,7 @@ export class DashboardComponent {
     this.initializeComponents();
     this.checkAndShowDevBanner();
     
-    // Subscribe to state changes
+    // Subscribe to state changes after initialization is complete
     stateManager.subscribe(this.handleStateChange.bind(this));
   }
 
@@ -66,7 +66,6 @@ export class DashboardComponent {
             </section>
 
             <section class="dashboard-section" id="task-distribution-section" style="display: none;">
-              <h3>📊 Distribuição de Tarefas</h3>
               <div id="task-distribution-container"></div>
             </section>
 
@@ -100,15 +99,61 @@ export class DashboardComponent {
     const rankingContainer = this.container.querySelector('#ranking-container');
     const historyContainer = this.container.querySelector('#history-container');
 
-    this.tasksComponent = new TasksComponent(tasksContainer);
-    this.rewardsComponent = new RewardsComponent(rewardsContainer);
-    this.achievementsComponent = new AchievementsComponent();
-    this.achievementsComponent.init(achievementsContainer);
-    this.rankingComponent = new RankingComponent(rankingContainer);
-    this.historyComponent = new HistoryComponent(historyContainer);
+    console.log('🔍 Inicialization containers check:', {
+      tasksContainer: !!tasksContainer,
+      rewardsContainer: !!rewardsContainer,
+      achievementsContainer: !!achievementsContainer,
+      taskDistributionContainer: !!taskDistributionContainer,
+      rankingContainer: !!rankingContainer,
+      historyContainer: !!historyContainer
+    });
+
+    try {
+      this.tasksComponent = new TasksComponent(tasksContainer);
+      console.log('✅ TasksComponent initialized successfully');
+    } catch (error) {
+      console.error('❌ Error initializing TasksComponent:', error);
+      this.tasksComponent = null;
+    }
     
-    // Inicializar componente de distribuição de tarefas apenas para admins
-    this.taskDistributionComponent = new TaskDistributionComponent(taskDistributionContainer);
+    try {
+      console.log('🎁 Initializing RewardsComponent with container:', rewardsContainer);
+      this.rewardsComponent = new RewardsComponent(rewardsContainer);
+      console.log('✅ RewardsComponent initialized successfully');
+    } catch (error) {
+      console.error('❌ Error initializing RewardsComponent:', error);
+      this.rewardsComponent = null;
+    }
+    
+    try {
+      this.achievementsComponent = new AchievementsComponent();
+      this.achievementsComponent.init(achievementsContainer);
+    } catch (error) {
+      console.error('❌ Error initializing AchievementsComponent:', error);
+      this.achievementsComponent = null;
+    }
+    
+    try {
+      this.rankingComponent = new RankingComponent(rankingContainer);
+    } catch (error) {
+      console.error('❌ Error initializing RankingComponent:', error);
+      this.rankingComponent = null;
+    }
+    
+    try {
+      this.historyComponent = new HistoryComponent(historyContainer);
+    } catch (error) {
+      console.error('❌ Error initializing HistoryComponent:', error);
+      this.historyComponent = null;
+    }
+    
+    try {
+      // Inicializar componente de distribuição de tarefas apenas para admins
+      this.taskDistributionComponent = new TaskDistributionComponent(taskDistributionContainer);
+    } catch (error) {
+      console.error('❌ Error initializing TaskDistributionComponent:', error);
+      this.taskDistributionComponent = null;
+    }
     
     // Expor para debug global
     window.achievementsComponent = this.achievementsComponent;
@@ -132,41 +177,58 @@ export class DashboardComponent {
   }
 
   handleStateChange(currentState) {
-    if (!currentState.user) return;
-
-    // Update user info display
-    const userNameElement = this.container.querySelector('#user-name');
-    const userPointsElement = this.container.querySelector('#user-points');
-    const userTypeElement = this.container.querySelector('#user-type');
-    const historyTitle = this.container.querySelector('#history-title');
-    const adminPanelContainer = this.container.querySelector('#admin-panel-container');
-    const taskDistributionSection = this.container.querySelector('#task-distribution-section');
-
-    userNameElement.textContent = currentState.user.name || currentState.user.nome;
-    userPointsElement.textContent = currentState.user.points?.toString() || currentState.userPoints?.toString() || '0';
-    userTypeElement.textContent = currentState.user.type === 'admin' ? 'Administrador' : 'Usuário';
-
-    // Handle admin features
-    if (currentState.user.type === 'admin' || currentState.userType === 'Administrador') {
-      adminPanelContainer.style.display = 'block';
-      taskDistributionSection.style.display = 'block';
-      historyTitle.textContent = '📊 Histórico de Todos os Usuários';
-      
-      if (!this.adminPanelComponent) {
-        this.adminPanelComponent = new AdminPanelComponent(adminPanelContainer);
+    try {
+      if (!currentState.user) {
+        return;
       }
-    } else {
-      adminPanelContainer.style.display = 'none';
-      taskDistributionSection.style.display = 'none';
-      historyTitle.textContent = '📊 Histórico de Atividades';
-      this.adminPanelComponent = null;
-    }
 
-    // Refresh all components
-    this.refreshComponents();
-    
-    // Carregar resumo de tarefas atribuídas
-    this.loadAssignedTasksSummary();
+      // Update user info display
+      const userNameElement = this.container.querySelector('#user-name');
+      const userPointsElement = this.container.querySelector('#user-points');
+      const userTypeElement = this.container.querySelector('#user-type');
+      const historyTitle = this.container.querySelector('#history-title');
+      const adminPanelContainer = this.container.querySelector('#admin-panel-container');
+      const taskDistributionSection = this.container.querySelector('#task-distribution-section');
+
+      if (userNameElement) {
+        userNameElement.textContent = currentState.user.name || currentState.user.nome;
+      }
+      if (userPointsElement) {
+        userPointsElement.textContent = currentState.user.points?.toString() || currentState.userPoints?.toString() || '0';
+      }
+      if (userTypeElement) {
+        userTypeElement.textContent = currentState.user.type === 'admin' ? 'Administrador' : 'Usuário';
+      }
+
+      // Handle admin features
+      if (currentState.user.type === 'admin' || currentState.userType === 'Administrador') {
+        if (adminPanelContainer) adminPanelContainer.style.display = 'block';
+        if (taskDistributionSection) taskDistributionSection.style.display = 'block';
+        if (historyTitle) historyTitle.textContent = '📊 Histórico de Todos os Usuários';
+        
+        if (!this.adminPanelComponent && adminPanelContainer) {
+          try {
+            this.adminPanelComponent = new AdminPanelComponent(adminPanelContainer);
+          } catch (error) {
+            console.error('❌ Error creating AdminPanelComponent:', error);
+          }
+        }
+      } else {
+        if (adminPanelContainer) adminPanelContainer.style.display = 'none';
+        if (taskDistributionSection) taskDistributionSection.style.display = 'none';
+        if (historyTitle) historyTitle.textContent = '📊 Histórico de Atividades';
+        this.adminPanelComponent = null;
+      }
+
+      // Refresh all components
+      this.refreshComponents();
+      
+      // Carregar resumo de tarefas atribuídas
+      this.loadAssignedTasksSummary();
+      
+    } catch (error) {
+      console.error('❌ Error in DashboardComponent.handleStateChange:', error);
+    }
   }
 
   async loadAssignedTasksSummary() {
@@ -234,14 +296,43 @@ export class DashboardComponent {
   }
 
   refreshComponents() {
-    this.tasksComponent.refresh();
-    this.rewardsComponent.refresh();
-    this.achievementsComponent.loadAchievements();
-    this.rankingComponent.refresh();
-    this.historyComponent.refresh();
+    console.log('🔄 Refreshing dashboard components...');
     
-    if (this.adminPanelComponent) {
-      this.adminPanelComponent.refresh();
+    // Verificar se os componentes foram inicializados antes de chamar refresh
+    const componentsToRefresh = [
+      { name: 'TasksComponent', component: this.tasksComponent, method: 'refresh' },
+      { name: 'RewardsComponent', component: this.rewardsComponent, method: 'refresh' },
+      { name: 'AchievementsComponent', component: this.achievementsComponent, method: 'loadAchievements' },
+      { name: 'RankingComponent', component: this.rankingComponent, method: 'refresh' },
+      { name: 'HistoryComponent', component: this.historyComponent, method: 'refresh' }
+    ];
+    
+    console.log('🔍 Components status:', componentsToRefresh.map(({ name, component, method }) => ({
+      name,
+      exists: !!component,
+      hasMethod: component && typeof component[method] === 'function'
+    })));
+    
+    componentsToRefresh.forEach(({ name, component, method }) => {
+      try {
+        if (component && typeof component[method] === 'function') {
+          console.log(`✅ Refreshing ${name}`);
+          component[method]();
+        } else {
+          console.warn(`⚠️ ${name} not available for refresh - Component: ${!!component}, Method: ${component && typeof component[method] === 'function'}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error refreshing ${name}:`, error);
+      }
+    });
+    
+    // Handle admin panel component separately
+    if (this.adminPanelComponent && typeof this.adminPanelComponent.refresh === 'function') {
+      try {
+        this.adminPanelComponent.refresh();
+      } catch (error) {
+        console.error('❌ Error refreshing AdminPanelComponent:', error);
+      }
     }
   }
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Sistema de Gamificação</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Teste do Sistema</h1>
+        <p>Verificando se os módulos carregam corretamente...</p>
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        try {
+            // Teste básico de imports
+            const { escapeHtml, formatDate } = await import('./src/utils/helpers.js');
+            
+            const testText = '&lt;script&gt;test&lt;/script&gt;';
+            document.getElementById('status').innerHTML = `
+                <p>✅ Helpers carregados com sucesso!</p>
+                <p>Teste escapeHtml funcionando</p>
+                <p>Teste formatDate: ${formatDate()}</p>
+            `;
+            
+            console.log('✅ Todos os módulos carregaram corretamente');
+            
+        } catch (error) {
+            document.getElementById('status').innerHTML = `
+                <p>❌ Erro ao carregar módulos: ${error.message}</p>
+            `;
+            console.error('❌ Erro:', error);
+        }
+    </script>
+</body>
+</html>

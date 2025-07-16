@@ -277,6 +277,8 @@ export class TaskDistributionComponent {
 
   async loadData() {
     try {
+      console.log('🔄 Carregando dados de distribuição...');
+      
       // Load tasks, users, and assignments in parallel
       const [tasksResponse, usersResponse, assignmentsResponse] = await Promise.all([
         api.getAllTasks(),
@@ -284,9 +286,19 @@ export class TaskDistributionComponent {
         api.getTaskAssignments() // Precisamos implementar esta API
       ]);
 
+      console.log('📋 Resposta das tarefas:', tasksResponse);
+      console.log('👥 Resposta dos usuários:', usersResponse);
+      console.log('📊 Resposta das atribuições:', assignmentsResponse);
+
       this.tasks = tasksResponse.data || [];
       this.users = (usersResponse.data || []).filter(user => user.type !== 'admin');
       this.assignments = assignmentsResponse.data || [];
+
+      console.log('✅ Dados carregados:', {
+        tasks: this.tasks.length,
+        users: this.users.length,
+        assignments: this.assignments.length
+      });
 
       this.renderStats();
       this.renderUserFilter();
@@ -442,7 +454,12 @@ export class TaskDistributionComponent {
     const container = this.container.querySelector('#completed-tasks-list');
     if (!container) return;
 
+    console.log('🔍 Renderizando tarefas concluídas...');
+    console.log('📋 Total de atribuições carregadas:', this.assignments.length);
+    
     const completedTasks = this.assignments.filter(assignment => assignment.status === 'completed');
+    console.log('✅ Tarefas concluídas encontradas:', completedTasks.length);
+    console.log('📊 Tarefas concluídas:', completedTasks);
 
     if (completedTasks.length === 0) {
       container.innerHTML = '<div class="empty">✅ Nenhuma tarefa concluída ainda.</div>';
@@ -452,6 +469,8 @@ export class TaskDistributionComponent {
     container.innerHTML = completedTasks.map(assignment => {
       const task = this.tasks.find(t => t.id === assignment.taskId);
       const user = this.users.find(u => u.id === assignment.userId);
+      
+      console.log(`🔍 Processando tarefa ${assignment.taskId}:`, { task, user });
 
       return `
         <div class="completed-card">

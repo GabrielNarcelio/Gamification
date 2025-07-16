@@ -3,15 +3,25 @@
 import { stateManager } from '@/services/state.js';
 import { LoginComponent } from '@/components/LoginComponent.js';
 import { DashboardComponent } from '@/components/DashboardComponent.js';
+import { smartCache } from '@/utils/smart-cache-manager.js';
 
 export class App {
   constructor(container) {
     this.container = container;
     this.currentComponent = null; // Track current component for cleanup
+    this.dashboardComponent = null; // Keep dashboard instance
     this.init();
   }
 
-  init() {
+  async init() {
+    try {
+      // Inicializar smart cache
+      await smartCache.init();
+      console.log('🚀 Smart Cache inicializado');
+    } catch (error) {
+      console.warn('⚠️ Erro ao inicializar smart cache:', error);
+    }
+    
     // Subscribe to state changes
     stateManager.subscribe(this.handleStateChange.bind(this));
     
@@ -44,10 +54,21 @@ export class App {
   }
 
   showDashboard() {
-    this.cleanupCurrentComponent(); // ✅ Cleanup before creating new component
-    this.container.innerHTML = '<div id="dashboard-container"></div>';
+    // Only cleanup login component, preserve dashboard if it exists
+    if (this.currentComponent && this.currentComponent.constructor.name === 'LoginComponent') {
+      this.cleanupCurrentComponent();
+    }
     
-    const dashboardContainer = this.container.querySelector('#dashboard-container');
-    this.currentComponent = new DashboardComponent(dashboardContainer);
+    // Create dashboard only if it doesn't exist
+    if (!this.dashboardComponent) {
+      this.container.innerHTML = '<div id="dashboard-container"></div>';
+      const dashboardContainer = this.container.querySelector('#dashboard-container');
+      this.dashboardComponent = new DashboardComponent(dashboardContainer);
+      console.log('✅ App: Created new DashboardComponent instance');
+    } else {
+      console.log('✅ App: Reusing existing DashboardComponent instance');
+    }
+    
+    this.currentComponent = this.dashboardComponent;
   }
 }

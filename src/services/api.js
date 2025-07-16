@@ -2,6 +2,7 @@
 
 import { CONFIG } from '../utils/config.js';
 import { mockData, simulateNetworkDelay, generateId } from './mockData.js';
+import { smartCache } from '../utils/smart-cache-manager.js';
 
 export class ApiService {
   constructor() {
@@ -9,12 +10,23 @@ export class ApiService {
     this.useMockData = CONFIG.USE_MOCK_DATA;
     this.isDevelopment = CONFIG.DEV_MODE;
     
+    // Inicializar sistema inteligente de cache
+    this.initSmartCache();
+    
     // Log do modo atual
     if (this.isDevelopment) {
       console.log('🚀 Modo desenvolvimento ativo - usando Backend Node.js');
       console.log(`📡 API URL: ${this.baseUrl}`);
     } else {
       console.log('🚀 Modo produção - usando Backend Node.js');
+    }
+  }
+
+  async initSmartCache() {
+    try {
+      await smartCache.init();
+    } catch (error) {
+      console.warn('⚠️ Erro ao inicializar smart cache:', error);
     }
   }
 
@@ -33,6 +45,9 @@ export class ApiService {
   // Método auxiliar para fazer requests REST
   async makeRequest(endpoint, options = {}) {
     try {
+      // Notificar smart cache sobre requisição
+      smartCache.onApiRequest(endpoint, options);
+      
       const url = `${this.baseUrl}${endpoint}`;
       
       // Configurações padrão para requests REST
@@ -72,9 +87,16 @@ export class ApiService {
       const data = await response.json();
       console.log(`✅ Response data:`, data);
       
+      // Notificar smart cache sobre sucesso
+      smartCache.onApiSuccess(endpoint, data);
+      
       return data;
     } catch (error) {
       console.error(`❌ Erro na request REST:`, error);
+      
+      // Notificar smart cache sobre erro
+      smartCache.onApiError(endpoint, error);
+      
       throw error;
     }
   }
@@ -387,7 +409,13 @@ export class ApiService {
       return response;
     } catch (error) {
       console.error('❌ Erro capturado em createTask:', error);
-      // Fallback para mock
+      
+      // Se for erro de validação (400), não usar fallback - propagar o erro
+      if (error.message && error.message.includes('HTTP 400')) {
+        throw error;
+      }
+      
+      // Fallback para mock apenas para outros erros (CORS, rede, etc.)
       const newTask = {
         id: generateId(),
         name: title,

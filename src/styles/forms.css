@@ -1,0 +1,17 @@
+/* Form Elements */
+.form-hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: #6c757d;
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+}
+
+.form-group input[type="number"]:invalid {
+  border-color: var(--danger-color);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-group input[type="number"]:valid {
+  border-color: var(--success-color);
+}

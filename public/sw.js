@@ -14,7 +14,6 @@ const STATIC_URLS = [
   '/src/styles/dashboard.css',
   '/src/styles/forms.css',
   '/src/styles/login.css',
-  '/src/styles/utilities.css',
   '/src/utils/pwa-manager.js',
   '/src/components/LoginComponent.js',
   '/src/components/DashboardComponent.js',

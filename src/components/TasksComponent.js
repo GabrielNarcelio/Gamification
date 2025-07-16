@@ -4,7 +4,6 @@ import { api } from '@/services/api.js';
 import { stateManager } from '@/services/state.js';
 import { MESSAGES } from '@/utils/config.js';
 import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
-import { CacheManager } from '../utils/cache-manager.js';
 
 export class TasksComponent {
   constructor(container) {
@@ -46,9 +45,6 @@ export class TasksComponent {
           <button id="refresh-tasks-btn" class="btn btn-secondary">
             🔄 Atualizar
           </button>
-          <button id="clear-cache-btn" class="btn btn-warning" title="Limpar cache se houver problemas">
-            🧹 Limpar Cache
-          </button>
         </div>
       </div>
       
@@ -62,12 +58,24 @@ export class TasksComponent {
             <textarea id="new-task-description" placeholder="Descrição da tarefa"></textarea>
           </div>
           <div class="form-group">
-            <input type="number" id="new-task-points" placeholder="Pontos" min="1" />
+            <input 
+              type="number" 
+              id="new-task-points" 
+              placeholder="Pontos (1-1000)" 
+              min="1" 
+              max="1000"
+              title="Digite um valor entre 1 e 1000 pontos"
+            />
+            <small class="form-hint">Valor entre 1 e 1000 pontos</small>
           </div>
           <button id="create-task-button" class="btn btn-primary">Criar Tarefa</button>
           <div id="task-form-error" class="error-message"></div>
         </div>
       ` : ''}
+      
+      <div id="task-summary" class="task-summary" style="display: none;">
+        <!-- Resumo será preenchido dinamicamente -->
+      </div>
       
       <div id="task-list" class="task-list">
         <div class="loading">Carregando tarefas...</div>
@@ -82,10 +90,6 @@ export class TasksComponent {
     const refreshBtn = this.container.querySelector('#refresh-tasks-btn');
     refreshBtn?.addEventListener('click', () => this.refreshTasks());
     
-    // Botão de limpar cache
-    const clearCacheBtn = this.container.querySelector('#clear-cache-btn');
-    clearCacheBtn?.addEventListener('click', () => this.clearCache());
-    
     if (state.userType === 'Administrador') {
       const createButton = this.container.querySelector('#create-task-button');
       createButton?.addEventListener('click', () => this.handleCreateTask());
@@ -93,6 +97,31 @@ export class TasksComponent {
       // Enter key support for inputs
       const titleInput = this.container.querySelector('#new-task-title');
       const pointsInput = this.container.querySelector('#new-task-points');
+      const errorDiv = this.container.querySelector('#task-form-error');
+      
+      // Validação em tempo real para pontos
+      pointsInput?.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        const isValid = !isNaN(value) && value >= 1 && value <= 1000;
+        
+        if (e.target.value && !isValid) {
+          e.target.style.borderColor = 'var(--danger-color)';
+          if (isNaN(value)) {
+            errorDiv.textContent = 'Digite apenas números para os pontos';
+          } else if (value < 1) {
+            errorDiv.textContent = 'Os pontos devem ser pelo menos 1';
+          } else if (value > 1000) {
+            errorDiv.textContent = 'Os pontos não podem exceder 1000';
+          }
+          errorDiv.style.display = 'block';
+        } else {
+          e.target.style.borderColor = '';
+          if (errorDiv.textContent.includes('pontos')) {
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+          }
+        }
+      });
       
       [titleInput, pointsInput].forEach(input => {
         input?.addEventListener('keypress', (e) => {
@@ -150,8 +179,8 @@ export class TasksComponent {
         descriptionInput.value = '';
         pointsInput.value = '';
         
-        // ✅ Trigger data refresh across all components
-        stateManager.triggerDataRefresh();
+        // ✅ Trigger specific cache cleanup for task creation
+        stateManager.onTaskCreated();
         
         // Show success message
         this.showSuccessMessage(MESSAGES.TASK_CREATED);
@@ -160,7 +189,29 @@ export class TasksComponent {
       }
     } catch (error) {
       console.error('Create task error:', error);
-      errorDiv.textContent = MESSAGES.GENERIC_ERROR;
+      
+      // Tentar extrair mensagem específica do backend
+      let errorMessage = MESSAGES.GENERIC_ERROR;
+      
+      if (error.message) {
+        // Se a mensagem contém JSON, tentar extrair a mensagem de erro
+        const jsonMatch = error.message.match(/\{.*\}/);
+        if (jsonMatch) {
+          try {
+            const errorData = JSON.parse(jsonMatch[0]);
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (parseError) {
+            console.warn('Não foi possível parsear erro do servidor:', parseError);
+          }
+        } else {
+          // Usar a mensagem de erro diretamente se não for JSON
+          errorMessage = error.message;
+        }
+      }
+      
+      errorDiv.textContent = errorMessage;
     } finally {
       resetButton();
     }
@@ -187,8 +238,8 @@ export class TasksComponent {
       const response = await api.deleteTask(taskId);
       
       if (response.success) {
-        // ✅ Trigger data refresh across all components
-        stateManager.triggerDataRefresh();
+        // ✅ Trigger specific cache cleanup for task deletion
+        stateManager.onTaskDeleted();
         
         // Show success message
         this.showSuccessMessage(`✅ Tarefa "${taskTitle}" deletada com sucesso!`);
@@ -224,8 +275,8 @@ export class TasksComponent {
         const newPoints = response.data?.newUserPoints || (state.userPoints + points);
         stateManager.updatePoints(newPoints);
         
-        // ✅ Trigger data refresh across all components
-        stateManager.triggerDataRefresh();
+        // ✅ Trigger specific cache cleanup for task completion
+        stateManager.onTaskCompleted();
         
         // Show success message
         this.showSuccessMessage(MESSAGES.TASK_COMPLETED);
@@ -281,19 +332,9 @@ export class TasksComponent {
       this.tasks = response.success ? response.data : [];
       console.log('📋 Tarefas carregadas:', this.tasks.length, 'tarefas');
       
-      // Para usuários normais, verificar status real das tarefas completadas
+      // Para usuários normais, verificar status real das tarefas completadas de forma otimizada
       if (!isAdmin && userId) {
-        console.log('🔍 Verificando status real das tarefas...');
-        for (let task of this.tasks) {
-          if (task.isCompleted) {
-            // Verificar no servidor se realmente foi completada
-            const reallyCompleted = await CacheManager.isTaskCompleted(task.id, userId);
-            if (!reallyCompleted) {
-              console.log('⚠️ Tarefa', task.id, 'marcada como completada no cache mas não no servidor');
-              task.isCompleted = false; // Corrigir status
-            }
-          }
-        }
+        await this.verifyTaskCompletionStatus(userId);
       }
       
       this.renderTasks();
@@ -304,77 +345,178 @@ export class TasksComponent {
   }
 
   renderTasks() {
+    this.renderTaskSummary();
+    this.renderTaskList();
+  }
+
+  renderTaskSummary() {
+    const taskSummary = this.container.querySelector('#task-summary');
+    const state = stateManager.getState();
+    const isAdmin = state.userType === 'Administrador';
+
+    if (isAdmin) {
+      taskSummary.style.display = 'none';
+      return;
+    }
+
+    // Calcular estatísticas para usuários normais
+    const totalTasks = this.tasks.length;
+    const availableTasks = this.tasks.filter(task => !task.isCompleted);
+    const completedTasks = this.tasks.filter(task => task.isCompleted);
+    const assignedTasks = this.tasks.filter(task => task.isAssigned && !task.isCompleted);
+    const assignedCompletedTasks = this.tasks.filter(task => task.isAssigned && task.isCompleted);
+
+    if (totalTasks === 0) {
+      taskSummary.style.display = 'none';
+      return;
+    }
+
+    taskSummary.style.display = 'block';
+    taskSummary.innerHTML = `
+      <div class="summary-cards">
+        <div class="summary-card available">
+          <div class="summary-number">${availableTasks.length}</div>
+          <div class="summary-label">Tarefas Disponíveis</div>
+        </div>
+        ${assignedTasks.length > 0 ? `
+          <div class="summary-card assigned">
+            <div class="summary-number">${assignedTasks.length}</div>
+            <div class="summary-label">Atribuídas a Você</div>
+          </div>
+        ` : ''}
+        <div class="summary-card completed">
+          <div class="summary-number">${completedTasks.length}</div>
+          <div class="summary-label">Concluídas</div>
+        </div>
+        ${assignedCompletedTasks.length > 0 ? `
+          <div class="summary-card assigned-completed">
+            <div class="summary-number">${assignedCompletedTasks.length}</div>
+            <div class="summary-label">Atribuídas Concluídas</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  renderTaskList() {
     const taskList = this.container.querySelector('#task-list');
     const state = stateManager.getState();
     const isAdmin = state.userType === 'Administrador';
 
-    // Para usuários normais, filtrar tarefas completadas
-    // Para admins, mostrar todas as tarefas
-    const tasksToShow = isAdmin ? this.tasks : this.tasks.filter(task => !task.isCompleted);
+    // Separar tarefas por categoria
+    const availableTasks = [];
+    const completedTasks = [];
+    const assignedCompletedTasks = [];
 
-    if (tasksToShow.length === 0) {
-      const message = isAdmin ? 'Nenhuma tarefa disponível.' : 'Nenhuma tarefa pendente. Você completou todas as tarefas disponíveis!';
-      taskList.innerHTML = `<div class="empty">${message}</div>`;
-      return;
+    this.tasks.forEach(task => {
+      if (task.isCompleted) {
+        if (task.isAssigned) {
+          assignedCompletedTasks.push(task);
+        } else {
+          completedTasks.push(task);
+        }
+      } else {
+        availableTasks.push(task);
+      }
+    });
+
+    // Para usuários normais: mostrar apenas tarefas disponíveis + seção de tarefas atribuídas completadas
+    // Para admins: mostrar todas as tarefas
+    let tasksToShow = [];
+    let sectionsHtml = '';
+
+    if (isAdmin) {
+      tasksToShow = this.tasks;
+      sectionsHtml = this.renderTaskSection('Todas as Tarefas', tasksToShow, isAdmin);
+    } else {
+      // Usuários normais: mostrar tarefas disponíveis e seção de completadas separadamente
+      if (availableTasks.length > 0) {
+        sectionsHtml += this.renderTaskSection('🎯 Tarefas Disponíveis', availableTasks, isAdmin);
+      }
+      
+      if (assignedCompletedTasks.length > 0) {
+        sectionsHtml += this.renderTaskSection('✅ Tarefas Atribuídas Concluídas', assignedCompletedTasks, isAdmin, true);
+      }
+      
+      if (availableTasks.length === 0 && assignedCompletedTasks.length === 0) {
+        sectionsHtml = '<div class="empty">🎉 Nenhuma tarefa pendente. Você está em dia com suas tarefas!</div>';
+      }
     }
 
-    taskList.innerHTML = tasksToShow.map(task => `
-      <div class="task-item ${task.isCompleted ? 'task-completed' : ''} ${task.isAssigned ? 'task-assigned' : ''}">
-        <div class="task-header">
-          <h4>
-            ${task.isAssigned ? '📌 ' : ''}${escapeHtml(task.title)} ${task.isCompleted ? '✅' : ''}
-          </h4>
-          <span class="task-points">${task.points} pts</span>
-        </div>
-        ${task.isAssigned ? `
-          <div class="task-assignment-info">
-            <small>📌 Tarefa atribuída a você</small>
-            ${task.deadline ? `<small>⏰ Prazo: ${new Date(task.deadline).toLocaleDateString('pt-BR')}</small>` : ''}
-            ${task.notes ? `<small>📝 Observações: ${escapeHtml(task.notes)}</small>` : ''}
-          </div>
-        ` : ''}
-        <div class="task-description">
-          ${escapeHtml(task.description)}
-        </div>
-        ${task.isCompleted ? `
-          <div class="task-completed-info">
-            <small>✅ Tarefa já completada!</small>
-          </div>
-        ` : ''}
-        ${isAdmin ? `
-          <div class="task-creator">
-            <small>Criado por: ${escapeHtml(task.createdBy || 'Sistema')}</small>
-          </div>
-          <div class="task-actions admin-actions">
-            <button 
-              class="btn btn-danger btn-sm" 
-              data-task-id="${task.id}"
-              onclick="window.taskComponent.deleteTask('${task.id}', '${escapeHtml(task.title)}')"
-              title="Deletar tarefa"
-            >
-              🗑️ Deletar
-            </button>
-          </div>
-        ` : `
-          <div class="task-actions">
-            <button 
-              class="btn ${task.isCompleted ? 'btn-secondary' : 'btn-success'}" 
-              data-task-id="${task.id}"
-              onclick="window.taskComponent.concludeTask('${task.id}', ${task.points})"
-              ${task.isCompleted ? 'disabled title="Você já completou esta tarefa"' : ''}
-            >
-              ${task.isCompleted ? '✅ Completada' : '✅ Concluir'}
-            </button>
-          </div>
-        `}
-      </div>
-    `).join('');
+    taskList.innerHTML = sectionsHtml;
 
     // Store reference for onclick handlers
     window.taskComponent = {
       concludeTask: (taskId, points) => this.handleConcludeTask(taskId, points),
       deleteTask: (taskId, title) => this.handleDeleteTask(taskId, title)
     };
+  }
+
+  renderTaskSection(sectionTitle, tasks, isAdmin, isCompletedSection = false) {
+    if (tasks.length === 0) return '';
+
+    const sectionClass = isCompletedSection ? 'completed-tasks-section' : 'available-tasks-section';
+    
+    return `
+      <div class="task-section ${sectionClass}">
+        <h3 class="section-title">${sectionTitle}</h3>
+        <div class="task-list-section">
+          ${tasks.map(task => `
+            <div class="task-item ${task.isCompleted ? 'task-completed' : ''} ${task.isAssigned ? 'task-assigned' : ''} ${isCompletedSection ? 'task-readonly' : ''}">
+              <div class="task-header">
+                <h4>
+                  ${task.isAssigned ? '📌 ' : ''}${escapeHtml(task.title)} ${task.isCompleted ? '✅' : ''}
+                </h4>
+                <span class="task-points">${task.points} pts</span>
+              </div>
+              ${task.isAssigned ? `
+                <div class="task-assignment-info">
+                  <small>📌 Tarefa atribuída a você</small>
+                  ${task.deadline ? `<small>⏰ Prazo: ${new Date(task.deadline).toLocaleDateString('pt-BR')}</small>` : ''}
+                  ${task.notes ? `<small>📝 Observações: ${escapeHtml(task.notes)}</small>` : ''}
+                </div>
+              ` : ''}
+              <div class="task-description">
+                ${escapeHtml(task.description)}
+              </div>
+              ${isCompletedSection ? `
+                <div class="task-completed-info">
+                  <small>✅ Tarefa concluída com sucesso! Você ganhou ${task.points} pontos.</small>
+                </div>
+              ` : ''}
+              ${isAdmin ? `
+                <div class="task-creator">
+                  <small>Criado por: ${escapeHtml(task.createdBy || 'Sistema')}</small>
+                </div>
+                <div class="task-actions admin-actions">
+                  <button 
+                    class="btn btn-danger btn-sm" 
+                    data-task-id="${task.id}"
+                    onclick="window.taskComponent.deleteTask('${task.id}', '${escapeHtml(task.title)}')"
+                    title="Deletar tarefa"
+                  >
+                    🗑️ Deletar
+                  </button>
+                </div>
+              ` : `
+                ${!isCompletedSection ? `
+                  <div class="task-actions">
+                    <button 
+                      class="btn ${task.isCompleted ? 'btn-secondary' : 'btn-success'}" 
+                      data-task-id="${task.id}"
+                      onclick="window.taskComponent.concludeTask('${task.id}', ${task.points})"
+                      ${task.isCompleted ? 'disabled title="Você já completou esta tarefa"' : ''}
+                    >
+                      ${task.isCompleted ? '✅ Completada' : '✅ Concluir'}
+                    </button>
+                  </div>
+                ` : ''}
+              `}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
   }
 
   // ✅ Métodos para mostrar diferentes tipos de mensagens
@@ -426,20 +568,11 @@ export class TasksComponent {
   async refreshTasks() {
     console.log('🔄 Atualizando tarefas...');
     
-    // Limpar cache específico de tarefas
-    await CacheManager.clearSpecificCache('/api/tasks');
-    await CacheManager.clearSpecificCache('/api/history');
-    
-    // Recarregar tarefas
+    // O smart cache agora é gerenciado automaticamente pelo StateManager
+    // Apenas recarregar tarefas - o cache será limpo automaticamente quando necessário
     await this.loadTasks();
     
     this.showSuccessMessage('✅ Tarefas atualizadas!');
-  }
-
-  async clearCache() {
-    if (confirm('🧹 Isso vai limpar todo o cache e recarregar a página. Continuar?')) {
-      await CacheManager.clearAllCache();
-    }
   }
 
   showSuccessMessage(message) {
@@ -468,5 +601,49 @@ export class TasksComponent {
 
   refresh() {
     this.loadTasks();
+  }
+
+  async verifyTaskCompletionStatus(userId) {
+    try {
+      console.log('🔍 Verificando status real das tarefas completadas...');
+      
+      // Buscar todas as tarefas completadas do usuário de uma vez
+      const { api } = await import('../services/api.js');
+      const historyResponse = await api.getHistory(userId, { type: 'task_completed' });
+      
+      if (historyResponse && historyResponse.success && historyResponse.data) {
+        const completedTaskIds = new Set(
+          historyResponse.data
+            .filter(entry => entry.type === 'task_completed' && entry.details?.taskId)
+            .map(entry => entry.details.taskId)
+        );
+        
+        // Atualizar status das tarefas baseado no histórico real
+        let correctedTasks = 0;
+        this.tasks.forEach(task => {
+          const shouldBeCompleted = completedTaskIds.has(task.id);
+          
+          // Se há discrepância entre o status local e o servidor
+          if (task.isCompleted !== shouldBeCompleted) {
+            task.isCompleted = shouldBeCompleted;
+            correctedTasks++;
+            
+            if (shouldBeCompleted) {
+              console.log(`✅ Tarefa ${task.id} marcada como completada (estava incorreta)`);
+            } else {
+              console.log(`⚠️ Tarefa ${task.id} não está realmente completada (corrigindo status)`);
+            }
+          }
+        });
+        
+        if (correctedTasks > 0) {
+          console.log(`🔄 ${correctedTasks} tarefa(s) tiveram status corrigido`);
+        } else {
+          console.log(`✅ Status de todas as tarefas está sincronizado`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao verificar status das tarefas:', error);
+    }
   }
 }

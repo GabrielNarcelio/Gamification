@@ -429,6 +429,27 @@ router.post('/:id/complete', async (req, res) => {
     };
     
     data.history.push(historyEntry);
+    
+    // ✅ ATUALIZAR ATRIBUIÇÃO SE EXISTIR
+    try {
+      // Verificar se esta tarefa foi atribuída ao usuário
+      const assignmentIndex = data.assignments?.findIndex(a => 
+        a.taskId === task.id && 
+        a.userId === userId && 
+        a.status === 'assigned'
+      );
+      
+      if (assignmentIndex !== -1 && data.assignments) {
+        console.log(`📋 Atualizando atribuição para tarefa ${task.id} do usuário ${userId}`);
+        data.assignments[assignmentIndex].status = 'completed';
+        data.assignments[assignmentIndex].completedAt = new Date().toISOString();
+        data.assignments[assignmentIndex].completedBy = userId;
+      }
+    } catch (assignmentError) {
+      console.error('⚠️ Erro ao atualizar atribuição:', assignmentError);
+      // Não falhar a requisição por causa deste erro
+    }
+    
     await saveData(data);
     
     // ✨ VERIFICAR CONQUISTAS AUTOMATICAMENTE

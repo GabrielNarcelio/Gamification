@@ -7,6 +7,10 @@ import { createLoadingButton, escapeHtml } from '@/utils/helpers.js';
 
 export class RewardsComponent {
   constructor(container) {
+    if (!container) {
+      throw new Error('RewardsComponent requires a valid container element');
+    }
+    
     this.container = container;
     this.rewards = [];
     this.render();

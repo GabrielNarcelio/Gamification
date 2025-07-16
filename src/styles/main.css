@@ -1,9 +1,9 @@
 /* Estilos principais da aplicação */
 
-/* TEMPORARIAMENTE COMENTADO - Importar outros arquivos de estilo */
-/* @import './login.css'; */
-/* @import './dashboard.css'; */
-/* @import './components.css'; */
+@import './login.css';
+@import './dashboard.css';
+@import './components.css';
+@import './forms.css';
 @import './task-distribution.css';
 @import './task-assignments.css';
 

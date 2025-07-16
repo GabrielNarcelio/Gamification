@@ -71,27 +71,39 @@ export class CacheManager {
 
   static async isTaskCompleted(taskId, userId) {
     try {
-      // Sempre buscar dados frescos, sem cache
-      const response = await fetch(`/api/history?userId=${userId}&type=task_completed`, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // Debug apenas se solicitado
+      const isDebug = window.location?.search?.includes('debug=true');
+      if (isDebug) {
+        console.log(`🔍 Verificando se tarefa ${taskId} foi completada pelo usuário ${userId}`);
+      }
       
-      if (response.ok) {
-        const data = await response.json();
-        return data.data.some(entry => 
+      // Importar a instância da API
+      const { api } = await import('../services/api.js');
+      
+      // Usar o método getHistory da API com filtro de tipo
+      const response = await api.getHistory(userId, { type: 'task_completed' });
+      
+      if (response && response.success && response.data) {
+        const isCompleted = response.data.some(entry => 
           entry.type === 'task_completed' && 
           entry.details?.taskId === taskId
         );
+        if (isDebug) {
+          console.log(`✅ Tarefa ${taskId} completada: ${isCompleted}`);
+        }
+        return isCompleted;
       }
       
+      if (isDebug) {
+        console.log(`⚠️ Resposta inválida ou sem dados para tarefa ${taskId}`);
+      }
       return false;
     } catch (error) {
-      console.error('❌ Erro ao verificar tarefa completada:', error);
+      console.error(`❌ Erro ao verificar tarefa completada ${taskId}:`, error.message);
+      // Se for erro de parsing JSON, provavelmente retornou HTML (404)
+      if (error.message && error.message.includes('JSON')) {
+        console.error('💥 Provavelmente recebeu HTML em vez de JSON - verifique se a API está rodando');
+      }
       return false;
     }
   }
