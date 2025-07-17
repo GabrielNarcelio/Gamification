@@ -224,22 +224,20 @@
       
       console.log('🧹 Service Worker e caches removidos - CSS deve funcionar agora');
       
-      // COMENTADO TEMPORARIAMENTE - Registrar Service Worker
-      /*
+      // Registrar Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js', {
             scope: '/'
           })
             .then(registration => {
-              console.log('� SW: Service Worker registrado com sucesso!', registration.scope);
+              console.log('✅ SW: Service Worker registrado com sucesso!', registration.scope);
             })
             .catch(error => {
               console.error('❌ SW: Falha ao registrar Service Worker:', error);
             });
         });
       }
-      */
       
       // Mostrar notificação de atualização
       function showUpdateNotification() {

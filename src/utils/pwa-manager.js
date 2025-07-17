@@ -26,8 +26,30 @@ export class PWAManager {
     // Configurar notificações
     this.setupNotifications();
     
+    // Configurar background sync
+    await this.setupBackgroundSync();
+    
+    // Configurar auto sync
+    this.setupAutoSync();
+    
     // Verificar atualizações
     this.checkForUpdates();
+    
+    console.log('✅ PWA Manager totalmente inicializado com todos os recursos!');
+  }
+
+  setupAutoSync() {
+    // Sincronizar automaticamente quando ficar online
+    window.addEventListener('online', () => {
+      this.autoSyncPendingData();
+    });
+    
+    // Sincronizar periodicamente se online
+    setInterval(() => {
+      if (this.isOnline) {
+        this.autoSyncPendingData();
+      }
+    }, 30000); // A cada 30 segundos
   }
 
   checkIfInstalled() {
@@ -112,8 +134,56 @@ export class PWAManager {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().then(permission => {
         console.log('📬 Permissão de notificação:', permission);
+        if (permission === 'granted') {
+          this.showNotification('🔔 Notificações ativadas!', 'success');
+        }
       });
     }
+  }
+
+  // Criar notificação nativa do sistema
+  async createSystemNotification(title, options = {}) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const notification = new Notification(title, {
+        icon: '/icon.svg',
+        badge: '/icon.svg',
+        vibrate: [200, 100, 200],
+        tag: 'gamification-app',
+        renotify: true,
+        ...options
+      });
+
+      // Auto-close após 5 segundos
+      setTimeout(() => notification.close(), 5000);
+      
+      return notification;
+    }
+  }
+
+  // Notificar conquista desbloqueada
+  notifyAchievementUnlocked(achievementName) {
+    this.createSystemNotification('🏆 Nova Conquista!', {
+      body: `Você desbloqueou: ${achievementName}`,
+      icon: '/icon.svg'
+    });
+    
+    this.showNotification(`🏆 Conquista desbloqueada: ${achievementName}`, 'success', 5000);
+  }
+
+  // Notificar tarefa concluída
+  notifyTaskCompleted(taskName, points) {
+    this.createSystemNotification('✅ Tarefa Concluída!', {
+      body: `${taskName} - +${points} pontos`,
+      icon: '/icon.svg'
+    });
+  }
+
+  // Notificar nova tarefa atribuída
+  notifyTaskAssigned(taskName) {
+    this.createSystemNotification('📋 Nova Tarefa!', {
+      body: `Nova tarefa atribuída: ${taskName}`,
+      icon: '/icon.svg'
+    });
   }
 
   async checkForUpdates() {
@@ -154,6 +224,34 @@ export class PWAManager {
         window.location.reload();
       });
     }
+  }
+
+  async installApp() {
+    if (this.installPrompt) {
+      const result = await this.installPrompt.prompt();
+      console.log('📱 Resultado da instalação:', result.outcome);
+      
+      if (result.outcome === 'accepted') {
+        this.installPrompt = null;
+        this.hideInstallButton();
+      }
+    } else {
+      // Mostrar instruções manuais
+      this.showInstallInstructions();
+    }
+  }
+
+  showInstallInstructions() {
+    const instructions = this.createNotification(
+      '📱 Para instalar: Menu do navegador > "Instalar app" ou "Adicionar à tela inicial"',
+      'info',
+      [
+        {
+          text: 'OK',
+          action: (notification) => notification.remove()
+        }
+      ]
+    );
   }
 
   showInstallButton() {
@@ -292,12 +390,76 @@ export class PWAManager {
     try {
       console.log('🔄 Sincronizando dados offline...');
       
-      // Aqui você implementaria a sincronização real
-      // Por exemplo, enviar dados salvos no localStorage/IndexedDB
+      // Verificar se há dados pendentes no localStorage
+      const offlineActions = JSON.parse(localStorage.getItem('offlineActions') || '[]');
       
-      this.showNotification('✅ Dados sincronizados!', 'success');
+      if (offlineActions.length > 0) {
+        console.log(`📤 Encontradas ${offlineActions.length} ações offline para sincronizar`);
+        
+        let syncedCount = 0;
+        for (const action of offlineActions) {
+          try {
+            await this.executeOfflineAction(action);
+            syncedCount++;
+          } catch (error) {
+            console.error('❌ Erro ao sincronizar ação:', action, error);
+          }
+        }
+        
+        if (syncedCount > 0) {
+          // Remover ações sincronizadas
+          localStorage.setItem('offlineActions', '[]');
+          this.showNotification(`✅ ${syncedCount} ação(ões) sincronizada(s)!`, 'success');
+          
+          // Forçar atualização dos dados
+          if (window.stateManager) {
+            window.stateManager.triggerDataRefresh('sync_completed');
+          }
+        }
+      }
+      
+      console.log('✅ Sincronização offline concluída');
     } catch (error) {
       console.error('❌ Erro na sincronização:', error);
+      this.showNotification('❌ Erro na sincronização offline', 'error');
+    }
+  }
+
+  async executeOfflineAction(action) {
+    // Importar dinamicamente a API para executar ações offline
+    const { api } = await import('../services/api.js');
+    
+    switch (action.type) {
+      case 'task_complete':
+        return await api.completeTask(action.data.taskId, action.data.userId);
+      
+      case 'task_create':
+        return await api.createTask(action.data);
+      
+      case 'reward_redeem':
+        return await api.redeemReward(action.data.rewardId, action.data.userId);
+      
+      default:
+        console.warn('⚠️ Tipo de ação offline desconhecido:', action.type);
+    }
+  }
+
+  // Salvar ação para sincronização posterior
+  saveOfflineAction(type, data) {
+    try {
+      const offlineActions = JSON.parse(localStorage.getItem('offlineActions') || '[]');
+      offlineActions.push({
+        id: Date.now(),
+        type,
+        data,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('offlineActions', JSON.stringify(offlineActions));
+      
+      console.log('💾 Ação salva para sincronização offline:', type);
+      this.showNotification('💾 Ação salva para quando voltar online', 'info', 2000);
+    } catch (error) {
+      console.error('❌ Erro ao salvar ação offline:', error);
     }
   }
 
@@ -345,6 +507,58 @@ export class PWAManager {
   }
 
   // Debug Info
+  // Background Sync - sincronização quando a conexão retornar
+  async setupBackgroundSync() {
+    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.sync.register('sync-offline-data');
+        console.log('🔄 Background sync registrado');
+      } catch (error) {
+        console.log('❌ Background sync não suportado:', error);
+      }
+    }
+  }
+
+  // Registrar sincronização específica
+  async registerBackgroundSync(tag) {
+    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.sync.register(tag);
+        console.log(`🔄 Background sync registrado: ${tag}`);
+      } catch (error) {
+        console.log(`❌ Erro ao registrar sync ${tag}:`, error);
+      }
+    }
+  }
+
+  // Sincronizar dados pendentes automaticamente
+  async autoSyncPendingData() {
+    const pendingData = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+    
+    if (pendingData.length > 0) {
+      console.log(`🔄 Sincronizando ${pendingData.length} operações pendentes...`);
+      
+      for (const operation of pendingData) {
+        try {
+          await this.executeOfflineAction(operation);
+          // Remove da lista após sucesso
+          const index = pendingData.indexOf(operation);
+          pendingData.splice(index, 1);
+        } catch (error) {
+          console.log('❌ Erro na sincronização:', error);
+        }
+      }
+      
+      localStorage.setItem('pendingSync', JSON.stringify(pendingData));
+      
+      if (pendingData.length === 0) {
+        this.showNotification('✅ Todos os dados sincronizados!', 'success');
+      }
+    }
+  }
+
   getDebugInfo() {
     return {
       isInstalled: this.isInstalled,

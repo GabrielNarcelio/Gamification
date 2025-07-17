@@ -200,6 +200,18 @@ export class RewardsComponent {
     const state = stateManager.getState();
     if (!state.user) return;
 
+    // Verificar se o prêmio ainda existe e tem estoque
+    const reward = this.rewards.find(r => r.id === rewardId);
+    if (!reward) {
+      alert('Prêmio não encontrado.');
+      return;
+    }
+
+    if (reward.stock !== undefined && reward.stock === 0) {
+      alert('❌ Este prêmio está esgotado!');
+      return;
+    }
+
     if (state.userPoints < cost) {
       alert(MESSAGES.INSUFFICIENT_POINTS);
       return;
@@ -259,9 +271,11 @@ export class RewardsComponent {
 
     rewardsList.innerHTML = this.rewards.map(reward => {
       const canAfford = state.userPoints >= reward.cost;
+      const isOutOfStock = reward.stock !== undefined && reward.stock === 0;
+      const canRedeem = canAfford && !isOutOfStock;
       
       return `
-        <div class="reward-item ${!canAfford && !isAdmin ? 'unavailable' : ''}">
+        <div class="reward-item ${(!canRedeem && !isAdmin) || isOutOfStock ? 'unavailable' : ''}">
           <div class="reward-header">
             <h4>${escapeHtml(reward.title)}</h4>
             <span class="reward-cost">${reward.cost} pts</span>
@@ -271,7 +285,12 @@ export class RewardsComponent {
           </div>
           <div class="reward-meta">
             <small>Categoria: ${escapeHtml(reward.category || 'Geral')}</small>
-            ${reward.stock !== undefined ? `<small>Estoque: ${reward.stock}</small>` : ''}
+            ${reward.stock !== undefined ? 
+              `<small class="${isOutOfStock ? 'out-of-stock' : ''}">
+                ${isOutOfStock ? '❌ Esgotado' : `Estoque: ${reward.stock}`}
+              </small>` : 
+              ''
+            }
           </div>
           ${isAdmin ? `
             <div class="reward-actions admin-actions">
@@ -287,12 +306,12 @@ export class RewardsComponent {
           ` : `
             <div class="reward-actions">
               <button 
-                class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'}" 
+                class="btn ${canRedeem ? 'btn-primary' : 'btn-disabled'}" 
                 data-reward-id="${reward.id}"
-                ${!canAfford ? 'disabled' : ''}
+                ${!canRedeem ? 'disabled' : ''}
                 onclick="window.rewardsComponent.redeemReward('${reward.id}', ${reward.cost})"
               >
-                ${canAfford ? '🎁 Resgatar' : '🔒 Pontos insuficientes'}
+                ${isOutOfStock ? '❌ Esgotado' : canAfford ? '🎁 Resgatar' : '🔒 Pontos insuficientes'}
               </button>
             </div>
           `}

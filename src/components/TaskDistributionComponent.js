@@ -18,6 +18,9 @@ export class TaskDistributionComponent {
     
     // Subscribe to state changes
     this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
+    
+    // Set global reference for onclick handlers
+    window.taskDistribution = this;
   }
 
   handleStateChange(newState) {
@@ -283,7 +286,7 @@ export class TaskDistributionComponent {
       const [tasksResponse, usersResponse, assignmentsResponse] = await Promise.all([
         api.getAllTasks(),
         api.getAllUsers(),
-        api.getTaskAssignments() // Precisamos implementar esta API
+        api.getTaskAssignments()
       ]);
 
       console.log('📋 Resposta das tarefas:', tasksResponse);
@@ -362,7 +365,8 @@ export class TaskDistributionComponent {
     const container = this.container.querySelector('#available-tasks-list');
     if (!container) return;
 
-    const availableTasks = this.tasks.filter(task => 
+    const filteredTasks = this.getFilteredTasks();
+    const availableTasks = filteredTasks.filter(task => 
       !this.isTaskAssigned(task.id) && 
       !this.isTaskCompleted(task.id)
     );
@@ -401,7 +405,8 @@ export class TaskDistributionComponent {
     const container = this.container.querySelector('#assigned-tasks-list');
     if (!container) return;
 
-    const assignedTasks = this.assignments.filter(assignment => assignment.status === 'assigned');
+    const filteredAssignments = this.getFilteredAssignments();
+    const assignedTasks = filteredAssignments.filter(assignment => assignment.status === 'assigned');
 
     if (assignedTasks.length === 0) {
       container.innerHTML = '<div class="empty">👥 Nenhuma tarefa atribuída no momento.</div>';
@@ -695,10 +700,45 @@ export class TaskDistributionComponent {
   }
 
   applyFilters() {
-    // Implement filtering logic based on selected filters
+    // Apply filters to tasks and assignments based on selected criteria
+    console.log('🔍 Aplicando filtros:', {
+      userId: this.selectedUserId,
+      category: this.selectedCategory,
+      priority: this.selectedPriority
+    });
+    
+    // Re-render all sections with filtered data
     this.renderAvailableTasks();
     this.renderAssignedTasks();
     this.renderCompletedTasks();
+    this.renderStats(); // Update stats with filtered data
+  }
+
+  getFilteredTasks() {
+    return this.tasks.filter(task => {
+      // Category filter
+      if (this.selectedCategory !== 'all' && task.category !== this.selectedCategory) {
+        return false;
+      }
+      
+      // Priority filter
+      if (this.selectedPriority !== 'all' && task.priority !== this.selectedPriority) {
+        return false;
+      }
+      
+      return true;
+    });
+  }
+
+  getFilteredAssignments() {
+    return this.assignments.filter(assignment => {
+      // User filter
+      if (this.selectedUserId && assignment.userId !== this.selectedUserId) {
+        return false;
+      }
+      
+      return true;
+    });
   }
 
   // Métodos que estão sendo chamados pelo onclick mas não estão implementados
@@ -706,28 +746,56 @@ export class TaskDistributionComponent {
     const task = this.tasks.find(t => t.id === taskId);
     if (!task) return;
     
-    alert(`Detalhes da Tarefa:
+    // Check if task is assigned and get assignment info
+    const assignment = this.assignments.find(a => a.taskId === taskId && a.status === 'assigned');
+    const assignedUser = assignment ? this.users.find(u => u.id === assignment.userId) : null;
     
-Título: ${task.title || task.name}
-Descrição: ${task.description}
-Pontos: ${task.points}
-Categoria: ${task.category || 'Outros'}
-Prioridade: ${this.getPriorityLabel(task.priority)}
-Criada em: ${new Date(task.createdAt || Date.now()).toLocaleDateString('pt-BR')}`);
+    const details = `📋 DETALHES DA TAREFA
+    
+🏷️ Título: ${task.title || task.name}
+📝 Descrição: ${task.description}
+⭐ Pontos: ${task.points}
+📂 Categoria: ${task.category || 'Outros'}
+🎯 Prioridade: ${this.getPriorityLabel(task.priority)}
+📅 Criada em: ${new Date(task.createdAt || Date.now()).toLocaleDateString('pt-BR')}
+
+${assignment ? `👤 ATRIBUIÇÃO:
+• Usuário: ${assignedUser?.name || 'Não encontrado'}
+• Atribuída em: ${new Date(assignment.assignedAt).toLocaleDateString('pt-BR')}
+${assignment.deadline ? `• Prazo: ${new Date(assignment.deadline).toLocaleDateString('pt-BR')}` : ''}
+${assignment.notes ? `• Observações: ${assignment.notes}` : ''}` : '✅ Status: Disponível para atribuição'}`;
+    
+    alert(details);
   }
 
   async reassignTask(assignmentId) {
     const assignment = this.assignments.find(a => a.id === assignmentId);
     if (!assignment) return;
     
-    const newUserId = prompt('Digite o ID do novo usuário:');
-    if (!newUserId) return;
+    const task = this.tasks.find(t => t.id === assignment.taskId);
+    const currentUser = this.users.find(u => u.id === assignment.userId);
+    
+    // Create a modal-like experience using prompt
+    const userOptions = this.users
+      .filter(u => u.id !== assignment.userId) // Exclude current user
+      .map((u, index) => `${index + 1}. ${u.name} (${u.points} pts)`)
+      .join('\n');
+    
+    const newUserIndex = prompt(`Reatribuir tarefa "${task?.title || 'Tarefa'}" de "${currentUser?.name || 'Usuário'}" para:\n\n${userOptions}\n\nDigite o número do usuário:`);
+    
+    if (!newUserIndex || isNaN(newUserIndex)) return;
+    
+    const selectedUser = this.users.filter(u => u.id !== assignment.userId)[parseInt(newUserIndex) - 1];
+    if (!selectedUser) {
+      alert('Usuário inválido selecionado.');
+      return;
+    }
     
     try {
-      const response = await api.updateAssignment(assignmentId, { userId: newUserId });
+      const response = await api.updateAssignment(assignmentId, { userId: selectedUser.id });
       if (response.success) {
         this.loadData();
-        this.showSuccessMessage('✅ Tarefa reatribuída com sucesso!');
+        this.showSuccessMessage(`✅ Tarefa reatribuída para ${selectedUser.name} com sucesso!`);
       } else {
         alert('Erro ao reatribuir tarefa: ' + response.message);
       }
@@ -785,5 +853,4 @@ Criada em: ${new Date(task.createdAt || Date.now()).toLocaleDateString('pt-BR')}
   }
 }
 
-// Make it globally accessible for onclick handlers
-window.taskDistribution = null;
+// Global reference will be set in constructor

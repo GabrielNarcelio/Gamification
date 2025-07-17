@@ -1,0 +1,579 @@
+/* ===== ESTILOS DO SISTEMA DE CONQUISTAS ===== */
+
+/* Container principal */
+.achievements-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* Header das conquistas */
+.achievements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.header-content h2 {
+  color: var(--dark-color);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.header-subtitle {
+  color: var(--secondary-color);
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Controles admin */
+.admin-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Estatísticas */
+.achievements-stats {
+  margin-bottom: var(--spacing-lg);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  border: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 50%;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  margin-top: var(--spacing-xs);
+}
+
+/* Filtros */
+.achievements-filters {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  justify-content: center;
+}
+
+.filter-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid #dee2e6;
+  background: white;
+  border-radius: 25px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.filter-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Grid de conquistas */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Card de conquista */
+.achievement-card {
+  background: white;
+  border-radius: var(--border-radius);
+  border: 2px solid #dee2e6;
+  padding: var(--spacing-lg);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--secondary-color);
+  transition: all 0.3s ease;
+}
+
+.achievement-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Cores por raridade */
+.achievement-card.rarity-common::before {
+  background: #6c757d;
+}
+
+.achievement-card.rarity-uncommon::before {
+  background: #28a745;
+}
+
+.achievement-card.rarity-rare::before {
+  background: #007bff;
+}
+
+.achievement-card.rarity-epic::before {
+  background: #6f42c1;
+}
+
+.achievement-card.rarity-legendary::before {
+  background: linear-gradient(90deg, #ffd700, #ffed4e);
+  height: 6px;
+}
+
+/* Conquista desbloqueada */
+.achievement-card.unlocked {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f8fff9, #e8f5e8);
+}
+
+.achievement-card.unlocked::before {
+  background: #28a745 !important;
+}
+
+/* Conquista bloqueada */
+.achievement-card.locked {
+  opacity: 0.7;
+  background: #f8f9fa;
+}
+
+.achievement-card.locked .achievement-icon {
+  filter: grayscale(1);
+}
+
+/* Ícone da conquista */
+.achievement-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 50%;
+  width: 80px;
+  margin: 0 auto var(--spacing-md);
+}
+
+.achievement-card.unlocked .achievement-icon {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+/* Conteúdo da conquista */
+.achievement-content {
+  text-align: center;
+}
+
+.achievement-name {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--dark-color);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.achievement-description {
+  color: var(--secondary-color);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.5;
+}
+
+/* Detalhes da conquista */
+.achievement-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.achievement-points {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.achievement-rarity {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.achievement-rarity.rarity-common {
+  background: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.achievement-rarity.rarity-uncommon {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border-color: #28a745;
+}
+
+.achievement-rarity.rarity-rare {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.achievement-rarity.rarity-epic {
+  background: rgba(111, 66, 193, 0.1);
+  color: #6f42c1;
+  border-color: #6f42c1;
+}
+
+.achievement-rarity.rarity-legendary {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 237, 78, 0.1));
+  color: #b8860b;
+  border-color: #ffd700;
+}
+
+/* Barra de progresso */
+.achievement-progress {
+  margin-top: var(--spacing-md);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), #0056b3);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+  font-weight: 500;
+}
+
+/* Conquista desbloqueada */
+.achievement-unlocked {
+  background: rgba(40, 167, 69, 0.1);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.unlocked-icon {
+  font-size: 1.2rem;
+}
+
+.unlocked-date {
+  font-size: 0.85rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Controles admin na conquista */
+.achievement-admin {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+}
+
+.achievement-delete {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: var(--spacing-xs);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.achievement-delete:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Estado vazio */
+.empty-achievements {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--secondary-color);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-achievements h3 {
+  color: var(--dark-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Loading */
+.loading-achievements {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--secondary-color);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto var(--spacing-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modal de conquista desbloqueada */
+.achievement-unlocked-modal {
+  z-index: 10000;
+}
+
+.achievement-notification {
+  max-width: 600px;
+  text-align: center;
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.notification-header {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: var(--spacing-lg);
+}
+
+.notification-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.new-achievements-list {
+  padding: var(--spacing-lg);
+}
+
+.new-achievement-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+}
+
+.new-achievement-item:last-child {
+  margin-bottom: 0;
+}
+
+.achievement-icon-large {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.new-achievement-item .achievement-info {
+  text-align: left;
+  flex: 1;
+}
+
+.new-achievement-item h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--dark-color);
+}
+
+.new-achievement-item p {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--secondary-color);
+}
+
+.notification-actions {
+  padding: var(--spacing-lg);
+  background: #f8f9fa;
+}
+
+/* Animações */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .achievements-container {
+    padding: var(--spacing-md);
+  }
+  
+  .achievements-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+  
+  .achievements-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .achievements-filters {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .achievement-card {
+    padding: var(--spacing-md);
+  }
+  
+  .achievement-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .achievement-details {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .new-achievement-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .new-achievement-item .achievement-info {
+    text-align: center;
+  }
+}

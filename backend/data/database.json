@@ -17,7 +17,7 @@
       "name": "gabriel",
       "email": "ksdjaskldjakda",
       "type": "user",
-      "points": 871,
+      "points": 241,
       "createdAt": "2025-07-15T23:46:51.066Z"
     },
     {
@@ -29,6 +29,16 @@
       "type": "user",
       "points": 10,
       "createdAt": "2025-07-16T18:56:30.646Z"
+    },
+    {
+      "id": "1752704206123re33sabgu",
+      "username": "marcos",
+      "password": "kasdjaskljda",
+      "name": "Marcos",
+      "email": "klajdaklj@gmail.com",
+      "type": "user",
+      "points": 2000,
+      "createdAt": "2025-07-16T22:16:46.123Z"
     }
   ],
   "tasks": [
@@ -91,6 +101,16 @@
       "difficulty": "medium",
       "createdAt": "2025-07-16T19:35:56.474Z",
       "createdBy": "admin"
+    },
+    {
+      "id": "1752707223741psydefwsj",
+      "title": "kadjaskdja",
+      "description": "jjjjjjjjjjjjjjjjjjjjjjj",
+      "points": 20,
+      "category": "Geral",
+      "difficulty": "medium",
+      "createdAt": "2025-07-16T23:07:03.741Z",
+      "createdBy": "admin"
     }
   ],
   "rewards": [
@@ -109,7 +129,7 @@
       "description": "Acesso a curso online de sua escolha",
       "cost": 150,
       "category": "Educação",
-      "stock": 6,
+      "stock": 5,
       "createdAt": "2025-01-15T10:00:00.000Z"
     },
     {
@@ -136,7 +156,7 @@
       "description": "Fone de ouvido Bluetooth premium",
       "cost": 500,
       "category": "Eletr�nicos",
-      "stock": 10,
+      "stock": 9,
       "createdAt": "2025-07-15T18:51:47.808Z"
     },
     {
@@ -1937,6 +1957,220 @@
         "taskTitle": "çklfsklç",
         "pointsEarned": 100
       }
+    },
+    {
+      "id": "17527035913494hvyj2d7s",
+      "userId": "1",
+      "type": "user_login",
+      "description": "Usuário 'Administrador' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T22:06:31.349Z",
+      "details": {
+        "username": "admin",
+        "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.6093"
+      }
+    },
+    {
+      "id": "1752703950361o8npqf8gq",
+      "userId": "system",
+      "type": "assignment_removed",
+      "description": "Atribuição da tarefa 'Testes Unitários' removida do usuário 'Usuário removido'",
+      "points": 0,
+      "details": {
+        "taskId": "4",
+        "taskTitle": "Testes Unitários",
+        "userId": "1752626270016j4069frau",
+        "userName": "Usuário removido",
+        "originalAssignedAt": "2025-07-16T01:20:12.410Z"
+      },
+      "userName": "Sistema",
+      "timestamp": "2025-07-16T22:12:30.361Z"
+    },
+    {
+      "id": "1752704035163pe41zmxbv",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T22:13:55.163Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752704042383jqt8j3d4w",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T22:14:02.383Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752704206125l73xfdjja",
+      "userId": "1752704206123re33sabgu",
+      "type": "user_created",
+      "description": "Usuário 'Marcos' criado",
+      "points": 0,
+      "timestamp": "2025-07-16T22:16:46.125Z",
+      "details": {
+        "username": "marcos",
+        "type": "user"
+      }
+    },
+    {
+      "id": "1752707223744hqrrjic2o",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'kadjaskdja' criada",
+      "points": 0,
+      "timestamp": "2025-07-16T23:07:03.744Z",
+      "details": {
+        "taskId": "1752707223741psydefwsj",
+        "taskTitle": "kadjaskdja",
+        "taskPoints": 20
+      }
+    },
+    {
+      "id": "1752707234339c20c4jsmm",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T23:07:14.339Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752707236168wkjxiiln6",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T23:07:16.168Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752707241929unzutnjp4",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T23:07:21.929Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752707250731v3nytm9gj",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "task_completed",
+      "description": "Tarefa 'kadjaskdja' concluída",
+      "points": 20,
+      "timestamp": "2025-07-16T23:07:30.731Z",
+      "details": {
+        "taskId": "1752707223741psydefwsj",
+        "taskTitle": "kadjaskdja",
+        "pointsEarned": 20
+      }
+    },
+    {
+      "id": "1752710377142rp4u3bxkn",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T23:59:37.142Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "175271038383426rgjp6vh",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-16T23:59:43.834Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752710627321gy9vlgdy6",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-17T00:03:47.321Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752710645827t68e3l5ns",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-17T00:04:05.827Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752711693982hgk14yvcw",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-17T00:21:33.982Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
+      }
+    },
+    {
+      "id": "1752711702582bwc8hwxr3",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "reward_redeemed",
+      "description": "Prêmio 'Curso Online' resgatado",
+      "points": -150,
+      "timestamp": "2025-07-17T00:21:42.582Z",
+      "details": {
+        "rewardId": "3",
+        "rewardTitle": "Curso Online",
+        "pointsSpent": 150,
+        "remainingStock": 5
+      }
+    },
+    {
+      "id": "1752711710223cr7s4zbes",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "reward_redeemed",
+      "description": "Prêmio 'Fone de Ouvido' resgatado",
+      "points": -500,
+      "timestamp": "2025-07-17T00:21:50.223Z",
+      "details": {
+        "rewardId": "1752605507808q199o4ltl",
+        "rewardTitle": "Fone de Ouvido",
+        "pointsSpent": 500,
+        "remainingStock": 9
+      }
     }
   ],
   "achievements": [
@@ -2103,17 +2337,6 @@
       "notes": "Tarefa de teste para demonstrar o sistema de distribui��o",
       "completedAt": "2025-07-15T23:47:00.664Z",
       "completedBy": "1752623211066jgwi5iicl"
-    },
-    {
-      "id": "1752628812410ztdrayg9b",
-      "taskId": "4",
-      "userId": "1752626270016j4069frau",
-      "status": "assigned",
-      "assignedAt": "2025-07-16T01:20:12.410Z",
-      "assignedBy": "system",
-      "deadline": null,
-      "notes": null,
-      "completedAt": null
     },
     {
       "id": "17526288919745ngxz527t",

@@ -1,7 +1,7 @@
 // Service Worker para PWA - Sistema de Gamificação
-const CACHE_NAME = 'gamification-v3.3.0'; // ✅ Versão atualizada para limpar cache
-const CACHE_STATIC_NAME = 'gamification-static-v3.3.0';
-const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v3.3.0';
+const CACHE_NAME = 'gamification-v3.4.0'; // ✅ Versão atualizada com PWA completo
+const CACHE_STATIC_NAME = 'gamification-static-v3.4.0';
+const CACHE_DYNAMIC_NAME = 'gamification-dynamic-v3.4.0';
 
 // URLs para cache estático (sempre disponível offline)
 const STATIC_URLS = [
@@ -389,6 +389,105 @@ self.addEventListener('push', event => {
   );
 });
 
+// Background Sync - Sincronização em segundo plano
+self.addEventListener('sync', event => {
+  console.log('🔄 Background sync acionado:', event.tag);
+  
+  if (event.tag === 'sync-offline-data') {
+    event.waitUntil(syncOfflineData());
+  }
+  
+  if (event.tag === 'sync-achievements') {
+    event.waitUntil(syncAchievements());
+  }
+  
+  if (event.tag === 'sync-tasks') {
+    event.waitUntil(syncTasks());
+  }
+});
+
+// Sincronizar dados offline quando conexão retornar
+async function syncOfflineData() {
+  try {
+    console.log('🔄 Iniciando sincronização de dados offline...');
+    
+    // Obter dados pendentes do IndexedDB ou localStorage
+    const pendingData = await getPendingOfflineData();
+    
+    for (const operation of pendingData) {
+      try {
+        const response = await fetch(operation.url, {
+          method: operation.method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...operation.headers
+          },
+          body: operation.body ? JSON.stringify(operation.body) : undefined
+        });
+        
+        if (response.ok) {
+          console.log('✅ Operação sincronizada:', operation.id);
+          await removePendingOperation(operation.id);
+        }
+      } catch (error) {
+        console.log('❌ Erro na sincronização:', error);
+      }
+    }
+    
+    // Notificar aplicação sobre sincronização
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_COMPLETE',
+        synced: pendingData.length
+      });
+    });
+    
+  } catch (error) {
+    console.log('❌ Erro na sincronização offline:', error);
+  }
+}
+
+// Sincronizar conquistas
+async function syncAchievements() {
+  try {
+    const response = await fetch('/api/achievements');
+    if (response.ok) {
+      const achievements = await response.json();
+      console.log('🏆 Conquistas sincronizadas:', achievements.length);
+    }
+  } catch (error) {
+    console.log('❌ Erro ao sincronizar conquistas:', error);
+  }
+}
+
+// Sincronizar tarefas
+async function syncTasks() {
+  try {
+    const response = await fetch('/api/tasks');
+    if (response.ok) {
+      const tasks = await response.json();
+      console.log('📋 Tarefas sincronizadas:', tasks.length);
+    }
+  } catch (error) {
+    console.log('❌ Erro ao sincronizar tarefas:', error);
+  }
+}
+
+// Obter dados pendentes (implementação simplificada)
+async function getPendingOfflineData() {
+  // Em uma implementação real, isso viria do IndexedDB
+  const pending = localStorage.getItem('pendingSync');
+  return pending ? JSON.parse(pending) : [];
+}
+
+// Remover operação pendente após sincronização
+async function removePendingOperation(operationId) {
+  const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+  const filtered = pending.filter(op => op.id !== operationId);
+  localStorage.setItem('pendingSync', JSON.stringify(filtered));
+}
+
 // Lidar com cliques em notificações
 self.addEventListener('notificationclick', event => {
   event.notification.close();
@@ -400,4 +499,4 @@ self.addEventListener('notificationclick', event => {
   }
 });
 
-console.log('🚀 Service Worker carregado - Sistema de Gamificação PWA');
+console.log('🚀 Service Worker carregado - Sistema de Gamificação PWA v3.4.0');

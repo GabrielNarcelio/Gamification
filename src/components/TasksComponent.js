@@ -278,6 +278,9 @@ export class TasksComponent {
         // ✅ Trigger specific cache cleanup for task completion
         stateManager.onTaskCompleted();
         
+        // 🏆 Verificar conquistas automaticamente após completar tarefa
+        await this.checkAchievementsAfterTask();
+        
         // Show success message
         this.showSuccessMessage(MESSAGES.TASK_COMPLETED);
       } else {
@@ -644,6 +647,42 @@ export class TasksComponent {
       }
     } catch (error) {
       console.error('❌ Erro ao verificar status das tarefas:', error);
+    }
+  }
+
+  // 🏆 Método para verificar conquistas após completar uma tarefa
+  async checkAchievementsAfterTask() {
+    const state = stateManager.getState();
+    if (!state.user || state.userType === 'Administrador') return;
+
+    try {
+      console.log('🏆 Verificando conquistas após completar tarefa...');
+      const response = await api.checkUserAchievements(state.user.id);
+      
+      if (response.success && response.data.newUnlocks > 0) {
+        console.log(`🎉 ${response.data.newUnlocks} nova(s) conquista(s) desbloqueada(s)!`);
+        
+        // Mostrar notificações de conquistas usando PWA Manager
+        if (window.pwaManager && response.data.newlyUnlocked?.length > 0) {
+          const firstAchievement = response.data.newlyUnlocked[0];
+          window.pwaManager.notifyAchievementUnlocked(firstAchievement.name);
+          
+          if (response.data.newlyUnlocked.length > 1) {
+            window.pwaManager.showNotification(
+              `🏆 ${response.data.newlyUnlocked.length} novas conquistas desbloqueadas!`, 
+              'success', 
+              6000
+            );
+          }
+        }
+        
+        // Atualizar pontos de conquistas
+        if (response.data.totalAchievementPoints) {
+          console.log(`💎 +${response.data.totalAchievementPoints} pontos de conquistas ganhos!`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao verificar conquistas:', error);
     }
   }
 }
