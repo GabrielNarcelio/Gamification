@@ -17,7 +17,7 @@
       "name": "gabriel",
       "email": "ksdjaskldjakda",
       "type": "user",
-      "points": 91,
+      "points": 241,
       "createdAt": "2025-07-15T23:46:51.066Z"
     },
     {
@@ -129,7 +129,7 @@
       "description": "Acesso a curso online de sua escolha",
       "cost": 150,
       "category": "Educação",
-      "stock": 4,
+      "stock": 5,
       "createdAt": "2025-01-15T10:00:00.000Z"
     },
     {
