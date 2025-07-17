@@ -1,9 +1,9 @@
 // Componente de Tarefas
 
-import { api } from '@/services/api.js';
-import { stateManager } from '@/services/state.js';
-import { MESSAGES } from '@/utils/config.js';
-import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '@/utils/helpers.js';
+import { api } from '../services/api.js';
+import { stateManager } from '../services/state.js';
+import { MESSAGES } from '../utils/config.js';
+import { validateRequired, validateTaskPoints, createLoadingButton, escapeHtml } from '../utils/helpers.js';
 
 export class TasksComponent {
   constructor(container) {

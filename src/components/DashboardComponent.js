@@ -18,7 +18,7 @@ export class DashboardComponent {
     this.checkAndShowDevBanner();
     
     // Subscribe to state changes after initialization is complete
-    stateManager.subscribe(this.handleStateChange.bind(this));
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
   }
 
   render() {
@@ -126,8 +126,9 @@ export class DashboardComponent {
     }
     
     try {
-      this.achievementsComponent = new AchievementsComponent();
-      this.achievementsComponent.init(achievementsContainer);
+      console.log('🏆 Initializing AchievementsComponent with container:', achievementsContainer);
+      this.achievementsComponent = new AchievementsComponent(achievementsContainer);
+      console.log('✅ AchievementsComponent initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing AchievementsComponent:', error);
       this.achievementsComponent = null;
@@ -302,7 +303,7 @@ export class DashboardComponent {
     const componentsToRefresh = [
       { name: 'TasksComponent', component: this.tasksComponent, method: 'refresh' },
       { name: 'RewardsComponent', component: this.rewardsComponent, method: 'refresh' },
-      { name: 'AchievementsComponent', component: this.achievementsComponent, method: 'loadAchievements' },
+      { name: 'AchievementsComponent', component: this.achievementsComponent, method: 'refresh' },
       { name: 'RankingComponent', component: this.rankingComponent, method: 'refresh' },
       { name: 'HistoryComponent', component: this.historyComponent, method: 'refresh' }
     ];

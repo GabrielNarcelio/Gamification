@@ -1,8 +1,8 @@
 // Aplicação Principal
 
-import { stateManager } from '@/services/state.js';
-import { LoginComponent } from '@/components/LoginComponent.js';
-import { DashboardComponent } from '@/components/DashboardComponent.js';
+import { stateManager } from './services/state.js';
+import { LoginComponent } from './components/LoginComponent.js';
+import { DashboardComponent } from './components/DashboardComponent.js';
 import { smartCache } from '@/utils/smart-cache-manager.js';
 
 export class App {
@@ -23,7 +23,7 @@ export class App {
     }
     
     // Subscribe to state changes
-    stateManager.subscribe(this.handleStateChange.bind(this));
+    this.unsubscribe = stateManager.subscribe(this.handleStateChange.bind(this));
     
     // Initialize with current state
     this.handleStateChange(stateManager.getState());
@@ -38,6 +38,12 @@ export class App {
   }
 
   handleStateChange(state) {
+    // Prevent unnecessary state changes
+    if ((state.user && this.currentComponent && this.currentComponent.constructor.name === 'DashboardComponent') ||
+        (!state.user && this.currentComponent && this.currentComponent.constructor.name === 'LoginComponent')) {
+      return; // No need to change component
+    }
+    
     if (state.user) {
       this.showDashboard();
     } else {
@@ -70,5 +76,21 @@ export class App {
     }
     
     this.currentComponent = this.dashboardComponent;
+  }
+
+  destroy() {
+    // Cleanup state subscription
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+    
+    // Cleanup current component
+    this.cleanupCurrentComponent();
+    
+    // Cleanup dashboard component
+    if (this.dashboardComponent && typeof this.dashboardComponent.destroy === 'function') {
+      this.dashboardComponent.destroy();
+      this.dashboardComponent = null;
+    }
   }
 }

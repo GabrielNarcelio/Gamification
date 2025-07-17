@@ -1,8 +1,8 @@
 // Componente de Histórico
 
-import { api } from '@/services/api.js';
-import { stateManager } from '@/services/state.js';
-import { escapeHtml } from '@/utils/helpers.js';
+import { api } from '../services/api.js';
+import { stateManager } from '../services/state.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export class HistoryComponent {
   constructor(container) {

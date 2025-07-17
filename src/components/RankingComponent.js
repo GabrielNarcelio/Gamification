@@ -1,8 +1,8 @@
 // Componente de Ranking
 
-import { api } from '@/services/api.js';
-import { stateManager } from '@/services/state.js';
-import { escapeHtml } from '@/utils/helpers.js';
+import { api } from '../services/api.js';
+import { stateManager } from '../services/state.js';
+import { escapeHtml } from '../utils/helpers.js';
 
 export class RankingComponent {
   constructor(container) {

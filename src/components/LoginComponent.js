@@ -1,9 +1,9 @@
 // Componente de Login
 
-import { api } from '@/services/api.js';
-import { stateManager } from '@/services/state.js';
-import { ADMIN_CREDENTIALS, MESSAGES } from '@/utils/config.js';
-import { validateRequired, createLoadingButton } from '@/utils/helpers.js';
+import { api } from '../services/api.js';
+import { stateManager } from '../services/state.js';
+import { ADMIN_CREDENTIALS, MESSAGES } from '../utils/config.js';
+import { validateRequired, createLoadingButton } from '../utils/helpers.js';
 
 export class LoginComponent {
   constructor(container) {

@@ -1,9 +1,9 @@
 // Componente de Recompensas/Prêmios
 
-import { api } from '@/services/api.js';
-import { stateManager } from '@/services/state.js';
-import { MESSAGES } from '@/utils/config.js';
-import { createLoadingButton, escapeHtml } from '@/utils/helpers.js';
+import { api } from '../services/api.js';
+import { stateManager } from '../services/state.js';
+import { MESSAGES } from '../utils/config.js';
+import { createLoadingButton, escapeHtml } from '../utils/helpers.js';
 
 export class RewardsComponent {
   constructor(container) {

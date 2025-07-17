@@ -1,7 +1,9 @@
 // Configurações da aplicação
 
+import { ADVANCED_CONFIG, FEATURE_FLAGS, isDevelopment } from './advanced-config.js';
+
 // Detecta automaticamente se está em desenvolvimento
-const isDevelopment = () => {
+const isDevMode = () => {
   const hostname = window.location.hostname;
   const port = window.location.port;
   
@@ -15,7 +17,7 @@ const isDevelopment = () => {
 
 // URL da API baseada no ambiente
 const getApiUrl = () => {
-  if (isDevelopment()) {
+  if (isDevMode()) {
     // Em desenvolvimento, usar backend Node.js local
     return 'http://localhost:3001/api';
   }
@@ -26,11 +28,22 @@ const getApiUrl = () => {
 export const CONFIG = {
   API_URL: getApiUrl(),
   APP_NAME: "Sistema de Gamificação de Tarefas",
-  VERSION: "2.0.0",
+  VERSION: "2.1.0",
   
   // Configurações de desenvolvimento
-  DEV_MODE: isDevelopment(),
-  USE_MOCK_DATA: false // ✅ DESABILITADO: Usando backend Node.js real
+  DEV_MODE: isDevMode(),
+  USE_MOCK_DATA: false, // ✅ DESABILITADO: Usando backend Node.js real
+  
+  // Configurações avançadas
+  PERFORMANCE: ADVANCED_CONFIG.PERFORMANCE,
+  UI: ADVANCED_CONFIG.UI,
+  VALIDATION: ADVANCED_CONFIG.VALIDATION,
+  PWA: ADVANCED_CONFIG.PWA,
+  ACHIEVEMENTS: ADVANCED_CONFIG.ACHIEVEMENTS,
+  DEVELOPMENT: ADVANCED_CONFIG.DEVELOPMENT,
+  
+  // Feature flags
+  FEATURES: FEATURE_FLAGS
 };
 
 export const ADMIN_CREDENTIALS = {

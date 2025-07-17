@@ -7,6 +7,8 @@
 @import './task-distribution.css';
 @import './task-assignments.css';
 @import './achievements.css';
+@import './states.css';
+@import './responsive.css';
 
 :root {
   /* Cores */

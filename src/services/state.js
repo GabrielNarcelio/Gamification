@@ -1,13 +1,15 @@
 // Gerenciador de estado da aplicação
 
-import { ADMIN_CREDENTIALS } from '@/utils/config.js';
+import { ADMIN_CREDENTIALS } from '../utils/config.js';
 
 class StateManager {
   constructor() {
     this.state = {
       user: null,
       userPoints: 0,
-      userType: null
+      userType: null,
+      achievements: [],
+      userAchievements: []
     };
     this.listeners = new Set();
     this.cacheCleanupEnabled = true;

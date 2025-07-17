@@ -1,6 +1,9 @@
 // Arquivo principal da aplicação
 
 import { App } from './App.js';
+// Performance e PWA utilities
+import { performanceUtils } from './utils/performance.js';
+import { pwaUtils } from './utils/pwa.js';
 // Carregar todos os CSS individualmente para garantir
 import './styles/main.css';
 import './styles/login.css';
@@ -173,5 +176,14 @@ if ('performance' in window) {
       domContentLoaded: Math.round(perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart),
       networkTime: Math.round(perfData.responseEnd - perfData.requestStart)
     });
+
+    // Log enhanced performance metrics
+    setTimeout(() => {
+      performanceUtils.monitor.logReport();
+    }, 2000);
   });
 }
+
+// Tornar utilitários disponíveis globalmente para debugging
+window.performanceUtils = performanceUtils;
+window.pwaUtils = pwaUtils;

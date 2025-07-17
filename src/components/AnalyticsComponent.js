@@ -1,5 +1,5 @@
 import { Chart } from 'chart.js/auto';
-import { stateManager } from '@/services/state.js';
+import { stateManager } from '../services/state.js';
 
 export class AnalyticsComponent {
   constructor(container) {

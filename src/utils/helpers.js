@@ -244,3 +244,381 @@ export function deepClone(obj) {
     return clonedObj;
   }
 }
+
+// ===== ENHANCED VALIDATION FUNCTIONS =====
+
+/**
+ * Comprehensive form validation
+ */
+export const ValidationRules = {
+  required: (value, fieldName) => {
+    if (!value || (typeof value === 'string' && !value.trim())) {
+      return `${fieldName} é obrigatório`;
+    }
+    return null;
+  },
+
+  minLength: (min) => (value, fieldName) => {
+    if (value && value.length < min) {
+      return `${fieldName} deve ter pelo menos ${min} caracteres`;
+    }
+    return null;
+  },
+
+  maxLength: (max) => (value, fieldName) => {
+    if (value && value.length > max) {
+      return `${fieldName} deve ter no máximo ${max} caracteres`;
+    }
+    return null;
+  },
+
+  email: (value, fieldName) => {
+    if (value && !isValidEmail(value)) {
+      return `${fieldName} deve ser um email válido`;
+    }
+    return null;
+  },
+
+  numeric: (value, fieldName) => {
+    if (value && isNaN(Number(value))) {
+      return `${fieldName} deve ser um número válido`;
+    }
+    return null;
+  },
+
+  positiveNumber: (value, fieldName) => {
+    const num = Number(value);
+    if (value && (isNaN(num) || num <= 0)) {
+      return `${fieldName} deve ser um número positivo`;
+    }
+    return null;
+  },
+
+  range: (min, max) => (value, fieldName) => {
+    const num = Number(value);
+    if (value && (!isNaN(num) && (num < min || num > max))) {
+      return `${fieldName} deve estar entre ${min} e ${max}`;
+    }
+    return null;
+  },
+
+  pattern: (regex, message) => (value, fieldName) => {
+    if (value && !regex.test(value)) {
+      return message || `${fieldName} tem formato inválido`;
+    }
+    return null;
+  },
+
+  custom: (validatorFn, message) => (value, fieldName) => {
+    if (value && !validatorFn(value)) {
+      return message || `${fieldName} é inválido`;
+    }
+    return null;
+  }
+};
+
+/**
+ * Validate field with multiple rules
+ */
+export function validateField(value, fieldName, rules = []) {
+  for (const rule of rules) {
+    const error = rule(value, fieldName);
+    if (error) {
+      return error;
+    }
+  }
+  return null;
+}
+
+/**
+ * Validate entire form object
+ */
+export function validateForm(formData, validationSchema) {
+  const errors = {};
+  let isValid = true;
+
+  for (const [fieldName, rules] of Object.entries(validationSchema)) {
+    const value = formData[fieldName];
+    const error = validateField(value, fieldName, rules);
+    if (error) {
+      errors[fieldName] = error;
+      isValid = false;
+    }
+  }
+
+  return { isValid, errors };
+}
+
+/**
+ * Real-time form validation helper
+ */
+export function createFormValidator(validationSchema) {
+  const errors = {};
+  const validators = {};
+
+  // Create individual field validators
+  for (const fieldName of Object.keys(validationSchema)) {
+    validators[fieldName] = (value) => {
+      const rules = validationSchema[fieldName];
+      const error = validateField(value, fieldName, rules);
+      
+      if (error) {
+        errors[fieldName] = error;
+      } else {
+        delete errors[fieldName];
+      }
+      
+      return error;
+    };
+  }
+
+  return {
+    validateField: (fieldName, value) => validators[fieldName]?.(value),
+    validateAll: (formData) => validateForm(formData, validationSchema),
+    getErrors: () => ({ ...errors }),
+    hasErrors: () => Object.keys(errors).length > 0,
+    clearErrors: () => {
+      for (const key of Object.keys(errors)) {
+        delete errors[key];
+      }
+    }
+  };
+}
+
+// ===== ENHANCED UI UTILITIES =====
+
+/**
+ * Smart form field error display
+ */
+export function showFieldError(fieldElement, message) {
+  // Remove existing error
+  clearFieldError(fieldElement);
+  
+  if (!message) return;
+  
+  // Add error class
+  fieldElement.classList.add('error');
+  
+  // Create error message element
+  const errorElement = document.createElement('div');
+  errorElement.className = 'field-error';
+  errorElement.textContent = message;
+  
+  // Insert after field or parent
+  const container = fieldElement.closest('.form-field') || fieldElement.parentNode;
+  container.appendChild(errorElement);
+}
+
+/**
+ * Clear field error display
+ */
+export function clearFieldError(fieldElement) {
+  fieldElement.classList.remove('error');
+  
+  const container = fieldElement.closest('.form-field') || fieldElement.parentNode;
+  const errorElement = container.querySelector('.field-error');
+  if (errorElement) {
+    errorElement.remove();
+  }
+}
+
+/**
+ * Enhanced loading state management
+ */
+export function createAdvancedLoader(element, options = {}) {
+  const {
+    text = 'Carregando...',
+    spinner = true,
+    overlay = true,
+    className = ''
+  } = options;
+
+  const originalContent = element.innerHTML;
+  const originalStyle = element.style.cssText;
+  
+  // Create loader HTML
+  const loaderHTML = `
+    <div class="advanced-loader ${className}">
+      ${overlay ? '<div class="loader-overlay"></div>' : ''}
+      <div class="loader-content">
+        ${spinner ? '<div class="loader-spinner"></div>' : ''}
+        <div class="loader-text">${text}</div>
+      </div>
+    </div>
+  `;
+  
+  // Apply loading state
+  element.innerHTML = loaderHTML;
+  element.classList.add('loading-state');
+  
+  return {
+    updateText: (newText) => {
+      const textElement = element.querySelector('.loader-text');
+      if (textElement) textElement.textContent = newText;
+    },
+    finish: () => {
+      element.innerHTML = originalContent;
+      element.style.cssText = originalStyle;
+      element.classList.remove('loading-state');
+    }
+  };
+}
+
+/**
+ * Enhanced tooltip system
+ */
+export function addTooltip(element, content, options = {}) {
+  const {
+    position = 'top',
+    trigger = 'hover',
+    delay = 200,
+    className = ''
+  } = options;
+
+  let tooltip = null;
+  let showTimeout = null;
+  let hideTimeout = null;
+
+  const showTooltip = (e) => {
+    if (showTimeout) clearTimeout(showTimeout);
+    if (hideTimeout) clearTimeout(hideTimeout);
+
+    showTimeout = setTimeout(() => {
+      // Remove existing tooltip
+      if (tooltip) tooltip.remove();
+
+      // Create new tooltip
+      tooltip = document.createElement('div');
+      tooltip.className = `tooltip tooltip-${position} ${className}`;
+      tooltip.innerHTML = content;
+      document.body.appendChild(tooltip);
+
+      // Position tooltip
+      const rect = element.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      let left, top;
+      
+      switch (position) {
+        case 'top':
+          left = rect.left + (rect.width - tooltipRect.width) / 2;
+          top = rect.top - tooltipRect.height - 8;
+          break;
+        case 'bottom':
+          left = rect.left + (rect.width - tooltipRect.width) / 2;
+          top = rect.bottom + 8;
+          break;
+        case 'left':
+          left = rect.left - tooltipRect.width - 8;
+          top = rect.top + (rect.height - tooltipRect.height) / 2;
+          break;
+        case 'right':
+          left = rect.right + 8;
+          top = rect.top + (rect.height - tooltipRect.height) / 2;
+          break;
+      }
+
+      tooltip.style.left = `${Math.max(8, left)}px`;
+      tooltip.style.top = `${Math.max(8, top)}px`;
+      tooltip.classList.add('tooltip-visible');
+    }, delay);
+  };
+
+  const hideTooltip = () => {
+    if (showTimeout) clearTimeout(showTimeout);
+    
+    hideTimeout = setTimeout(() => {
+      if (tooltip) {
+        tooltip.classList.remove('tooltip-visible');
+        setTimeout(() => {
+          if (tooltip) tooltip.remove();
+          tooltip = null;
+        }, 200);
+      }
+    }, 100);
+  };
+
+  if (trigger === 'hover') {
+    element.addEventListener('mouseenter', showTooltip);
+    element.addEventListener('mouseleave', hideTooltip);
+  } else if (trigger === 'click') {
+    element.addEventListener('click', showTooltip);
+    document.addEventListener('click', (e) => {
+      if (!element.contains(e.target)) hideTooltip();
+    });
+  }
+
+  return {
+    destroy: () => {
+      element.removeEventListener('mouseenter', showTooltip);
+      element.removeEventListener('mouseleave', hideTooltip);
+      element.removeEventListener('click', showTooltip);
+      if (tooltip) tooltip.remove();
+    },      updateContent: (newContent) => {
+        content = newContent;
+        if (tooltip) tooltip.innerHTML = newContent;
+      }
+    };
+  }
+
+// ===== DOM SAFETY UTILITIES =====
+
+/**
+ * Safe DOM manipulation with protection against missing elements
+ */
+export function safeUpdateElement(selector, container, updateFn) {
+  try {
+    const element = container.querySelector(selector);
+    if (element && typeof updateFn === 'function') {
+      updateFn(element);
+      return true;
+    } else if (!element) {
+      console.warn(`🔍 Element not found: ${selector}`);
+    }
+    return false;
+  } catch (error) {
+    console.error(`❌ Error updating element ${selector}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Safe text content update
+ */
+export function safeSetTextContent(selector, container, text) {
+  return safeUpdateElement(selector, container, (element) => {
+    element.textContent = text;
+  });
+}
+
+/**
+ * Safe innerHTML update
+ */
+export function safeSetInnerHTML(selector, container, html) {
+  return safeUpdateElement(selector, container, (element) => {
+    element.innerHTML = html;
+  });
+}
+
+/**
+ * Safe style update
+ */
+export function safeSetStyle(selector, container, property, value) {
+  return safeUpdateElement(selector, container, (element) => {
+    element.style[property] = value;
+  });
+}
+
+/**
+ * Protected state change handler wrapper
+ */
+export function createSafeStateHandler(handlerFunction, componentName = 'Component') {
+  return function(state) {
+    try {
+      handlerFunction.call(this, state);
+    } catch (error) {
+      console.error(`❌ Error in ${componentName} handleStateChange:`, error);
+      // Don't rethrow to prevent breaking other listeners
+    }
+  };
+}
