@@ -6,7 +6,7 @@ import { RewardsComponent } from './RewardsComponent.js';
 import { RankingComponent } from './RankingComponent.js';
 import { HistoryComponent } from './HistoryComponent.js';
 import { AdminPanelComponent } from './AdminPanelComponent.js';
-import { AchievementsComponent } from './AchievementsComponent.js';
+// import { AchievementsComponent } from './AchievementsComponent.js';
 import { TaskDistributionComponent } from './TaskDistributionComponent.js';
 
 export class DashboardComponent {
@@ -60,10 +60,7 @@ export class DashboardComponent {
               <div id="rewards-container"></div>
             </section>
 
-            <section class="dashboard-section">
-              <h3>🏆 Conquistas</h3>
-              <div id="achievements-container"></div>
-            </section>
+
 
             <section class="dashboard-section" id="task-distribution-section" style="display: none;">
               <div id="task-distribution-container"></div>
@@ -126,12 +123,9 @@ export class DashboardComponent {
     }
     
     try {
-      console.log('🏆 Initializing AchievementsComponent with container:', achievementsContainer);
-      this.achievementsComponent = new AchievementsComponent(achievementsContainer);
-      console.log('✅ AchievementsComponent initialized successfully');
+      // AchievementsComponent removido
     } catch (error) {
-      console.error('❌ Error initializing AchievementsComponent:', error);
-      this.achievementsComponent = null;
+      // AchievementsComponent removido
     }
     
     try {
@@ -157,7 +151,7 @@ export class DashboardComponent {
     }
     
     // Expor para debug global
-    window.achievementsComponent = this.achievementsComponent;
+    // window.achievementsComponent removido
     window.taskDistribution = this.taskDistributionComponent;
   }
 
@@ -303,7 +297,7 @@ export class DashboardComponent {
     const componentsToRefresh = [
       { name: 'TasksComponent', component: this.tasksComponent, method: 'refresh' },
       { name: 'RewardsComponent', component: this.rewardsComponent, method: 'refresh' },
-      { name: 'AchievementsComponent', component: this.achievementsComponent, method: 'refresh' },
+      // AchievementsComponent removido do array
       { name: 'RankingComponent', component: this.rankingComponent, method: 'refresh' },
       { name: 'HistoryComponent', component: this.historyComponent, method: 'refresh' }
     ];
@@ -355,9 +349,7 @@ export class DashboardComponent {
     if (this.rewardsComponent && typeof this.rewardsComponent.destroy === 'function') {
       this.rewardsComponent.destroy();
     }
-    if (this.achievementsComponent && typeof this.achievementsComponent.destroy === 'function') {
-      this.achievementsComponent.destroy();
-    }
+    // AchievementsComponent removido
     if (this.rankingComponent && typeof this.rankingComponent.destroy === 'function') {
       this.rankingComponent.destroy();
     }

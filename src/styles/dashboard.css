@@ -2,8 +2,14 @@
 
 .dashboard-container {
   min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
   background: #f8f9fa;
   animation: fadeIn 0.5s ease;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .dashboard-header {
@@ -44,13 +50,15 @@
 }
 
 .dashboard-content {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-md);
+  /* padding vertical menor e lateral ainda menor para mais largura útil */
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: var(--spacing-xl);
+  max-width: 98vw;
 }
 
 .dashboard-section {

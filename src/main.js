@@ -54,71 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   window.autoFixAchievements = async () => {
     console.log('🔧 Auto-fixing achievement system...');
-    if (window.achievementsComponent && typeof window.achievementsComponent.autoFixSystem === 'function') {
-      return await window.achievementsComponent.autoFixSystem();
-    } else {
-      console.error('❌ AchievementsComponent not available');
-    }
+    // AchievementsComponent removido
   };
   
   window.testCompleteAchievementSystem = async () => {
     console.log('🏆 Testing Complete Achievement System...');
-    
-    // 1. Verificar se está logado
-    const currentUser = stateManager.getCurrentUser();
-    if (!currentUser) {
-      console.error('❌ User not logged in. Please login first.');
-      return;
-    }
-    
-    console.log('✅ User logged in:', currentUser.name);
-    
-    // 2. Testar carregamento de conquistas
-    if (window.achievementsComponent) {
-      try {
-        await window.achievementsComponent.loadAchievements();
-        console.log('✅ Achievements loaded successfully');
-        
-        // 3. Testar verificação automática
-        if (currentUser.type !== 'admin') {
-          await window.achievementsComponent.checkAchievements();
-          console.log('✅ Achievement check completed');
-        }
-        
-        // 4. Se for admin, testar modal
-        if (currentUser.type === 'admin') {
-          const button = document.querySelector('#btn-new-achievement');
-          if (button) {
-            console.log('✅ Admin: New achievement button found');
-            
-            // Testar clique no botão
-            button.click();
-            setTimeout(() => {
-              const modal = document.querySelector('#achievement-modal');
-              if (modal && modal.style.display === 'flex') {
-                console.log('✅ Admin: Modal opened successfully');
-                
-                // Fechar modal
-                const closeBtn = modal.querySelector('#close-achievement-modal');
-                if (closeBtn) closeBtn.click();
-                console.log('✅ Admin: Modal closed successfully');
-              } else {
-                console.error('❌ Admin: Modal did not open');
-              }
-            }, 200);
-          } else {
-            console.error('❌ Admin: New achievement button not found');
-          }
-        }
-        
-        console.log('🎉 Achievement system test completed successfully!');
-        
-      } catch (error) {
-        console.error('❌ Error during achievement system test:', error);
-      }
-    } else {
-      console.error('❌ AchievementsComponent not available');
-    }
+    // AchievementsComponent removido
   };
   
   console.log('🛠️ Debug functions available: debugLogin(), forceAdminLogin(), testAchievementButton(), autoFixAchievements(), testCompleteAchievementSystem()');
