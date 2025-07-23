@@ -250,26 +250,64 @@ export class HistoryComponent {
       return;
     }
 
-    // ✅ CORREÇÃO: Não paginar novamente - os dados já vêm paginados da API
-    historyList.innerHTML = this.history.map(item => {
+    // Agrupar logins consecutivos do mesmo usuário e mesmo dia
+    const grouped = [];
+    let last = null;
+    let loginCount = 1;
+    for (let i = 0; i < this.history.length; i++) {
+      const item = this.history[i];
+      if (
+        item.type === 'user_login' &&
+        last &&
+        last.type === 'user_login' &&
+        item.userId === last.userId &&
+        new Date(item.timestamp).toDateString() === new Date(last.timestamp).toDateString()
+      ) {
+        loginCount++;
+        last = item;
+        if (i === this.history.length - 1) {
+          if (loginCount > 1) {
+            grouped.push({ ...item, loginCount });
+          } else {
+            grouped.push(last);
+          }
+        }
+      } else {
+        if (last && last.type === 'user_login') {
+          if (loginCount > 1) {
+            grouped.push({ ...last, loginCount });
+          } else {
+            grouped.push(last);
+          }
+        } else if (last) {
+          grouped.push(last);
+        }
+        last = item;
+        loginCount = 1;
+        if (i === this.history.length - 1) {
+          grouped.push(item);
+        }
+      }
+    }
+
+    historyList.innerHTML = grouped.map(item => {
       const typeIcon = item.type === 'task_completed' ? '✅' : 
                       item.type === 'reward_redeemed' ? '🎁' : 
                       item.type === 'user_created' ? '👤' : 
                       item.type === 'user_deleted' ? '🗑️' : 
                       item.type === 'user_login' ? '🔐' : '📝';
-      
-      // Format timestamp to readable date
+      const isReward = item.type === 'reward_redeemed';
+      const isLoginGroup = item.type === 'user_login' && item.loginCount > 1;
       const date = new Date(item.timestamp).toLocaleString('pt-BR');
-      
       return `
-        <div class="history-item ${isAdmin ? 'admin-history' : ''}">
+        <div class="history-item ${isAdmin ? 'admin-history' : ''} ${isReward ? 'history-reward' : ''} ${isLoginGroup ? 'history-login-group' : ''}">
           ${isAdmin ? `
             <div class="history-header">
               <strong>${escapeHtml(item.userName || 'Sistema')}</strong>
               <span class="history-date">${date}</span>
             </div>
             <div class="history-content">
-              ${typeIcon} ${escapeHtml(item.description)} 
+              ${typeIcon} ${isLoginGroup ? `Login realizado ${item.loginCount} vezes hoje` : escapeHtml(item.description)}
               <span class="history-points">(${item.points > 0 ? '+' : ''}${item.points} pts)</span>
             </div>
           ` : `
@@ -278,7 +316,7 @@ export class HistoryComponent {
               <span class="history-separator">—</span>
               <span class="history-type">${typeIcon}</span>
               <span class="history-separator">—</span>
-              <span class="history-description">${escapeHtml(item.description)}</span>
+              <span class="history-description">${isLoginGroup ? `Login realizado ${item.loginCount} vezes hoje` : escapeHtml(item.description)}</span>
               <span class="history-points">(${item.points > 0 ? '+' : ''}${item.points} pts)</span>
             </div>
           `}

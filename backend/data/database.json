@@ -2269,6 +2269,42 @@
         "username": "gabriel",
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"
       }
+    },
+    {
+      "id": "175329417205004flafft9",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-23T18:09:32.050Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "id": "1753294179403a0vo9nmmy",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-23T18:09:39.404Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "id": "17532941851481jt7n2ur9",
+      "userId": "1752623211066jgwi5iicl",
+      "type": "user_login",
+      "description": "Usuário 'gabriel' fez login",
+      "points": 0,
+      "timestamp": "2025-07-23T18:09:45.148Z",
+      "details": {
+        "username": "gabriel",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+      }
     }
   ],
   "achievements": [

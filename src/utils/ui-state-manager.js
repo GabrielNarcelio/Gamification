@@ -314,6 +314,15 @@ export class UIStateManager {
   // ===== CONFIRMATION DIALOGS =====
   async showConfirmDialog(message, title = 'Confirmação') {
     return new Promise((resolve) => {
+      // Só exibe o modal se houver usuário logado (evita exibir na tela de login)
+      let user = null;
+      if (window.stateManager && typeof window.stateManager.getCurrentUser === 'function') {
+        user = window.stateManager.getCurrentUser();
+      }
+      if (!user) {
+        resolve(false);
+        return;
+      }
       const modal = document.createElement('div');
       modal.className = 'modal';
       modal.style.cssText = `
