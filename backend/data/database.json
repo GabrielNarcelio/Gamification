@@ -93,23 +93,13 @@
       "createdBy": "admin"
     },
     {
-      "id": "1752694556474cxk0h1vs1",
-      "title": "çklfsklç",
-      "description": "flkjdskfj",
-      "points": 100,
+      "id": "1753356980821kyurtnwf7",
+      "title": "teste prisma",
+      "description": "ksajdakjd",
+      "points": 1000,
       "category": "Geral",
       "difficulty": "medium",
-      "createdAt": "2025-07-16T19:35:56.474Z",
-      "createdBy": "admin"
-    },
-    {
-      "id": "1752707223741psydefwsj",
-      "title": "kadjaskdja",
-      "description": "jjjjjjjjjjjjjjjjjjjjjjj",
-      "points": 20,
-      "category": "Geral",
-      "difficulty": "medium",
-      "createdAt": "2025-07-16T23:07:03.741Z",
+      "createdAt": "2025-07-24T11:36:20.821Z",
       "createdBy": "admin"
     }
   ],
@@ -2328,6 +2318,43 @@
       "details": {
         "username": "gabriel",
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "id": "1753356869054zlcf6vyqt",
+      "userId": "admin",
+      "type": "task_deleted",
+      "description": "Tarefa 'kadjaskdja' deletada",
+      "points": 0,
+      "timestamp": "2025-07-24T11:34:29.054Z",
+      "details": {
+        "deletedTaskTitle": "kadjaskdja",
+        "deletedTaskPoints": 20
+      }
+    },
+    {
+      "id": "1753356872462gwx35fz1v",
+      "userId": "admin",
+      "type": "task_deleted",
+      "description": "Tarefa 'çklfsklç' deletada",
+      "points": 0,
+      "timestamp": "2025-07-24T11:34:32.462Z",
+      "details": {
+        "deletedTaskTitle": "çklfsklç",
+        "deletedTaskPoints": 100
+      }
+    },
+    {
+      "id": "1753356980825vc07xw9sk",
+      "userId": "admin",
+      "type": "task_created",
+      "description": "Tarefa 'teste prisma' criada",
+      "points": 0,
+      "timestamp": "2025-07-24T11:36:20.825Z",
+      "details": {
+        "taskId": "1753356980821kyurtnwf7",
+        "taskTitle": "teste prisma",
+        "taskPoints": 1000
       }
     }
   ],
